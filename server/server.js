@@ -54,8 +54,8 @@ const app = express()
 // CORS configuration
 app.use(cors({
   origin: [
-    'https://www.graba2z.ae',
-    'https://www.grabatoz.ae',
+    'https://super-boss.vercel.app',
+    'https://seenalif.com',
     'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -137,7 +137,7 @@ app.use('/', sitemapRoutes)
 // Health check route
 app.get("/", (req, res) => {
   res.json({
-    message: "GrabA2Z API is running!",
+    message: "Super Boss API is running!",
     version: "1.0.0",
     environment: config.NODE_ENV,
   })
