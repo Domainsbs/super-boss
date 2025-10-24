@@ -56,6 +56,7 @@ app.use(cors({
   origin: [
     'https://super-boss.vercel.app',
     'https://seenalif.com',
+    'https://www.seenalif.com',
     'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
