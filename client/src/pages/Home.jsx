@@ -816,7 +816,7 @@ const Home = () => {
             {notifStep === "ask" && (
               <>
                 <div className="flex flex-col sm:flex-row items-center mb-4">
-                  <img src="/g.png" alt="Logo" className="w-16 h-16 rounded-full mb-3 sm:mb-0 sm:mr-4" />
+                  <img src="/bigbossblack2.png" alt="Logo" className="w-16 h-16 rounded-full mb-3 sm:mb-0 sm:mr-4" />
                   <div className="text-center sm:text-left">
                     <h2 className="text-base md:text-lg font-bold text-black mb-1">
                       This website would like to send you awesome updates and offers!
@@ -827,10 +827,10 @@ const Home = () => {
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
-                  <button className="px-4 py-2 rounded bg-gray-200 text-black font-semibold text-sm" onClick={handleNotifDeny}>
+                  <button className="px-4 py-2 rounded bg-gray-200 text-black font-semibold text-sm hover:bg-gray-300" onClick={handleNotifDeny}>
                     Don't Allow
                   </button>
-                  <button className="px-4 py-2 rounded bg-lime-500 text-white font-semibold text-sm" onClick={handleNotifAllow}>
+                  <button className="px-4 py-2 rounded bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-sm" onClick={handleNotifAllow}>
                     Allow
                   </button>
                 </div>
@@ -839,7 +839,7 @@ const Home = () => {
             {notifStep === "email" && !notifSuccess && (
               <form onSubmit={handleNotifEmailSubmit}>
                 <div className="flex flex-col sm:flex-row items-center mb-4">
-                  <img src="/g.png" alt="Logo" className="w-14 h-14 rounded-full mb-3 sm:mb-0 sm:mr-4" />
+                  <img src="/bigbossblack2.png" alt="Logo" className="w-14 h-14 rounded-full mb-3 sm:mb-0 sm:mr-4" />
                   <div className="text-center sm:text-left">
                     <h2 className="text-base md:text-lg font-bold text-black mb-1">Subscribe to our newsletter</h2>
                     <p className="text-gray-600 text-xs md:text-sm">Enter your email to get the best offers and updates!</p>
@@ -856,7 +856,7 @@ const Home = () => {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded bg-lime-500 text-white font-semibold text-sm whitespace-nowrap"
+                    className="px-4 py-2 rounded bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-sm whitespace-nowrap"
                     disabled={notifLoading}
                   >
                     {notifLoading ? "Subscribing..." : "Subscribe"}
