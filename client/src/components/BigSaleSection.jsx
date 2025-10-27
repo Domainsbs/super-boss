@@ -169,53 +169,88 @@ const BigSaleSection = ({ products = [] }) => {
   // If no products, don't render anything
   if (!products || products.length === 0) return null
 
-  // Only show on desktop (md and above)
   return (
-    <section className="my-6 hidden md:block overflow-hidden mx-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 shadow-sm">
-      {/* Section Heading */}
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
-        <div className="flex items-center justify-center mt-3 mb-2">
-          <div className="h-1 w-80 bg-black rounded-full"></div>
+    <>
+      {/* Desktop Version - Slider */}
+      <section className="my-6 hidden md:block overflow-hidden mx-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 shadow-sm">
+        {/* Section Heading */}
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Featured Products</h2>
+          <div className="flex items-center justify-center mt-3 mb-2">
+            <div className="h-1 w-80 bg-black rounded-full"></div>
+          </div>
+          <p className="text-gray-600">Grab the best deals on featured products</p>
         </div>
-        <p className="text-gray-600">Grab the best deals on featured products</p>
-      </div>
 
-      <div className="relative max-w-8xl">
-        <div className="flex justify-center">
-          <div className="w-full relative" ref={containerRef}>
-            <button
-              onClick={prevSlide}
-              disabled={currentSlide === 0}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-gray-200"
-            >
-              <ChevronLeft size={20} className="text-gray-700" />
-            </button>
-
-            <button
-              onClick={nextSlide}
-              disabled={currentSlide >= products.length - 6}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-gray-200"
-            >
-              <ChevronRight size={20} className="text-gray-700" />
-            </button>
-
-            <div className="overflow-hidden py-2">
-              <div
-                className="flex transition-transform duration-300 ease-in-out gap-2"
-                style={{ transform: `translateX(-${currentSlide * (100 / 6)}%)` }}
+        <div className="relative max-w-8xl">
+          <div className="flex justify-center">
+            <div className="w-full relative" ref={containerRef}>
+              <button
+                onClick={prevSlide}
+                disabled={currentSlide === 0}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-gray-200"
               >
-                {products.map((product) => (
-                  <div key={product._id} className="flex-shrink-0" style={{ width: 'calc(16.666% - 6.67px)' }}>
-                    <ProductCard product={product} />
-                  </div>
-                ))}
+                <ChevronLeft size={20} className="text-gray-700" />
+              </button>
+
+              <button
+                onClick={nextSlide}
+                disabled={currentSlide >= products.length - 6}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white hover:bg-gray-100 rounded-full p-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-gray-200"
+              >
+                <ChevronRight size={20} className="text-gray-700" />
+              </button>
+
+              <div className="overflow-hidden py-2">
+                <div
+                  className="flex transition-transform duration-300 ease-in-out gap-2"
+                  style={{ transform: `translateX(-${currentSlide * (100 / 6)}%)` }}
+                >
+                  {products.map((product) => (
+                    <div key={product._id} className="flex-shrink-0" style={{ width: 'calc(16.666% - 6.67px)' }}>
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Mobile Version - Grid */}
+      <section className="my-6 md:hidden overflow-hidden mx-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 shadow-sm">
+        {/* Section Heading */}
+        <div className="mb-4 text-center">
+          <h2 className="text-xl font-bold text-gray-900">Featured Products</h2>
+          <div className="flex items-center justify-center mt-2 mb-2">
+            <div className="h-1 w-40 bg-black rounded-full"></div>
+          </div>
+          <p className="text-sm text-gray-600">Grab the best deals on featured products</p>
+        </div>
+
+        {/* Mobile Grid - 2 columns */}
+        <div className="grid grid-cols-2 gap-2">
+          {products.slice(0, 6).map((product) => (
+            <div key={product._id}>
+              <ProductCard product={product} isMobile={true} />
+            </div>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        {products.length > 6 && (
+          <div className="mt-4 text-center">
+            <Link 
+              to="/shop" 
+              className="inline-block px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              View All Products
+            </Link>
+          </div>
+        )}
+      </section>
+    </>
   )
 }
 

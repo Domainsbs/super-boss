@@ -1048,8 +1048,8 @@ const MobileProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex h-[170px] justify-center items-center">
+    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex h-[150px] md:h-[170px] justify-center items-center">
         <Link to={`/product/${product.slug || product._id}`}>
           <img
             src={product.image || "/placeholder.svg?height=120&width=120"}
@@ -1070,45 +1070,45 @@ const MobileProductCard = ({ product }) => {
         </button>
       </div>
       
-      <div className="mb-1 flex items-center gap-2">
-        <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-xs inline-block mr-1`}>
+      <div className="mb-1 flex items-center gap-1 md:gap-2">
+        <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-xs inline-block`}>
           {stockStatus}
         </div>
         {discount && (
-          <div className="bg-red-600 text-white px-1 py-0.5 rounded text-xs inline-block font-bold">{discount}</div>
+          <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-xs inline-block font-bold">{discount}</div>
         )}
       </div>
       
       <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px] mb-1">{product.name}</h3>
+        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px] mb-1">{product.name}</h3>
       </Link>
       
-      {product.category && <div className="text-xs text-yellow-600 mb-1">Category: {categoryName}</div>}
-      <div className="text-xs text-green-600 mb-1">Inclusive VAT</div>
+      {product.category && <div className="text-[10px] md:text-xs text-yellow-600 mb-1">Category: {categoryName}</div>}
+      <div className="text-[10px] md:text-xs text-green-600 mb-1">Inclusive VAT</div>
       
-      <div className="flex items-center gap-2 mb-1">
-        <div className="text-red-600 font-bold text-sm">
+      <div className="flex items-center gap-1 md:gap-2 mb-1">
+        <div className="text-red-600 font-bold text-xs md:text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-xs font-medium">
+          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with 20px stars */}
-      <div className="flex items-center mb-2 min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with responsive stars */}
+      <div className="flex items-center mb-2 min-h-[20px] md:min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={20}
-              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              size={16}
+              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
 
       <button
@@ -1121,10 +1121,10 @@ const MobileProductCard = ({ product }) => {
           }, 100)
           addToCart(product)
         }}
-        className="mt-auto w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className="mt-auto w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={12} />
+        <ShoppingBag size={10} className="md:w-3 md:h-3" />
         Add to Cart
       </button>
     </div>
@@ -1172,14 +1172,14 @@ const DynamicBrandProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex justify-center items-center" style={{height:190}}>
+    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex justify-center items-center h-[150px] md:h-[190px]">
         <Link to={`/product/${product.slug || product._id}`} className="w-full h-full flex items-center justify-center">
           <img
             src={product.image || "/placeholder.svg?height=120&width=120"}
             alt={product.name}
-            className="w-full h-full object-contain bg-white rounded mx-auto mb-4"
-            style={{maxHeight:165}}
+            className="w-full h-full object-contain bg-white rounded mx-auto"
+            style={{maxHeight: '145px'}}
           />
         </Link>
         <button
@@ -1193,11 +1193,11 @@ const DynamicBrandProductCard = ({ product }) => {
         >
           <Heart size={12} className={isInWishlist(product._id) ? "text-red-500 fill-red-500" : "text-gray-400"} />
         </button>
-        {/* Status & Discount badges overlayed at bottom of image, always inside image area */}
-        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-2 z-10">
-          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
+        {/* Status & Discount badges overlayed at bottom of image */}
+        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-1 z-10">
+          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
           {finalDiscountLabel && (
-            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[10px] font-bold shadow-sm">
+            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-bold shadow-sm">
               {finalDiscountLabel}
             </div>
           )}
@@ -1205,33 +1205,33 @@ const DynamicBrandProductCard = ({ product }) => {
       </div>
       
       <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px]">{product.name}</h3>
+        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px]">{product.name}</h3>
       </Link>
-      {product.category && <div className="text-xs text-yellow-600">Category: {categoryName}</div>}
-      <div className="text-xs text-green-600">Inclusive VAT</div>
-      <div className="flex items-center gap-2">
-        <div className="text-red-600 font-bold text-sm">
+      {product.category && <div className="text-[10px] md:text-xs text-yellow-600">Category: {categoryName}</div>}
+      <div className="text-[10px] md:text-xs text-green-600">Inclusive VAT</div>
+      <div className="flex items-center gap-1 md:gap-2">
+        <div className="text-red-600 font-bold text-xs md:text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-xs font-medium">
+          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with 20px stars */}
-      <div className="flex items-center min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with responsive stars */}
+      <div className="flex items-center min-h-[20px] md:min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={20}
-              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              size={16}
+              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
       
       <button
@@ -1244,10 +1244,10 @@ const DynamicBrandProductCard = ({ product }) => {
           }, 100)
           addToCart(product)
         }}
-        className=" w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className="w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={12} />
+        <ShoppingBag size={10} className="md:w-3 md:h-3" />
         Add to Cart
       </button>
     </div>
@@ -1295,14 +1295,14 @@ const AccessoriesProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex justify-center items-center" style={{height:190}}>
+    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex justify-center items-center h-[150px] md:h-[190px]">
         <Link to={`/product/${product.slug || product._id}`} className="w-full h-full flex items-center justify-center">
           <img
             src={product.image || "/placeholder.svg?height=120&width=120"}
             alt={product.name}
-            className="w-full h-full object-contain bg-white rounded mx-auto mb-4"
-            style={{maxHeight:165}}
+            className="w-full h-full object-contain bg-white rounded mx-auto"
+            style={{maxHeight: '145px'}}
           />
         </Link>
         <button
@@ -1316,44 +1316,44 @@ const AccessoriesProductCard = ({ product }) => {
         >
           <Heart size={12} className={isInWishlist(product._id) ? "text-red-500 fill-red-500" : "text-gray-400"} />
         </button>
-        {/* Status & Discount badges overlayed at bottom of image, always inside image area */}
-        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-2 z-10">
-          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
+        {/* Status & Discount badges overlayed at bottom of image */}
+        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-1 z-10">
+          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
           {finalDiscountLabel && (
-            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[10px] font-bold shadow-sm">
+            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-bold shadow-sm">
               {finalDiscountLabel}
             </div>
           )}
         </div>
       </div>
       <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px]">{product.name}</h3>
+        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px]">{product.name}</h3>
       </Link>
-      {product.category && <div className="text-xs text-yellow-600">Category: {categoryName}</div>}
-      <div className="text-xs text-green-600">Inclusive VAT</div>
-      <div className="flex items-center gap-2">
-        <div className="text-red-600 font-bold text-sm">
+      {product.category && <div className="text-[10px] md:text-xs text-yellow-600">Category: {categoryName}</div>}
+      <div className="text-[10px] md:text-xs text-green-600">Inclusive VAT</div>
+      <div className="flex items-center gap-1 md:gap-2">
+        <div className="text-red-600 font-bold text-xs md:text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-xs font-medium">
+          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with 20px stars */}
-      <div className="flex items-center min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with responsive stars */}
+      <div className="flex items-center min-h-[20px] md:min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={20}
-              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              size={16}
+              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
       
       <button
@@ -1364,10 +1364,10 @@ const AccessoriesProductCard = ({ product }) => {
           setTimeout(() => { if (e.target) e.target.style.transform = "scale(1)" }, 100)
           addToCart(product)
         }}
-        className=" w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className="w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={12} />
+        <ShoppingBag size={10} className="md:w-3 md:h-3" />
         Add to Cart
       </button>
     </div>

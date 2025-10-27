@@ -35,22 +35,22 @@ const CoreServiceAspects = () => {
   ]
 
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
+    <section className="py-8 md:py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute top-10 left-10 w-20 h-20 bg-blue-300 rounded-full opacity-40 blur-2xl"></div>
       <div className="absolute bottom-20 right-20 w-32 h-32 bg-indigo-300 rounded-full opacity-30 blur-3xl"></div>
       <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-cyan-200 rounded-full opacity-20 blur-2xl"></div>
       
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 relative z-10">
         {/* Section Title */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+        <div className="text-center mb-8 md:mb-16">
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 md:mb-3">
             Core Service Aspects
           </h2>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Services Grid - 2x2 on mobile, 4 columns on large screens */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {services.map((service, index) => {
             const IconComponent = service.icon
             return (
@@ -63,26 +63,26 @@ const CoreServiceAspects = () => {
               >
                 {/* Card with tilt effect */}
                 <div className={`transform transition-all duration-500 hover:scale-105 ${service.rotate} hover:rotate-0`}>
-                  {/* Icon Container - Card Style */}
-                  <div className="relative mb-6">
-                    <div className="w-32 h-32 flex items-center justify-center rounded-3xl bg-white shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                  {/* Icon Container - Card Style - Responsive sizes */}
+                  <div className="relative mb-3 md:mb-6">
+                    <div className="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center rounded-2xl md:rounded-3xl bg-white shadow-lg group-hover:shadow-2xl transition-all duration-300 border border-gray-100">
                       {/* Icon circle */}
-                      <div className="w-20 h-20 flex items-center justify-center rounded-full bg-blue-50 border-2 border-blue-500 group-hover:border-blue-600 transition-colors">
-                        <IconComponent className="w-10 h-10 text-blue-600" strokeWidth={2} />
+                      <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-blue-50 border-2 border-blue-500 group-hover:border-blue-600 transition-colors">
+                        <IconComponent className="w-8 h-8 md:w-10 md:h-10 text-blue-600" strokeWidth={2} />
                       </div>
                       
                       {/* Decorative corner accent */}
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-400 rounded-full opacity-60"></div>
+                      <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 w-4 h-4 md:w-6 md:h-6 bg-blue-400 rounded-full opacity-60"></div>
                     </div>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-3 px-2">
+                  {/* Title - Responsive text */}
+                  <h3 className="text-sm md:text-lg lg:text-xl font-bold text-gray-900 mb-2 md:mb-3 px-1 md:px-2">
                     {service.title}
                   </h3>
 
-                  {/* Description */}
-                  <p className="text-sm md:text-base text-gray-600 leading-relaxed max-w-xs mx-auto px-4">
+                  {/* Description - Responsive text */}
+                  <p className="text-xs md:text-sm lg:text-base text-gray-600 leading-relaxed max-w-xs mx-auto px-2 md:px-4">
                     {service.description}
                   </p>
                 </div>

@@ -47,24 +47,24 @@ const PromotionalOffers = () => {
 
   return (
     <section className="py-6 mx-auto max-w-7xl px-3 bg-white">
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Special Offers</h2>
-        <div className="flex items-center justify-center mt-3 mb-2">
-          <div className="h-1 w-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
+      <div className="mb-6 md:mb-8 text-center">
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Special Offers</h2>
+        <div className="flex items-center justify-center mt-2 md:mt-3 mb-2">
+          <div className="h-1 w-16 md:w-20 bg-gradient-to-r from-orange-500 to-red-600 rounded-full"></div>
         </div>
-        <p className="text-gray-600">Use these exclusive codes to save more</p>
+        <p className="text-sm md:text-base text-gray-600">Use these exclusive codes to save more</p>
       </div>
 
-      {/* 4 Cards Grid - Centered */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+      {/* 4 Cards Grid - Responsive: 2 columns on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 max-w-6xl mx-auto">
         {offers.map((offer) => (
           <div
             key={offer.id}
             onClick={() => handleOfferClick(offer)}
             className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group"
           >
-            {/* Image Container */}
-            <div className="relative h-[180px] bg-white overflow-hidden">
+            {/* Image Container - Responsive height */}
+            <div className="relative h-[120px] md:h-[180px] bg-white overflow-hidden">
               <img
                 src={offer.image}
                 alt={offer.title}
@@ -73,12 +73,12 @@ const PromotionalOffers = () => {
             </div>
 
             {/* Content Container */}
-            <div className="p-4 text-center">
+            <div className="p-2 md:p-4 text-center">
               {/* Title */}
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{offer.title}</h3>
+              <h3 className="text-sm md:text-lg font-bold text-gray-900 mb-1">{offer.title}</h3>
 
               {/* Description */}
-              <p className="text-sm text-gray-600">{offer.description}</p>
+              <p className="text-xs md:text-sm text-gray-600">{offer.description}</p>
             </div>
           </div>
         ))}

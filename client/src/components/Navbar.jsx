@@ -910,22 +910,22 @@ const Navbar = () => {
       </header>
 
       {/* Mobile Navbar - Shown only on Mobile */}
-      <header className="md:hidden bg-white shadow-sm sticky top-0 z-50">
+      <header className="md:hidden bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 shadow-sm sticky top-0 z-50">
         {/* Mobile Top Bar */}
         <div className="flex items-center justify-between px-4 py-3">
           {/* Hamburger Menu */}
           <button onClick={toggleMobileMenu} className="p-2">
-            <Menu size={24} className="text-gray-700" />
+            <Menu size={24} className="text-white" />
           </button>
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img src="/bigboss.png" alt="Big Boss Logo" className="h-8" />
+          {/* Logo - Made larger and more visible on mobile */}
+          <Link to="/" className="flex items-center flex-1 justify-center">
+            <img src="/bigboss.png" alt="Big Boss Logo" className="h-12 w-auto object-contain" />
           </Link>
 
           {/* Search Icon */}
           <button className="p-2" onClick={handleMobileSearchOpen} aria-label="Open search">
-            <Search size={24} className="text-gray-700" />
+            <Search size={24} className="text-white" />
           </button>
         </div>
       </header>

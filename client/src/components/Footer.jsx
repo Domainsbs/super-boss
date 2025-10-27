@@ -320,22 +320,25 @@ const Footer = ({ className = "" }) => {
       </section>
 
       {/* Mobile Footer - Only visible on mobile */}
-      <footer className="md:hidden bg-white">
+      <footer className="md:hidden bg-gradient-to-b from-gray-50 to-white">
         {/* Categories Section */}
         <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection("categories")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Categories</span>
-            {openSections.categories ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-base font-semibold text-gray-900">Categories</span>
+            {openSections.categories ? <Minus size={18} className="text-gray-600" /> : <Plus size={18} className="text-gray-600" />}
           </button>
           {openSections.categories && (
-            <div className="px-4 pb-4">
-              <ul className="space-y-3">
-                {categories.map((category) => (
+            <div className="px-4 pb-3 bg-gray-50">
+              <ul className="space-y-2.5 grid grid-cols-2 gap-x-3">
+                {categories.slice(0, 12).map((category) => (
                   <li key={category._id}>
-                    <Link to={`/shop?parentCategory=${category._id}`} className="text-gray-700 hover:text-orange-500">
+                    <Link 
+                      to={generateShopURL({ parentCategory: category.name })} 
+                      className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1"
+                    >
                       {category.name}
                     </Link>
                   </li>
@@ -345,46 +348,41 @@ const Footer = ({ className = "" }) => {
           )}
         </div>
 
-        {/* Legal Section */}
+        {/* Quick Links Section */}
         <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection("legal")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Legal</span>
-            {openSections.legal ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-base font-semibold text-gray-900">Quick Links</span>
+            {openSections.legal ? <Minus size={18} className="text-gray-600" /> : <Plus size={18} className="text-gray-600" />}
           </button>
           {openSections.legal && (
-            <div className="px-4 pb-4">
-              <ul className="space-y-3">
+            <div className="px-4 pb-3 bg-gray-50">
+              <ul className="space-y-2.5">
                 <li>
-                  <Link to="/about" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/about" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/contact" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     Contact Us
                   </Link>
                 </li>
                 <li>
-                   <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="text-gray-700 hover:text-orange-500">
-    Blog
-  </a>
-                </li>
-                <li>
-                  <Link to="/shop" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/shop" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     Shop
                   </Link>
                 </li>
                 <li>
-                  <Link to="/login" className="text-gray-700 hover:text-orange-500">
-                    Login
+                  <Link to="/track-order" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Track Order
                   </Link>
                 </li>
                 <li>
-                  <Link to="/register" className="text-gray-700 hover:text-orange-500">
-                    Register
+                  <Link to="/login" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Login / Register
                   </Link>
                 </li>
               </ul>
@@ -392,56 +390,51 @@ const Footer = ({ className = "" }) => {
           )}
         </div>
 
-        {/* Support Section */}
+        {/* Policies Section */}
         <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection("support")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Support</span>
-            {openSections.support ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-base font-semibold text-gray-900">Policies</span>
+            {openSections.support ? <Minus size={18} className="text-gray-600" /> : <Plus size={18} className="text-gray-600" />}
           </button>
           {openSections.support && (
-            <div className="px-4 pb-4">
-              <ul className="space-y-3">
+            <div className="px-4 pb-3 bg-gray-50">
+              <ul className="space-y-2.5">
                 <li>
-                  <Link to="/refund-return" className="text-gray-700 hover:text-orange-500">
-                    Refund and Return
+                  <Link to="/refund-return" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Refund & Return
                   </Link>
                 </li>
                 <li>
-                  <Link to="/cookies-policy" className="text-gray-700 hover:text-orange-500">
-                    Cookies Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms-conditions" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/terms-conditions" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     Terms & Conditions
                   </Link>
                 </li>
                 <li>
-                  <Link to="/privacy-policy" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/privacy-policy" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/disclaimer-policy" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/cookies-policy" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Cookies Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/disclaimer-policy" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
                     Disclaimer Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/track-order" className="text-gray-700 hover:text-orange-500">
-                    Track Order
+                  <Link to="/voucher-terms" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Voucher Terms
                   </Link>
                 </li>
                 <li>
-                  <Link to="/wishlist" className="text-gray-700 hover:text-orange-500">
-                    Wishlist
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/cart" className="text-gray-700 hover:text-orange-500 font-semibold">
-                    Cart
+                  <Link to="/delivery-terms" className="text-sm text-gray-700 hover:text-blue-600 hover:underline transition-colors block py-1">
+                    Delivery Terms
                   </Link>
                 </li>
               </ul>
@@ -453,93 +446,119 @@ const Footer = ({ className = "" }) => {
         <div className="border-b border-gray-200">
           <button
             onClick={() => toggleSection("connect")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center px-4 py-3 text-left hover:bg-gray-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Connect</span>
-            {openSections.connect ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-base font-semibold text-gray-900">Follow Us</span>
+            {openSections.connect ? <Minus size={18} className="text-gray-600" /> : <Plus size={18} className="text-gray-600" />}
           </button>
           {openSections.connect && (
-            <div className="px-4 pb-4">
-              <div className="mb-4">
-                {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Connect With Us</h4> */}
-                <div className="flex space-x-4">
-                  <a
-                    href="https://www.facebook.com/grabatozae/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="Facebook"
-                  >
-                    <Facebook size={20} className="text-[#1877F2]" />
-                  </a>
-                  <a
-                    href="https://x.com/GrabAtoz"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="X (Twitter)"
-                  >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-black fill-current" role="img">
-                      <path d="M18.25 2h3.5l-7.66 8.73L24 22h-6.87l-5.02-6.58L6.3 22H2.8l8.2-9.34L0 2h7.04l4.54 6.02L18.25 2z" />
-                    </svg>
-                  </a>
-                  <a
-                    href="https://www.instagram.com/grabatoz/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="Instagram"
-                  >
-                    <Instagram size={20} className="text-[#E4405F]" />
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/company/grabatozae"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin size={20} className="text-[#0A66C2]" />
-                  </a>
-                  <a
-                    href="https://www.pinterest.com/grabatoz/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="Pinterest"
-                  >
-                    <FontAwesomeIcon icon={faPinterest} style={{width: '20px', height: '20px', color: '#E60023'}} />
-                  </a>
-                  <a
-                    href="https://www.tiktok.com/@grabatoz"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="TikTok"
-                  >
-                    <FontAwesomeIcon icon={faTiktok} style={{width: '20px', height: '20px', color: '#000'}} />
-                  </a>
-                  <a
-                    href="https://www.youtube.com/@grabAtoZ"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
-                    aria-label="YouTube"
-                  >
-                    <FontAwesomeIcon icon={faYoutube} style={{width: '20px', height: '20px', color: '#FF0000'}} />
-                  </a>
-                </div>
-
-
-            
+            <div className="px-4 pb-4 bg-gray-50">
+              <div className="flex flex-wrap gap-3 justify-center">
+                <a
+                  href="https://www.facebook.com/grabatozae/"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all"
+                  aria-label="Facebook"
+                >
+                  <Facebook size={18} className="text-[#1877F2]" />
+                </a>
+                <a
+                  href="https://x.com/GrabAtoz"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-gray-800 hover:shadow-md transition-all"
+                  aria-label="X (Twitter)"
+                >
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-black fill-current" role="img">
+                    <path d="M18.25 2h3.5l-7.66 8.73L24 22h-6.87l-5.02-6.58L6.3 22H2.8l8.2-9.34L0 2h7.04l4.54 6.02L18.25 2z" />
+                  </svg>
+                </a>
+                <a
+                  href="https://www.instagram.com/grabatoz/"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-pink-500 hover:shadow-md transition-all"
+                  aria-label="Instagram"
+                >
+                  <Instagram size={18} className="text-[#E4405F]" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/grabatozae"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-blue-700 hover:shadow-md transition-all"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={18} className="text-[#0A66C2]" />
+                </a>
+                <a
+                  href="https://www.pinterest.com/grabatoz/"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-red-600 hover:shadow-md transition-all"
+                  aria-label="Pinterest"
+                >
+                  <FontAwesomeIcon icon={faPinterest} style={{width: '18px', height: '18px', color: '#E60023'}} />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@grabatoz"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-gray-800 hover:shadow-md transition-all"
+                  aria-label="TikTok"
+                >
+                  <FontAwesomeIcon icon={faTiktok} style={{width: '18px', height: '18px', color: '#000'}} />
+                </a>
+                <a
+                  href="https://www.youtube.com/@grabAtoZ"
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-gray-200 hover:border-red-600 hover:shadow-md transition-all"
+                  aria-label="YouTube"
+                >
+                  <FontAwesomeIcon icon={faYoutube} style={{width: '18px', height: '18px', color: '#FF0000'}} />
+                </a>
               </div>
             </div>
           )}
         </div>
 
-        {/* Shop On The Go Section - Always Visible */}
-        <div className="bg-[#1F1F39] text-white p-6">
-          <h3 className="text-xl font-bold text-center mb-4">Shop On The Go</h3>
-          <div className="flex justify-center space-x-4 mb-6 ">
-            <img src="/google_play.png" alt="Google Play" className="h-8" />
-            <img src="/app_store.png" alt="App Store" className="h-8" />
+        {/* Newsletter Section - Always Visible */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4">
+          <h3 className="text-sm font-bold text-gray-900 text-center mb-3">
+            GET EXCLUSIVE OFFERS
+          </h3>
+          <form className="max-w-md mx-auto" onSubmit={handleNewsletterSubmit}>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={newsletterEmail}
+                onChange={handleNewsletterInput}
+                required
+              />
+              <button 
+                type="submit" 
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-all whitespace-nowrap"
+              >
+                Subscribe
+              </button>
+            </div>
+          </form>
+          {showNewsletterModal && (
+            <NewsletterModal
+              email={newsletterEmail}
+              onClose={() => setShowNewsletterModal(false)}
+            />
+          )}
+        </div>
+
+        {/* Bottom Section - Always Visible */}
+        <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 text-white py-6 px-4">
+          <div className="text-center mb-4">
+            <h3 className="text-base font-bold mb-3">Download Our App</h3>
+            <div className="flex justify-center gap-3">
+              <img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757938965/google_pj1cxc.webp" alt="Google Play" className="h-10" />
+            </div>
           </div>
 
           {/* Payment Methods */}
           <div className="flex justify-center mb-4">
-            <img src="/1.svg" alt="Payment Methods" className="h-8 w-auto" />
+            <img src="/1.svg" alt="Payment Methods" className="h-10 w-auto opacity-90" />
           </div>
 
           {/* Copyright */}
-          <div className="text-center text-sm text-gray-300">
-            <p> 2025 Grabatoz powered by Crown Excel.</p>
-            <p className="mt-1">Develop By <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer">Tech Solutionor</a></p>
+          <div className="text-center text-xs text-white/90 space-y-1">
+            <p>© 2025 SuperBoss.com. All rights reserved.</p>
+            <p>Developed by <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white font-semibold">Tech Solutionor</a></p>
           </div>
         </div>
       </footer>
