@@ -184,11 +184,11 @@ const Footer = ({ className = "" }) => {
                     Contact Us
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline transition-colors">
                     Blog
                   </a>
-                </li>
+                </li> */}
                 <li>
                   <Link to="/shop" className="hover:text-blue-600 hover:underline transition-colors">
                     Shop
@@ -255,7 +255,7 @@ const Footer = ({ className = "" }) => {
 
               {/* Disclaimer Text */}
               <p className="text-xs text-gray-600 mb-4 max-w-4xl mx-auto">
-                Your email address will be used to send you Electronics Newsletters and emails about Big Boss's products, services, sales, and special offers. You can unsubscribe at any time by clicking on the unsubscribe link in each email. For more information on our use of your personal information and your rights, see our <Link to="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+                Your email address will be used to send you Electronics Newsletters and emails about Super Boss's products, services, sales, and special offers. You can unsubscribe at any time by clicking on the unsubscribe link in each email. For more information on our use of your personal information and your rights, see our <Link to="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
               </p>
               <p className="text-xs text-gray-600 mb-6">
                 This site is protected by reCAPTCHA and the Google <Link to="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</Link> and <Link to="/terms-conditions" className="text-blue-600 hover:underline">Terms of Service</Link> apply.
@@ -265,21 +265,21 @@ const Footer = ({ className = "" }) => {
               <div className="flex justify-center items-center gap-8 mb-6">
                 {/* Social Icons */}
                 <div className="flex space-x-4">
-                  <a href="https://www.facebook.com/grabatozae/" target="_blank" className="text-gray-600 hover:text-blue-600 transition-colors">
+                  <a href="#" className="text-gray-600 hover:text-blue-600 transition-colors">
                     <Facebook size={24} />
                   </a>
-                  <a href="https://x.com/GrabAtoz" target="_blank" className="text-gray-600 hover:text-black transition-colors" aria-label="X (Twitter)">
+                  <a href="#"  className="text-gray-600 hover:text-black transition-colors" aria-label="X (Twitter)">
                     <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current" role="img">
                       <path d="M18.25 2h3.5l-7.66 8.73L24 22h-6.87l-5.02-6.58L6.3 22H2.8l8.2-9.34L0 2h7.04l4.54 6.02L18.25 2z" />
                     </svg>
                   </a>
-                  <a href="https://www.youtube.com/@grabAtoZ" target="_blank" className="text-gray-600 hover:text-red-600 transition-colors">
+                  <a href="#"  className="text-gray-600 hover:text-red-600 transition-colors">
                     <FontAwesomeIcon icon={faYoutube} style={{width: '24px', height: '24px'}} />
                   </a>
-                  <a href="https://www.pinterest.com/grabatoz/" target="_blank" className="text-gray-600 hover:text-red-600 transition-colors">
+                  <a href="#"  className="text-gray-600 hover:text-red-600 transition-colors">
                     <FontAwesomeIcon icon={faPinterest} style={{width: '24px', height: '24px'}} />
                   </a>
-                  <a href="https://www.instagram.com/grabatoz/" target="_blank" className="text-gray-600 hover:text-pink-600 transition-colors">
+                  <a href="#"  className="text-gray-600 hover:text-pink-600 transition-colors">
                     <Instagram size={24} />
                   </a>
                 </div>
@@ -300,7 +300,7 @@ const Footer = ({ className = "" }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-xs text-gray-600">
             {/* Copyright Text - Left Column */}
             <div className="md:col-span-1">
-              <p>BigBoss.com © Copyright 1997-2025 BigBoss, LLC. All rights reserved.</p>
+              <p>SuperBoss.com © Copyright 1997-2025 SuperBoss, LLC. All rights reserved.</p>
             </div>
 
             {/* Payment Methods - Center Column */}
@@ -310,13 +310,7 @@ const Footer = ({ className = "" }) => {
 
             {/* Links - Right Column */}
             <div className="flex flex-col items-center md:items-end gap-3">
-              <div className="flex gap-2 flex-wrap justify-center md:justify-end">
-                <Link to="/privacy-policy" className="text-blue-600 hover:underline whitespace-nowrap">Privacy Policy | BigBoss</Link>
-                <span className="text-gray-400">|</span>
-                <Link to="/terms-conditions" className="text-blue-600 hover:underline whitespace-nowrap">Terms of Use | BigBoss</Link>
-                <span className="text-gray-400">|</span>
-                <Link to="/accessibility" className="text-blue-600 hover:underline">Accessibility</Link>
-              </div>
+           
               <p className="font-semibold text-center md:text-right">
                 Developed By <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">Tech Solutionor</a>
               </p>
