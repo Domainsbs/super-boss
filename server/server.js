@@ -1,11 +1,18 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+import path from "path"
+import { fileURLToPath } from "url"
 import connectDB from "./config/db.js"
 import config from "./config/config.js"
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js"
 
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 import googleMerchantRoutes from "./routes/googleMerchantRoutes.js"
+import acerProductsRoutes from "./routes/acerProductsRoutes.js"
 import sitemapRoutes from './routes/sitemapRoutes.js'
 
 // Routes
@@ -25,6 +32,12 @@ import taxRoutes from "./routes/taxRoutes.js"
 import deliveryChargeRoutes from "./routes/deliveryChargeRoutes.js"
 import couponRoutes from "./routes/couponRoutes.js"
 import bannerRoutes from "./routes/bannerRoutes.js"
+import bannerCardRoutes from "./routes/bannerCardRoutes.js"
+import homeSectionRoutes from "./routes/homeSectionRoutes.js"
+import offerPageRoutes from "./routes/offerPageRoutes.js"
+import offerProductRoutes from "./routes/offerProductRoutes.js"
+import offerBrandRoutes from "./routes/offerBrandRoutes.js"
+import offerCategoryRoutes from "./routes/offerCategoryRoutes.js"
 import blogRoutes from "./routes/blogRoutes.js"
 import blogCategoryRoutes from "./routes/blogCategoryRoutes.js"
 import blogTopicRoutes from "./routes/blogTopicRoutes.js"
@@ -43,6 +56,10 @@ import mobileApiRoutes from "./routes/mobileApiRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import adminReviewRoutes from "./routes/adminReviewRoutes.js"
 import priceAdjustmentRoutes from "./routes/priceAdjustmentRoutes.js"
+import redirectRoutes from "./routes/redirectRoutes.js"
+import bulkPurchaseRoutes from "./routes/bulkPurchaseRoutes.js"
+import buyerProtectionRoutes from "./routes/buyerProtectionRoutes.js"
+import cacheRoutes from "./routes/cacheRoutes.js"
 
 dotenv.config()
 
@@ -54,9 +71,8 @@ const app = express()
 // CORS configuration
 app.use(cors({
   origin: [
-    'https://super-boss.vercel.app',
-    'https://seenalif.com',
-    'https://www.seenalif.com',
+    'https://www.graba2z.ae',
+    'https://www.grabatoz.ae',
     'http://localhost:3000'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -73,13 +89,16 @@ app.options("*", (req, res) => {
 });
 
 // Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
+const uploadsPath = path.join(__dirname, 'uploads');
+app.use('/uploads', express.static(uploadsPath));
 
 // Add logging for static file requests
 app.use('/uploads', (req, res, next) => {
   console.log('📁 Static file request:', req.path);
   next();
 });
+
+console.log('📂 Serving static files from:', uploadsPath);
 
 // Apply webhook middleware before body parser for webhook routes
 app.use("/api/payment/tamara/webhook", captureRawBody, webhookRateLimit, authenticateWebhook)
@@ -105,6 +124,12 @@ app.use("/api/tax", taxRoutes)
 app.use("/api/delivery-charges", deliveryChargeRoutes)
 app.use("/api/coupons", couponRoutes)
 app.use("/api/banners", bannerRoutes)
+app.use("/api/banner-cards", bannerCardRoutes)
+app.use("/api/home-sections", homeSectionRoutes)
+app.use("/api/offer-pages", offerPageRoutes)
+app.use("/api/offer-products", offerProductRoutes)
+app.use("/api/offer-brands", offerBrandRoutes)
+app.use("/api/offer-categories", offerCategoryRoutes)
 app.use("/api/blogs", blogRoutes)
 app.use("/api/blog-categories", blogCategoryRoutes)
 app.use("/api/blog-topics", blogTopicRoutes)
@@ -112,6 +137,7 @@ app.use("/api/blog-ratings", blogRatingRoutes)
 app.use("/api/settings", settingsRoutes)
 app.use("/api/wishlist", wishlistRoutes)
 app.use("/api/request-callback", requestCallbackRoutes)
+app.use("/api/bulk-purchase", bulkPurchaseRoutes)
 app.use("/api/payment", paymentRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/email-templates", emailTemplateRoutes)
@@ -119,10 +145,14 @@ app.use("/api/newsletter", newsletterRoutes)
 
 
 app.use("/api/price-adjustment", priceAdjustmentRoutes)
+app.use("/api/redirects", redirectRoutes)
+app.use("/api/buyer-protection", buyerProtectionRoutes)
+app.use("/api/cache", cacheRoutes)
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 app.use("/api/google-merchant", googleMerchantRoutes)
+app.use("/acer-products", acerProductsRoutes)
 app.use('/api/app', appRoutes)
 app.use('/api/mobile', mobileApiRoutes)
 
@@ -138,7 +168,7 @@ app.use('/', sitemapRoutes)
 // Health check route
 app.get("/", (req, res) => {
   res.json({
-    message: "Super Boss API is running!",
+    message: "GrabA2Z API is running!",
     version: "1.0.0",
     environment: config.NODE_ENV,
   })

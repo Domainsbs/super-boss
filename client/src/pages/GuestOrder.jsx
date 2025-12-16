@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CheckCircle, Clock, Package, Truck, AlertTriangle } from "lucide-react";
+import { getFullImageUrl } from "../utils/imageUtils";
 import config from "../config/config";
 
 const GuestOrder = () => {
@@ -45,6 +46,55 @@ const GuestOrder = () => {
     };
     fetchOrder();
   }, [location]);
+
+  // Initialize Google Customer Reviews opt-in module for guest orders
+  useEffect(() => {
+    if (!order || !successMessage) return
+
+    // Load Google API platform script if not already loaded
+    if (!window.gapi) {
+      const script = document.createElement("script")
+      script.src = "https://apis.google.com/js/platform.js?onload=renderOptIn"
+      script.async = true
+      script.defer = true
+      document.body.appendChild(script)
+    }
+
+    // Calculate estimated delivery date (7-14 days from now by default)
+    const estimatedDeliveryDate = order.estimatedDelivery
+      ? new Date(order.estimatedDelivery).toISOString().split('T')[0]
+      : new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 10 days from now
+
+    // Extract GTINs from order items if available
+    const products = order.orderItems
+      .filter(item => item.product?.gtin || item.product?.barcode)
+      .map(item => ({ gtin: item.product?.gtin || item.product?.barcode }))
+
+    // Define the render function for GCR opt-in
+    window.renderOptIn = function () {
+      if (window.gapi && window.gapi.load) {
+        window.gapi.load('surveyoptin', function () {
+          window.gapi.surveyoptin.render({
+            // REQUIRED FIELDS
+            "merchant_id": 5615926184,
+            "order_id": order._id,
+            "email": order.shippingAddress?.email || "",
+            "delivery_country": "AE", // UAE country code
+            "estimated_delivery_date": estimatedDeliveryDate,
+
+            // OPTIONAL FIELDS
+            "products": products.length > 0 ? products : undefined,
+            "opt_in_style": "BOTTOM_RIGHT_DIALOG"
+          })
+        })
+      }
+    }
+
+    // Call renderOptIn if gapi is already loaded
+    if (window.gapi && window.gapi.load) {
+      window.renderOptIn()
+    }
+  }, [order, successMessage]);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -108,11 +158,11 @@ const GuestOrder = () => {
           <div className="px-6 py-4">
             <h3 className="text-sm font-medium text-gray-900 mb-4">Items</h3>
             <ul className="divide-y divide-gray-200">
-              {order.orderItems.map((item) => (
+              {order.orderItems.filter(item => !item.isProtection).map((item) => (
                 <li key={item._id} className="py-4 flex">
                   <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden">
                     <img
-                      src={item.image || "/placeholder.svg"}
+                      src={getFullImageUrl(item.image) || "/placeholder.svg"}
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
@@ -127,6 +177,29 @@ const GuestOrder = () => {
                 </li>
               ))}
             </ul>
+            {order.orderItems.some(item => item.isProtection) && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-900 mb-2 flex items-center">
+                  <svg className="w-4 h-4 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Buyer Protection Plans
+                </h4>
+                <ul className="divide-y divide-gray-200 bg-blue-50 rounded-lg">
+                  {order.orderItems.filter(item => item.isProtection).map((item) => (
+                    <li key={item._id} className="py-3 px-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <div className="flex-1">
+                        <h5 className="text-sm font-medium text-gray-900">{item.name}</h5>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 ml-2">AED {item.price.toLocaleString()}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="px-6 py-4 bg-gray-50">

@@ -10,7 +10,7 @@ const productSchema = mongoose.Schema(
     sku: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true, // allows null/undefined values but ensures non-null values are unique
     },
     slug: {
       type: String,
@@ -20,7 +20,7 @@ const productSchema = mongoose.Schema(
     barcode: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true, // allows null/undefined values but ensures non-null values are unique
     },
     stockStatus: {
       type: String,
@@ -39,8 +39,23 @@ const productSchema = mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    // Subcategory (shown in dropdown)
+    // Subcategory Level 1 (shown in dropdown)
     category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
+    },
+    // Subcategory Level 2 (optional)
+    subCategory2: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
+    },
+    // Subcategory Level 3 (optional)
+    subCategory3: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
+    },
+    // Subcategory Level 4 (optional)
+    subCategory4: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SubCategory",
     },
@@ -85,6 +100,14 @@ const productSchema = mongoose.Schema(
         type: String,
       },
     ],
+    video: {
+      type: String,
+    },
+    videoGallery: [
+      {
+        type: String,
+      },
+    ],
     countInStock: {
       type: Number,
       required: true,
@@ -123,6 +146,10 @@ const productSchema = mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    onHold: {
+      type: Boolean,
+      default: false,
+    },
     canPurchase: {
       type: Boolean,
       default: true,
@@ -136,6 +163,10 @@ const productSchema = mongoose.Schema(
       default: true,
     },
     featured: {
+      type: Boolean,
+      default: false,
+    },
+    hideFromShop: {
       type: Boolean,
       default: false,
     },
@@ -166,6 +197,105 @@ const productSchema = mongoose.Schema(
       },
       {
         timestamps: true,
+      },
+    ],
+    variations: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        variationText: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
+    reverseVariationText: {
+      type: String,
+      default: "",
+    },
+    // The label for this product when shown in variation lists (e.g., "16GB RAM", "24GB RAM")
+    selfVariationText: {
+      type: String,
+      default: "",
+    },
+    colorVariations: [
+      {
+        color: {
+          type: String,
+          default: "",
+        },
+        image: {
+          type: String,
+          default: "",
+        },
+        galleryImages: [
+          {
+            type: String,
+          },
+        ],
+        buyingPrice: {
+          type: Number,
+          default: 0,
+        },
+        price: {
+          type: Number,
+          default: 0,
+        },
+        offerPrice: {
+          type: Number,
+          default: 0,
+        },
+        sku: {
+          type: String,
+          default: "",
+        },
+        countInStock: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+    currentProductColor: {
+      type: String,
+      default: "",
+    },
+    dosVariations: [
+      {
+        dosType: {
+          type: String,
+          default: "",
+        },
+        image: {
+          type: String,
+          default: "",
+        },
+        galleryImages: [
+          {
+            type: String,
+          },
+        ],
+        buyingPrice: {
+          type: Number,
+          default: 0,
+        },
+        price: {
+          type: Number,
+          default: 0,
+        },
+        offerPrice: {
+          type: Number,
+          default: 0,
+        },
+        sku: {
+          type: String,
+          default: "",
+        },
+        countInStock: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
     createdBy: {

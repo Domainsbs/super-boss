@@ -50,7 +50,7 @@ const CacheStatus = () => {
       {/* Toggle button */}
       <button
         onClick={() => setIsVisible(!isVisible)}
-        className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-full shadow-lg transition-all duration-200"
+        className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full shadow-lg transition-all duration-200"
         title="Cache Status"
       >
         <Database size={20} />
@@ -124,7 +124,7 @@ const CacheStatus = () => {
             </button>
             <button
               onClick={forceRefreshCache}
-              className="flex-1 bg-primary-500 hover:bg-primary-600 text-white text-xs py-1 px-2 rounded transition-colors"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs py-1 px-2 rounded transition-colors"
               title="Force Refresh"
             >
               <RefreshCw size={12} className="inline mr-1" />
@@ -132,7 +132,7 @@ const CacheStatus = () => {
             </button>
             <button
               onClick={clearCache}
-              className="flex-1 bg-dark-900 hover:bg-dark-800 text-white text-xs py-1 px-2 rounded transition-colors"
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2 rounded transition-colors"
               title="Clear Cache"
             >
               <Trash2 size={12} className="inline mr-1" />

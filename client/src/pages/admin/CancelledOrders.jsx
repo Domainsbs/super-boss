@@ -16,18 +16,33 @@ import {
   User,
   Printer,
   Save,
+  Shield,
 } from "lucide-react"
 
 import config from "../../config/config"
+import { getInvoiceBreakdown } from "../../utils/invoiceBreakdown"
+import { resolveOrderItemBasePrice, computeBaseSubtotal, deriveBaseDiscount } from "../../utils/orderPricing"
+import { getPaymentMethodDisplay, getPaymentMethodBadgeColor, getPaymentInfo } from "../../utils/paymentUtils"
 
 const InvoiceComponent = forwardRef(({ order }, ref) => {
   const formatPrice = (price) => {
-    return `AED ${price?.toLocaleString() || 0}`
+    return `AED ${Number(price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
   }
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString()
   }
+
+  const resolvedItems = Array.isArray(order?.orderItems) ? order.orderItems : []
+  
+  // Separate protection items from regular items
+  const protectionItems = resolvedItems.filter(item => item.isProtection || (item.name && item.name.includes('for ')))
+  const regularItems = resolvedItems.filter(item => !item.isProtection && !(item.name && item.name.includes('for ')))
+  
+  const baseSubtotal = computeBaseSubtotal(regularItems)
+
+  const { subtotal, shipping, tax, total, couponCode, couponDiscount } = getInvoiceBreakdown(order)
+  const derivedDiscount = deriveBaseDiscount(baseSubtotal, subtotal)
 
   const currentDate = new Date().toLocaleDateString()
   const orderDate = new Date(order.createdAt).toLocaleDateString()
@@ -82,7 +97,7 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
           </div>
 
           <div className="w-1/2 text-end p-5   rounded-xl backdrop-blur-sm max-w-xs ml-auto">
-            <h2 className="text-2xl font-bold mb-1">TAX INVOICE</h2>
+            <h2 className="text-2xl font-bold mb-1">VAT INVOICE</h2>
             <div className="text-lg font-semibold mb-1">Order: #{order._id.slice(-6)}</div>
             <div className="text-sm">📅 Date: {orderDate}</div>
           </div>
@@ -94,167 +109,238 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
         <h3 className="text-2xl font-bold text-lime-800 mb-2 uppercase tracking-wide">📋 Order Summary</h3>
 
         {/* Addresses */}
+        {/* Addresses */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-2">
           {/* Shipping Address */}
           <div className="bg-white border-2 border-lime-200 rounded-lg px-3 py-1 relative">
-            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-lime-400 to-lime-600"></div>
-            <h4 className="text-lg font-bold text-lime-800 flex items-center">🚚 Shipping Address</h4>
-            <div className=" text-sm">
-              <p className="font-semibold text-gray-900 text-base">{order.shippingAddress?.name || "N/A"}</p>
-              <p className="text-gray-700">{order.shippingAddress?.address || "N/A"}</p>
-              <p className="text-gray-700">
-                {order.shippingAddress?.city || "N/A"}, {order.shippingAddress?.state || "N/A"}{" "}
-                {order.shippingAddress?.zipCode || "N/A"}
+            <div className="absolute -top-3 left-3 bg-white px-2">
+              <h4 className="text-sm font-bold text-lime-700 uppercase">📦 Shipping Address</h4>
+            </div>
+            <div className="pt-2 space-y-1 text-sm">
+              <p>
+                <strong>Name:</strong> {order.shippingAddress?.name || "N/A"}
               </p>
-              <p className="text-gray-700">📞 {order.shippingAddress?.phone || "N/A"}</p>
-              <p className="text-gray-700">✉️ {order.shippingAddress?.email || "N/A"}</p>
+              <p>
+                <strong>Email:</strong> {order.shippingAddress?.email || "N/A"}
+              </p>
+              <p>
+                <strong>Phone:</strong> {order.shippingAddress?.phone || "N/A"}
+              </p>
+              <p>
+                <strong>Address:</strong> {order.shippingAddress?.address || "N/A"}
+              </p>
+              <p>
+                <strong>City:</strong> {order.shippingAddress?.city || "N/A"}
+              </p>
+              <p>
+                <strong>State:</strong> {order.shippingAddress?.state || "N/A"}
+              </p>
+              <p>
+                <strong>Zip Code:</strong> {order.shippingAddress?.zipCode || "N/A"}
+              </p>
             </div>
           </div>
 
           {/* Billing Address */}
           <div className="bg-white border-2 border-lime-200 rounded-lg px-3 py-1 relative">
-            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-lime-400 to-lime-600"></div>
-            <h4 className="text-lg font-bold text-lime-800 flex items-center">💳 Billing Address</h4>
-            <div className="text-sm">
-              <p className="font-semibold text-gray-900 text-base">
-                {order.billingAddress?.name || order.shippingAddress?.name || "N/A"}
+            <div className="absolute -top-3 left-3 bg-white px-2">
+              <h4 className="text-sm font-bold text-lime-700 uppercase">💳 Billing Address</h4>
+            </div>
+            <div className="pt-2 space-y-1 text-sm">
+              <p>
+                <strong>Name:</strong> {order.billingAddress?.name || order.shippingAddress?.name || "N/A"}
               </p>
-              <p className="text-gray-700">
-                {order.billingAddress?.address || order.shippingAddress?.address || "N/A"}
+              <p>
+                <strong>Email:</strong> {order.billingAddress?.email || order.shippingAddress?.email || "N/A"}
               </p>
-              <p className="text-gray-700">
-                {order.billingAddress?.city || order.shippingAddress?.city || "N/A"},{" "}
-                {order.billingAddress?.state || order.shippingAddress?.state || "N/A"}{" "}
-                {order.billingAddress?.zipCode || order.shippingAddress?.zipCode || "N/A"}
+              <p>
+                <strong>Phone:</strong> {order.billingAddress?.phone || order.shippingAddress?.phone || "N/A"}
               </p>
-              <p className="text-gray-700">📞 {order.billingAddress?.phone || order.shippingAddress?.phone || "N/A"}</p>
-              <p className="text-gray-700">✉️ {order.billingAddress?.email || order.shippingAddress?.email || "N/A"}</p>
+              <p>
+                <strong>Address:</strong> {order.billingAddress?.address || order.shippingAddress?.address || "N/A"}
+              </p>
+              <p>
+                <strong>City:</strong> {order.billingAddress?.city || order.shippingAddress?.city || "N/A"}
+              </p>
+              <p>
+                <strong>State:</strong> {order.billingAddress?.state || order.shippingAddress?.state || "N/A"}
+              </p>
+              <p>
+                <strong>Zip Code:</strong> {order.billingAddress?.zipCode || order.shippingAddress?.zipCode || "N/A"}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Products Table */}
-        <div className="mb-2">
-          <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-            <thead>
-              <tr className="bg-gradient-to-r from-lime-500 to-lime-600 text-white">
-                <th className="text-left p-4 font-bold"> Product</th>
-                <th className="text-left p-4 font-bold"> SKU</th>
-                <th className="text-center p-4 font-bold"> Quantity</th>
-                <th className="text-right p-4 font-bold">Price</th>
-                <th className="text-right p-4 font-bold"> Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.orderItems?.map((item, index) => (
-                <tr key={item._id || index} className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
-                  <td className="p-4 font-medium text-gray-900">{item.name}</td>
-                  <td className="p-4 text-gray-600 whitespace-nowrap">{item.product?.sku || item.sku || "-"}</td>
-                  <td className="p-4 text-center font-semibold text-lime-600">{item.quantity}</td>
-                  <td className="p-4 text-right font-medium">{formatPrice(item.price)}</td>
-                  <td className="p-4 text-right font-bold text-lime-600">{formatPrice(item.price * item.quantity)}</td>
+        {/* Seller Comments */}
+        {order.sellerComments && (
+          <div className="mb-4 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
+            <h4 className="text-sm font-bold text-blue-700 uppercase mb-2">💬 Seller Comments</h4>
+            <p className="text-gray-700 whitespace-pre-wrap">{order.sellerComments}</p>
+          </div>
+        )}
+
+        {/* Order Items */}
+        <div className="mb-4">
+          <h4 className="text-lg font-bold text-lime-800 mb-2 uppercase">🛍️ Order Items</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-lime-300">
+              <thead>
+                <tr className="bg-lime-100">
+                  <th className="border border-lime-300 px-3 py-2 text-left text-sm font-bold">Product</th>
+                  <th className="border border-lime-300 px-3 py-2 text-center text-sm font-bold">Qty</th>
+                  <th className="border border-lime-300 px-3 py-2 text-right text-sm font-bold">Price</th>
+                  <th className="border border-lime-300 px-3 py-2 text-right text-sm font-bold">Total</th>
                 </tr>
-              )) || (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500">
-                    No items found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {regularItems.map((item, index) => {
+                  const basePrice = resolveOrderItemBasePrice(item)
+                  const itemPrice = Number(item.price) || basePrice
+                  const showDiscount = basePrice > itemPrice
+                  const lineTotal = itemPrice * (item.quantity || 0)
+                  const baseTotal = basePrice * (item.quantity || 0)
 
-        {/* Totals */}
-        <div className="bg-white border-2 border-lime-200 rounded-lg p-3">
-          <div className="space-y-1">
-            <div className="flex justify-between text-gray-700">
-              <span>💰 Sub-Total:</span>
-              <span className="font-medium">{formatPrice(order.itemsPrice || 0)}</span>
-            </div>
-            {/* Discount amount (AED) - now placed right below Sub-Total */}
-            {(() => {
-              const subtotal = Number(order.itemsPrice || 0)
-              const shipping = Number(order.shippingPrice || 0)
-              const tax = Number(order.taxPrice || 0)
-              const total = Number(order.totalPrice || 0)
-              // Prefer explicit discountAmount if present; otherwise derive it from totals
-              const explicit = Number(order.discountAmount || 0)
-              const expected = subtotal + shipping + (tax > 0 ? tax : 0)
-              const derived = total > 0 ? Math.max(0, expected - total) : 0
-              const discountAmt = explicit > 0 ? explicit : derived
-              return discountAmt > 0 ? (
-                <div className="flex justify-between text-gray-700">
-                  <span>🎉 Discount:</span>
-                  <span className="font-medium text-gray-700">-{formatPrice(discountAmt)}</span>
-                </div>
-              ) : null
-            })()}
-
-            {(() => {
-              const total = Number(order.totalPrice || 0)
-              const vat = total > 0 ? total * 0.05 : 0
-              return (
-                <div className="flex justify-between text-gray-700">
-                  <span>✔️ Tax (VAT):</span>
-                  <span className="font-medium">{formatPrice(vat)}</span>
-                </div>
-              )
-            })()}
-
-            <div className="flex justify-between text-gray-700">
-              <span>🚚 Shipping Charge:</span>
-              <span className="font-medium">{formatPrice(order.shippingPrice || 0)}</span>
-            </div>
-
-            <div className="border-t-2 border-lime-500">
-              <div className="flex justify-between text-xl font-bold text-lime-800 bg-lime-100 p-2 rounded-lg">
-                <span> TOTAL AMOUNT:</span>
-                <span>{formatPrice(order.totalPrice || 0)}</span>
+                  return (
+                    <tr key={index} className="hover:bg-lime-50">
+                      <td className="border border-lime-300 px-3 py-2 text-sm">
+                        <div className="font-medium text-gray-900">{item.name}</div>
+                        {item.selectedColorData && (
+                          <div className="text-xs text-purple-600 font-medium mt-1 flex items-center">
+                            <span className="inline-block w-3 h-3 rounded-full mr-1 border border-gray-300" style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}></span>
+                            Color: {item.selectedColorData.color}
+                          </div>
+                        )}
+                        {item.selectedDosData && (
+                          <div className="text-xs text-blue-600 font-medium mt-1 flex items-center">
+                            💻 OS: {item.selectedDosData.dosType}
+                          </div>
+                        )}
+                        {showDiscount && (
+                          <div className="text-xs text-gray-500">Base: {formatPrice(basePrice)}</div>
+                        )}
+                      </td>
+                      <td className="border border-lime-300 px-3 py-2 text-center text-sm">{item.quantity}</td>
+                      <td className="border border-lime-300 px-3 py-2 text-right text-sm">
+                        {showDiscount && (
+                          <span className="block text-xs text-gray-400 line-through">{formatPrice(basePrice)}</span>
+                        )}
+                        <span className="font-semibold text-gray-900">{formatPrice(itemPrice)}</span>
+                      </td>
+                      <td className="border border-lime-300 px-3 py-2 text-right text-sm font-semibold">
+                        {showDiscount && (
+                          <span className="block text-xs text-gray-400 font-normal line-through">
+                            {formatPrice(baseTotal)}
+                          </span>
+                        )}
+                        <span>{formatPrice(lineTotal)}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          {protectionItems.length > 0 && (
+            <div className="mt-3">
+              <h5 className="text-md font-bold text-blue-700 mb-2 flex items-center">
+                <span className="mr-1">🛡️</span> Buyer Protection Plans
+              </h5>
+              <div className="bg-blue-50 border border-blue-300 rounded p-2">
+                {protectionItems.map((item, index) => {
+                  const itemPrice = Number(item.price) || 0
+                  return (
+                    <div key={index} className="flex justify-between py-1 text-sm">
+                      <span className="font-medium text-gray-900">{item.name}</span>
+                      <span className="font-semibold text-gray-900">{formatPrice(itemPrice)}</span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="flex justify-between gap-6 mt-2 bg-yellow-50 p-3 rounded-lg border-2 border-yellow-200">
-          {/* Section 1 */}
-          <div className="space-y-4 w-1/3">
-            <div>
-              <p className="font-semibold text-gray-800 mb-2">💳 Payment Status:</p>
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-bold ${
-                  order.isPaid ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
-                }`}
-              >
-                {order.isPaid ? "✅ Paid" : "❌ Unpaid"}
-              </span>
+        {/* Total Amount */}
+        <div className="bg-gray-50 border rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Total Amount</h3>
+          <div className="space-y-2">
+            {baseSubtotal > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Base Price:</span>
+                <span className="text-gray-400 line-through">{formatPrice(baseSubtotal)}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600">Subtotal:</span>
+              <span className="text-gray-900">{formatPrice(subtotal)}</span>
             </div>
-          </div>
-
-          {/* Section 2 */}
-          <div className="space-y-4 w-1/3">
-            <div>
-              <p className="font-semibold text-gray-800">💰 Payment Method:</p>
-              <p className="text-gray-700">{order.paymentMethod || "Card"}</p>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Shipping:</span>
+              <span className="text-gray-900">{formatPrice(shipping)}</span>
             </div>
-          </div>
-
-          {/* Section 3 */}
-          <div className="space-y-4 w-1/3">
-            {order.trackingId && (
-              <div>
-                <p className="font-semibold text-gray-800">📦 Tracking ID:</p>
-                <code className="bg-gray-100 px-3 py-1 rounded text-sm font-mono">{order.trackingId}</code>
+            <div className="flex justify-between">
+              <span className="text-gray-600">VAT:</span>
+              <span className="text-gray-900">{formatPrice(tax)}</span>
+            </div>
+            {derivedDiscount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Offer Discount:</span>
+                <span className="text-green-600">-{formatPrice(derivedDiscount)}</span>
               </div>
             )}
 
-            {order.paidAt && (
-              <div>
-                <p className="font-semibold text-gray-800">✅ Paid At:</p>
-                <p className="text-gray-700">{new Date(order.paidAt).toLocaleString()}</p>
+            {(couponDiscount > 0 || (order.couponCode && order.discountAmount > 0)) && (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3 -mx-1">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium text-green-800">Coupon Applied</span>
+                    {(couponCode || order.couponCode) && (
+                      <div className="text-xs text-green-600 mt-0.5">Code: <span className="font-semibold">{couponCode || order.couponCode}</span></div>
+                    )}
+                  </div>
+                  <span className="text-lg font-bold text-green-700">-{formatPrice(couponDiscount || order.discountAmount || 0)}</span>
+                </div>
               </div>
             )}
+
+            <div className="border-t pt-2 flex justify-between">
+              <span className="text-lg font-semibold text-gray-900">Total:</span>
+              <span className="text-lg font-bold text-lime-600">{formatPrice(total)}</span>
+            </div>
           </div>
+        </div>
+
+        <div className="flex items-center gap-4 mt-2 bg-yellow-50 p-2 rounded-lg border-2 border-yellow-200 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-gray-800">💳 Payment Status:</span>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-bold ${
+                order.isPaid ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
+              }`}
+            >
+              {order.isPaid ? "✅ Paid" : "❌ Unpaid"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-gray-800">💰 Payment Method:</span>
+            <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPaymentMethodBadgeColor(order)}`}>
+              {getPaymentMethodDisplay(order)}
+            </span>
+          </div>
+          {order.trackingId && (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-gray-800">📦 Tracking ID:</span>
+              <code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">{order.trackingId}</code>
+            </div>
+          )}
+          {order.paidAt && (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-gray-800">✅ Paid At:</span>
+              <span className="text-gray-700 text-xs">{new Date(order.paidAt).toLocaleString()}</span>
+            </div>
+          )}
         </div>
 
         {/* Notes */}
@@ -294,6 +380,13 @@ const CancelledOrders = () => {
   const [orderNotes, setOrderNotes] = useState("")
   const [trackingId, setTrackingId] = useState("")
   const [estimatedDelivery, setEstimatedDelivery] = useState("")
+  const [sellerComments, setSellerComments] = useState("")
+  const [sellerMessage, setSellerMessage] = useState("")
+  
+  // Notification modal states
+  const [showNotificationModal, setShowNotificationModal] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notificationOrderId, setNotificationOrderId] = useState(null)
 
   // Print ref
   const printComponentRef = useRef(null)
@@ -315,12 +408,22 @@ const CancelledOrders = () => {
   const paymentStatusOptions = ["Paid", "Unpaid"]
 
   const formatPrice = (price) => {
-    return `AED ${price?.toLocaleString() || 0}`
+    return `AED ${Number(price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
   }
 
   const formatDate = (date) => {
     return new Date(date).toLocaleString()
   }
+
+  const selectedOrderItems = Array.isArray(selectedOrder?.orderItems) ? selectedOrder.orderItems : []
+  const selectedBaseSubtotal = computeBaseSubtotal(selectedOrderItems)
+  const selectedTotals = getInvoiceBreakdown(selectedOrder || {})
+  const selectedBaseDiscount = deriveBaseDiscount(selectedBaseSubtotal, selectedTotals.subtotal)
+  
+  // Calculate total discount (manual or coupon)
+  const totalDiscountAmount = selectedTotals.couponDiscount + selectedTotals.manualDiscount
+  const couponCodeLabel = selectedTotals.couponCode || selectedOrder?.couponCode || ""
+  const showCouponDetail = totalDiscountAmount > 0
 
   // Print handler
   const handlePrint = useReactToPrint({
@@ -386,6 +489,8 @@ const CancelledOrders = () => {
     setOrderNotes(order.notes || "")
     setTrackingId(order.trackingId || "")
     setEstimatedDelivery(order.estimatedDelivery ? new Date(order.estimatedDelivery).toISOString().split("T")[0] : "")
+    setSellerComments(order.sellerComments || "")
+    setSellerMessage(order.sellerMessage || "")
   }
 
   const handleCloseModal = () => {
@@ -393,6 +498,8 @@ const CancelledOrders = () => {
     setOrderNotes("")
     setTrackingId("")
     setEstimatedDelivery("")
+    setSellerComments("")
+    setSellerMessage("")
   }
 
   const handleUpdateStatus = async (orderId, status) => {
@@ -489,6 +596,8 @@ const CancelledOrders = () => {
       const updateData = {
         notes: orderNotes,
         trackingId: trackingId,
+        sellerComments: sellerComments,
+        sellerMessage: sellerMessage,
         ...(estimatedDelivery && { estimatedDelivery: new Date(estimatedDelivery).toISOString() }),
       }
 
@@ -504,6 +613,8 @@ const CancelledOrders = () => {
         ...selectedOrder,
         notes: orderNotes,
         trackingId: trackingId,
+        sellerComments: sellerComments,
+        sellerMessage: sellerMessage,
         estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
       }
 
@@ -521,14 +632,23 @@ const CancelledOrders = () => {
   }
 
   const handleSendNotification = async (orderId) => {
+    // Open notification modal instead of sending directly
+    // Pre-populate with existing seller message from order
+    const order = orders.find(o => o._id === orderId) || selectedOrder
+    setNotificationOrderId(orderId)
+    setNotificationMessage(order?.sellerMessage || "")
+    setShowNotificationModal(true)
+  }
+
+  const handleConfirmSendNotification = async () => {
     try {
       setProcessingAction(true)
       const token =
         localStorage.getItem("adminToken") || localStorage.getItem("token") || localStorage.getItem("authToken")
 
       await axios.post(
-        `${config.API_URL}/api/admin/orders/${orderId}/notify`,
-        {},
+        `${config.API_URL}/api/admin/orders/${notificationOrderId}/notify`,
+        { sellerMessage: notificationMessage },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -537,6 +657,22 @@ const CancelledOrders = () => {
         },
       )
 
+      // Update local state with the new seller message
+      if (notificationMessage) {
+        setSellerMessage(notificationMessage)
+        if (selectedOrder && selectedOrder._id === notificationOrderId) {
+          setSelectedOrder({ ...selectedOrder, sellerMessage: notificationMessage })
+        }
+        setOrders(orders.map((order) => 
+          order._id === notificationOrderId 
+            ? { ...order, sellerMessage: notificationMessage } 
+            : order
+        ))
+      }
+
+      setShowNotificationModal(false)
+      setNotificationMessage("")
+      setNotificationOrderId(null)
       alert("Notification email sent successfully!")
       setProcessingAction(false)
     } catch (error) {
@@ -740,8 +876,8 @@ const CancelledOrders = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lime-500"></div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-lg shadow-sm" style={{ overflow: 'visible' }}>
+          <div className="overflow-x-auto" style={{ overflow: 'visible' }}>
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -810,8 +946,8 @@ const CancelledOrders = () => {
                       <div className="text-sm text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</div>
                       <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleTimeString()}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap relative">
-                      <div className="relative">
+                    <td className="px-6 py-4 whitespace-nowrap" style={{ overflow: 'visible' }}>
+                      <div style={{ position: 'relative' }}>
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -839,7 +975,7 @@ const CancelledOrders = () => {
                         </button>
 
                         {showStatusDropdown[order._id] && (
-                          <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', width: '192px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 9999 }}>
                             {orderStatusOptions.map((status) => (
                               <button
                                 key={status}
@@ -857,8 +993,8 @@ const CancelledOrders = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap relative">
-                      <div className="relative">
+                    <td className="px-6 py-4 whitespace-nowrap" style={{ overflow: 'visible' }}>
+                      <div style={{ position: 'relative' }}>
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -872,7 +1008,7 @@ const CancelledOrders = () => {
                         </button>
 
                         {showPaymentDropdown[order._id] && (
-                          <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', width: '128px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 9999 }}>
                             {paymentStatusOptions.map((status) => (
                               <button
                                 key={status}
@@ -1059,55 +1195,132 @@ const CancelledOrders = () => {
               <div className="bg-white border rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
                 <div className="space-y-4">
-                  {selectedOrder.orderItems?.map((item, index) => (
-                    <div
-                      key={item._id || index}
-                      className="flex items-center justify-between py-3 border-b last:border-b-0"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-15 h-15 bg-gray-200 rounded-md flex items-center justify-center">
-                          <Package size={24} className="text-gray-400" />
+                  {selectedOrderItems.filter(item => !item.isProtection).length > 0 ? (
+                    selectedOrderItems.filter(item => !item.isProtection).map((item, index) => {
+                      const basePrice = resolveOrderItemBasePrice(item)
+                      const salePrice = Number(item.price) || basePrice
+                      const showDiscount = basePrice > salePrice
+                      const lineTotal = salePrice * (item.quantity || 0)
+                      const baseTotal = basePrice * (item.quantity || 0)
+
+                      return (
+                        <div
+                          key={item._id || index}
+                          className="flex items-center justify-between py-3 border-b last:border-b-0"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-15 h-15 bg-gray-200 rounded-md flex items-center justify-center">
+                              <Package size={24} className="text-gray-400" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">{item.name}</h4>
+                              {item.selectedColorData && (
+                                <p className="text-xs text-purple-600 font-medium mt-1 flex items-center">
+                                  <span className="inline-block w-3 h-3 rounded-full mr-1 border border-gray-300" style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}></span>
+                                  Color: {item.selectedColorData.color}
+                                </p>
+                              )}
+                              {item.selectedDosData && (
+                                <p className="text-xs text-blue-600 font-medium mt-1 flex items-center">
+                                  💻 OS: {item.selectedDosData.dosType}
+                                </p>
+                              )}
+                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {showDiscount && (
+                              <p className="text-xs text-gray-400 line-through">{formatPrice(basePrice)}</p>
+                            )}
+                            <p className="font-semibold text-gray-900">{formatPrice(salePrice)}</p>
+                            {showDiscount && (
+                              <p className="text-xs text-gray-400 line-through">{formatPrice(baseTotal)}</p>
+                            )}
+                            <p className="text-sm text-gray-500">Total: {formatPrice(lineTotal)}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{item.name}</h4>
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900">{formatPrice(item.price)}</p>
-                        <p className="text-sm text-gray-500">Total: {formatPrice(item.price * item.quantity)}</p>
-                      </div>
-                    </div>
-                  )) || <p className="text-gray-500 text-center py-4">No items found</p>}
+                      )
+                    })
+                  ) : (
+                    <p className="text-gray-500 text-center py-4">No items found</p>
+                  )}
                 </div>
+                
+                {selectedOrderItems.some(item => item.isProtection) && (
+                  <div className="mt-6 pt-4 border-t">
+                    <h4 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      Buyer Protection Plans
+                    </h4>
+                    <div className="space-y-3">
+                      {selectedOrderItems.filter(item => item.isProtection).map((item, index) => {
+                        const price = Number(item.price) || 0
+                        return (
+                          <div key={item._id || index} className="flex items-center justify-between py-2 px-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                              </svg>
+                              <div>
+                                <h5 className="font-medium text-gray-900">{item.name}</h5>
+                              </div>
+                            </div>
+                            <p className="font-semibold text-gray-900">{formatPrice(price)}</p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Total Amount */}
               <div className="bg-gray-50 border rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Total Amount</h3>
                 <div className="space-y-2">
+                  {selectedBaseSubtotal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Base Price:</span>
+                      <span className="text-gray-400 line-through">{formatPrice(selectedBaseSubtotal)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal:</span>
-                    <span className="text-gray-900">{formatPrice(selectedOrder.itemsPrice || 0)}</span>
+                    <span className="text-gray-900">{formatPrice(selectedTotals.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping:</span>
-                    <span className="text-gray-900">{formatPrice(selectedOrder.shippingPrice || 0)}</span>
+                    <span className="text-gray-900">{formatPrice(selectedTotals.shipping)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax:</span>
-                    <span className="text-gray-900">{formatPrice(selectedOrder.taxPrice || 0)}</span>
+                    <span className="text-gray-600">VAT:</span>
+                    <span className="text-gray-900">{formatPrice(selectedTotals.tax)}</span>
                   </div>
-                  {selectedOrder.discountAmount > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Discount:</span>
-                      <span className="text-green-600">-{formatPrice(selectedOrder.discountAmount)}</span>
-                    </div>
-                  )}
+                    {selectedBaseDiscount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Offer Discount:</span>
+                        <span className="text-green-600">-{formatPrice(selectedBaseDiscount)}</span>
+                      </div>
+                    )}
+                    {showCouponDetail && (
+                      <div className="bg-green-50 border border-green-200 rounded-md p-3 -mx-1">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="text-sm font-medium text-green-800">Coupon Applied</span>
+                            {couponCodeLabel && (
+                              <div className="text-xs text-green-600 mt-0.5">Code: <span className="font-semibold">{couponCodeLabel}</span></div>
+                            )}
+                          </div>
+                          <span className="text-lg font-bold text-green-700">-{formatPrice(totalDiscountAmount)}</span>
+                        </div>
+                      </div>
+                    )}
                   <div className="border-t pt-2 flex justify-between">
                     <span className="text-lg font-semibold text-gray-900">Total:</span>
                     <span className="text-lg font-bold text-lime-600">
-                      {formatPrice(selectedOrder.totalPrice || 0)}
+                      {formatPrice(selectedTotals.total)}
                     </span>
                   </div>
                 </div>
@@ -1247,6 +1460,22 @@ const CancelledOrders = () => {
                   </div>
                 </div>
 
+                {showCouponDetail && (
+                  <div className="mt-4 bg-lime-50 border border-lime-200 p-4 rounded-lg space-y-2">
+                    <p className="text-sm font-medium text-lime-700">{couponCodeLabel ? "Coupon Details" : "Discount Details"}</p>
+                    {couponCodeLabel && (
+                      <div className="flex justify-between text-sm text-gray-700">
+                        <span>Code:</span>
+                        <span className="font-semibold text-gray-900">{couponCodeLabel}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm text-gray-700">
+                      <span>Discount Amount:</span>
+                      <span className="font-semibold text-green-600">-{formatPrice(totalDiscountAmount)}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Customer Notes</label>
                   <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md min-h-[48px]">
@@ -1254,6 +1483,17 @@ const CancelledOrders = () => {
                       {selectedOrder.customerNotes || selectedOrder.notes || "N/A"}
                     </p>
                   </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Seller Comments</label>
+                  <textarea
+                    value={sellerComments}
+                    onChange={(e) => setSellerComments(e.target.value)}
+                    placeholder="Add seller comments here..."
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                  />
                 </div>
 
                 <div className="mt-4">
@@ -1301,6 +1541,67 @@ const CancelledOrders = () => {
       {selectedOrder && (
         <div style={{ display: "none" }}>
           <InvoiceComponent order={selectedOrder} ref={printComponentRef} />
+        </div>
+      )}
+
+      {/* Notification Modal */}
+      {showNotificationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <Mail size={20} className="mr-2 text-green-600" />
+                Send Notification Email
+              </h3>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Seller Message <span className="text-xs text-gray-500">(Optional)</span>
+                </label>
+                <textarea
+                  value={notificationMessage}
+                  onChange={(e) => setNotificationMessage(e.target.value)}
+                  placeholder="Enter a message to include in the notification email..."
+                  rows="4"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  This message will be displayed in the customer's notification email. Leave empty to send without a message.
+                </p>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowNotificationModal(false)
+                  setNotificationMessage("")
+                  setNotificationOrderId(null)
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+                disabled={processingAction}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSendNotification}
+                disabled={processingAction}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center transition-colors disabled:bg-gray-400"
+              >
+                {processingAction ? (
+                  <>
+                    <RefreshCw size={16} className="mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail size={16} className="mr-2" />
+                    Send Notification
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

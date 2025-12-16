@@ -8,7 +8,7 @@ function WhatsAppButton() {
       href="https://wa.me/971508604360"
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-16 md:bottom-8 right-4 z-[9998]"
+      className="fixed bottom-16 md:bottom-8 right-4 z-50"
       aria-label="Chat on WhatsApp"
       style={{ transition: 'transform 0.2s' }}
     >
@@ -22,22 +22,22 @@ function WhatsAppButton() {
   )
 }
 
-const Layout = () => {
+function Layout() {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Fixed Navbar */}
+    <div className="flex flex-col min-h-screen">
+      {/* Navbar - Fixed height */}
       <Navbar />
-      
-      {/* Main Content - with proper constraints */}
+
+      {/* Main Content Area - Grows to fill space */}
       <main className="flex-1 w-full">
-        <div className="max-w-[1920px] mx-auto">
+        <div className="w-full max-w-[1700px] mx-auto">
           <Outlet />
         </div>
       </main>
-      
-      {/* Footer */}
+
+      {/* Footer - At bottom */}
       <Footer />
-      
+
       {/* WhatsApp Button */}
       <WhatsAppButton />
     </div>

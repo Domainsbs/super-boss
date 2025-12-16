@@ -1,6 +1,8 @@
+ 
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { getFullImageUrl } from "../utils/imageUtils"
 
 import config from "../config/config"
 import { Link, useNavigate, useLocation } from "react-router-dom"
@@ -23,8 +25,123 @@ import {
   ChevronDown,
   ChevronRight,
   Truck,
+  ChevronLeft,
 } from "lucide-react"
 import axios from "axios"
+
+// Recursive component for mobile subcategory rendering
+const MobileSubCategoryItem = ({ 
+  subCategory, 
+  parentCategory, 
+  level, 
+  expandedId, 
+  onToggle, 
+  closeMobileMenu,
+  parentChain = []
+}) => {
+  // Helper to get children of current subcategory
+  const getChildSubCategories = (parentNodeId) => {
+    const stack = []
+    // Get all categories from window context (we'll pass this data)
+    const categories = window.__navbarCategories || []
+    for (const c of categories) {
+      if (Array.isArray(c.children)) stack.push(...c.children)
+    }
+    const visited = new Set()
+    while (stack.length) {
+      const node = stack.pop()
+      if (!node || visited.has(node._id)) continue
+      visited.add(node._id)
+      if (node._id === parentNodeId) {
+        return Array.isArray(node.children) ? node.children : []
+      }
+      if (Array.isArray(node.children) && node.children.length) {
+        stack.push(...node.children)
+      }
+    }
+    return []
+  }
+
+  const nestedChildren = getChildSubCategories(subCategory._id)
+  const hasNested = nestedChildren && nestedChildren.length > 0
+  const isExpanded = Array.isArray(expandedId) ? expandedId.includes(subCategory._id) : expandedId === subCategory._id
+  
+  // Build the URL params based on level
+  const buildUrlParams = () => {
+    const params = { parentCategory: parentCategory.name }
+    const chain = [...parentChain, subCategory.name]
+    
+    if (level === 1) params.subcategory = subCategory.name
+    else if (level === 2) {
+      params.subcategory = chain[0]
+      params.subcategory2 = subCategory.name
+    } else if (level === 3) {
+      params.subcategory = chain[0]
+      params.subcategory2 = chain[1]
+      params.subcategory3 = subCategory.name
+    } else if (level === 4) {
+      params.subcategory = chain[0]
+      params.subcategory2 = chain[1]
+      params.subcategory3 = chain[2]
+      params.subcategory4 = subCategory.name
+    }
+    
+    return params
+  }
+
+  const textSizeClass = level === 1 ? 'text-sm' : level === 2 ? 'text-xs' : 'text-xs'
+  const textColorClass = level === 1 ? 'text-red-600' : 'text-gray-700'
+
+  return (
+    <div className="space-y-1">
+      <div className={`flex items-center justify-between py-2 px-2 ${textColorClass} hover:bg-gray-50 rounded-lg ${textSizeClass}`}>
+        <Link
+          to={generateShopURL(buildUrlParams())}
+          className="flex-1"
+          onClick={closeMobileMenu}
+        >
+          <strong>{subCategory.name}</strong>
+        </Link>
+        {hasNested && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggle(subCategory._id)
+            }}
+            className="ml-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-lime-500 text-white hover:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm active:scale-95 transition"
+            aria-expanded={isExpanded}
+            aria-controls={`mobile-subcat-${subCategory._id}`}
+          >
+            {isExpanded ? (
+              <ChevronDown size={16} />
+            ) : (
+              <ChevronRight size={16} />
+            )}
+          </button>
+        )}
+      </div>
+
+      {hasNested && isExpanded && (
+        <div id={`mobile-subcat-${subCategory._id}`} className="ml-4 space-y-1 pb-2">
+          {nestedChildren.map((nested) => (
+            <MobileSubCategoryItem
+              key={nested._id}
+              subCategory={nested}
+              parentCategory={parentCategory}
+              level={level + 1}
+              expandedId={expandedId}
+              onToggle={onToggle}
+              closeMobileMenu={closeMobileMenu}
+              parentChain={[...parentChain, subCategory.name]}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth()
@@ -42,78 +159,212 @@ const Navbar = () => {
   const mobileSearchInputRef = useRef(null)
   const mobileSearchDropdownRef = useRef(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [categories, setCategories] = useState([])
-  const [subCategories, setSubCategories] = useState([])
+  const [categories, setCategories] = useState([]) // now contains nested tree nodes: { _id, name, slug, children: [] }
+  const [flatSubCategories, setFlatSubCategories] = useState([]) // keep for backward compatibility / other components
   const [hoveredCategory, setHoveredCategory] = useState(null)
+  const [hoveredSubCategory1, setHoveredSubCategory1] = useState(null) // For Level 2
+  const [hoveredSubCategory2, setHoveredSubCategory2] = useState(null) // For Level 3
+  const [hoveredSubCategory3, setHoveredSubCategory3] = useState(null) // For Level 4
   const [expandedMobileCategory, setExpandedMobileCategory] = useState(null)
+  const [expandedMobileSubCategories, setExpandedMobileSubCategories] = useState([])
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const profileRef = useRef(null)
   const profileButtonRef = useRef(null)
   const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(8)
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false)
-  const moreDropdownTimeoutRef = useRef(null)
-  const [hoveredMoreCategory, setHoveredMoreCategory] = useState(null)
-  const moreCategoryTimeoutRef = useRef(null)
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
-  const [hoveredCategoryInDropdown, setHoveredCategoryInDropdown] = useState(null)
-  const categoriesDropdownRef = useRef(null)
+  const [categoryOffset, setCategoryOffset] = useState(0)
+  // Timeout refs for delayed hover states
+  const categoryTimeoutRef = useRef(null)
+  const categoryOpenTimeoutRef = useRef(null)
+  const subCategory1TimeoutRef = useRef(null)
+  const subCategory2TimeoutRef = useRef(null)
+  const subCategory3TimeoutRef = useRef(null)
   // Tiny in-memory cache to speed up repeated candidate lookups during typing
   const liveSearchCacheRef = useRef(new Map())
+  // Direction states (simple midpoint rule: items left of screen center open right, else open left)
+  const [level2Dir, setLevel2Dir] = useState('right')
+  const [level3Dir, setLevel3Dir] = useState('right')
+  const [level4Dir, setLevel4Dir] = useState('right')
+  const [activeCategoryRect, setActiveCategoryRect] = useState(null)
+  const megaContentRef = useRef(null)
+  const [megaScrollState, setMegaScrollState] = useState({ canScrollLeft: false, canScrollRight: false })
+  const MEGA_LABEL_LIMIT_CLASS = "whitespace-normal break-words //max-w-[23ch]"
+  const CATEGORY_OPEN_DELAY = 220
+  const CATEGORY_DROPDOWN_MARGIN = 16
+  const CATEGORY_DROPDOWN_GAP = 6
+  const MAX_CATEGORY_DROPDOWN_WIDTH = 1320
+
+  // Decide direction based on available space rather than midpoint
+  const MIN_PANEL_WIDTH = 260 // px (matches min-w[240] + padding/margins)
+  const computeRightDir = (rect) => {
+    if (!rect) return 'right'
+    const rightSpace = window.innerWidth - rect.right
+    const leftSpace = rect.left
+    if (rightSpace >= MIN_PANEL_WIDTH) return 'right'
+    if (leftSpace >= MIN_PANEL_WIDTH) return 'left'
+    return rightSpace >= leftSpace ? 'right' : 'left'
+  }
+  const computeLeftDir = (rect) => {
+    if (!rect) return 'left'
+    const leftSpace = rect.left
+    const rightSpace = window.innerWidth - rect.right
+    if (leftSpace >= MIN_PANEL_WIDTH) return 'left'
+    if (rightSpace >= MIN_PANEL_WIDTH) return 'right'
+    return leftSpace >= rightSpace ? 'left' : 'right'
+  }
+
+  const getPanelStyle = (rect, direction, width = 280, estimatedHeight = 300) => {
+    if (!rect) return {}
+    const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1920
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 1080
+    
+    // Vertical positioning - align to the top of the parent item
+    const style = {
+      top: rect.top
+    }
+    
+    // Horizontal positioning - position inline, right next to the arrow
+    const spaceRight = viewportWidth - rect.right
+    if (direction === 'right' || spaceRight >= width) {
+      // Open to the right, inline with the arrow
+      style.left = rect.right + 4 // Small 4px gap for visual separation
+    } else {
+      // Open to the left if no space on right
+      style.right = viewportWidth - rect.left + 4
+    }
+    
+    return style
+  }
+
+  const getCategoryDropdownStyle = (rect) => {
+    if (!rect) return {}
+    const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1920
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 1080
+    
+    // Calculate padding based on screen size (matching the slider container)
+    let horizontalPadding = 16 // Default: px-4 (4 * 4 = 16px on each side)
+    if (viewportWidth >= 1536) {
+      horizontalPadding = 48 // 2xl:px-12 (12 * 4 = 48px)
+    } else if (viewportWidth >= 1280) {
+      horizontalPadding = 32 // xl:px-8 (8 * 4 = 32px)
+    }
+    
+    // The navbar container has max-w-[1920px] and is centered
+    const maxContainerWidth = 1920
+    const containerWidth = Math.min(viewportWidth, maxContainerWidth)
+    
+    // Calculate centering offset when viewport is wider than max container
+    const containerOffset = viewportWidth > maxContainerWidth 
+      ? (viewportWidth - maxContainerWidth) / 2 
+      : 0
+    
+    // Match the slider container width exactly (container width minus padding)
+    const dropdownWidth = containerWidth - (horizontalPadding * 2)
+    const dropdownLeft = containerOffset + horizontalPadding
+    
+    // Use rect.bottom to position below the category bar, ensuring no overlap
+    const dropdownTop = rect.bottom + 2
+    
+    return {
+      left: `${dropdownLeft}px`,
+      top: `${dropdownTop}px`,
+      width: `${dropdownWidth}px`,
+      height: "400px",
+    }
+  }
+
+  const resetMegaMenu = () => {
+    setHoveredCategory(null)
+    setHoveredSubCategory1(null)
+    setHoveredSubCategory2(null)
+    setHoveredSubCategory3(null)
+    setActiveCategoryRect(null)
+  }
+
+  const updateMegaScrollState = () => {
+    const el = megaContentRef.current
+    if (!el) {
+      setMegaScrollState({ canScrollLeft: false, canScrollRight: false })
+      return
+    }
+    const { scrollLeft, clientWidth, scrollWidth } = el
+    setMegaScrollState({
+      canScrollLeft: scrollLeft > 8,
+      canScrollRight: scrollLeft + clientWidth < scrollWidth - 8,
+    })
+  }
+
+  const handleMegaScroll = (direction) => {
+    const el = megaContentRef.current
+    if (!el) return
+    const offset = direction === "left" ? -320 : 320
+    el.scrollBy({ left: offset, behavior: "smooth" })
+  }
+
 
   // Fetch categories and subcategories from API
-  const fetchCategories = async () => {
+  const fetchCategoryTree = async () => {
     try {
-      const { data } = await axios.get(`${config.API_URL}/api/categories`)
-      setCategories(Array.isArray(data) ? data.filter((cat) => cat.isActive !== false) : [])
+      const [treeResp, subsResp] = await Promise.all([
+        axios.get(`${config.API_URL}/api/categories/tree`),
+        axios.get(`${config.API_URL}/api/subcategories`), // still used for any legacy logic (e.g., other pages)
+      ])
+      const treeData = Array.isArray(treeResp.data) ? treeResp.data : []
+      setCategories(treeData)
+      // Store categories globally for mobile subcategory component
+      if (typeof window !== 'undefined') {
+        window.__navbarCategories = treeData
+      }
+      setFlatSubCategories(Array.isArray(subsResp.data) ? subsResp.data : [])
     } catch (error) {
-      console.error("Error fetching categories:", error)
+      console.error("Error fetching category tree:", error)
     }
   }
 
-  const fetchSubCategories = async () => {
-    try {
-      const { data } = await axios.get(`${config.API_URL}/api/subcategories`)
-      setSubCategories(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error("Error fetching subcategories:", error)
-    }
-  }
-
+  // Helpers now use tree structure
   const getSubCategoriesForCategory = (categoryId) => {
-    return subCategories.filter((sub) => sub.category?._id === categoryId)
+    const cat = categories.find((c) => c._id === categoryId)
+    if (!cat || !Array.isArray(cat.children)) return []
+    // Level 1 nodes: nodes with level === 1 OR no level property (import fallback)
+    return cat.children.filter((n) => !n.level || n.level === 1)
+  }
+
+  const getChildSubCategories = (parentNodeId) => {
+    // We need a lookup: flatten categories children recursively once (memoized by ref) OR derive by search each time for simplicity.
+    // Simplicity approach: depth-first search for node id and return its children.
+    const stack = []
+    for (const c of categories) {
+      if (Array.isArray(c.children)) stack.push(...c.children)
+    }
+    const visited = new Set()
+    while (stack.length) {
+      const node = stack.pop()
+      if (!node || visited.has(node._id)) continue
+      visited.add(node._id)
+      if (node._id === parentNodeId) {
+        return Array.isArray(node.children) ? node.children : []
+      }
+      if (Array.isArray(node.children) && node.children.length) {
+        stack.push(...node.children)
+      }
+    }
+    return []
   }
 
   const toggleMobileCategory = (categoryId) => {
-    setExpandedMobileCategory(expandedMobileCategory === categoryId ? null : categoryId)
+    setExpandedMobileCategory((prev) => (prev === categoryId ? null : categoryId))
+    setExpandedMobileSubCategories([])
   }
 
-  // Handle "More" dropdown hover with delay to prevent flickering
-  const handleMoreDropdownEnter = () => {
-    if (moreDropdownTimeoutRef.current) {
-      clearTimeout(moreDropdownTimeoutRef.current)
-    }
-    setIsMoreDropdownOpen(true)
-  }
-
-  const handleMoreDropdownLeave = () => {
-    moreDropdownTimeoutRef.current = setTimeout(() => {
-      setIsMoreDropdownOpen(false)
-      setHoveredMoreCategory(null) // Also close any open subcategory dropdown
-    }, 150) // Small delay to allow cursor movement to dropdown
-  }
-
-  // Handle subcategory dropdown hover within "More" dropdown
-  const handleMoreCategoryEnter = (categoryId) => {
-    if (moreCategoryTimeoutRef.current) {
-      clearTimeout(moreCategoryTimeoutRef.current)
-    }
-    setHoveredMoreCategory(categoryId)
-  }
-
-  const handleMoreCategoryLeave = () => {
-    moreCategoryTimeoutRef.current = setTimeout(() => {
-      setHoveredMoreCategory(null)
-    }, 150) // Small delay to allow cursor movement to subcategory dropdown
+  const handleMobileSubCategoryToggle = (subCategoryId) => {
+    setExpandedMobileSubCategories((prev) => {
+      if (prev.includes(subCategoryId)) {
+        // Remove this ID and all its children
+        return prev.filter(id => id !== subCategoryId)
+      } else {
+        // Add this ID to the array
+        return [...prev, subCategoryId]
+      }
+    })
   }
 
   // Function to check if search query matches a product's SKU (or name) exactly
@@ -273,53 +524,52 @@ const Navbar = () => {
   }, [])
 
   useEffect(() => {
-    fetchCategories()
-    fetchSubCategories()
+    fetchCategoryTree()
   }, [])
 
-  // Close categories dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (categoriesDropdownRef.current && !categoriesDropdownRef.current.contains(event.target)) {
-        setIsCategoriesOpen(false)
-        setHoveredCategoryInDropdown(null)
-      }
+    if (!hoveredCategory) {
+      setMegaScrollState({ canScrollLeft: false, canScrollRight: false })
+      return
     }
 
-    if (isCategoriesOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
+    const handleResize = () => updateMegaScrollState()
+    const rafId = requestAnimationFrame(updateMegaScrollState)
+
+    window.addEventListener("resize", handleResize)
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      cancelAnimationFrame(rafId)
+      window.removeEventListener("resize", handleResize)
     }
-  }, [isCategoriesOpen])
+  }, [hoveredCategory])
 
-  // Responsive categories count based on screen size
+  // Fixed 10 categories visible - font size will adjust instead of count
   useEffect(() => {
     const updateVisibleCategories = () => {
       const width = window.innerWidth
-      if (width >= 1536) {
-        // 2xl screens
+      
+      // Always show 10 categories on desktop/tablet, 8 on mobile
+      if (width >= 768) {
         setVisibleCategoriesCount(10)
-      } else if (width >= 1280) {
-        // xl screens
-        setVisibleCategoriesCount(8)
-      } else if (width >= 1024) {
-        // lg screens
-        setVisibleCategoriesCount(6)
-      } else if (width >= 768) {
-        // md screens
-        setVisibleCategoriesCount(4)
       } else {
-        setVisibleCategoriesCount(8) // mobile - show all in mobile menu
+        setVisibleCategoriesCount(8) // mobile - show 8 in mobile menu
       }
     }
 
     updateVisibleCategories()
     window.addEventListener("resize", updateVisibleCategories)
-    return () => window.removeEventListener("resize", updateVisibleCategories)
+    const interval = setInterval(updateVisibleCategories, 500)
+    return () => {
+      window.removeEventListener("resize", updateVisibleCategories)
+      clearInterval(interval)
+    }
   }, [])
+
+  useEffect(() => {
+    const maxOffset = Math.max(0, categories.length - visibleCategoriesCount)
+    setCategoryOffset((prev) => Math.min(prev, maxOffset))
+  }, [categories, visibleCategoriesCount])
 
   // Close profile dropdown on outside click (desktop only)
   useEffect(() => {
@@ -340,15 +590,14 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleProfileClick)
   }, [isProfileOpen])
 
-  // Cleanup timeouts on unmount
+  // Cleanup hover timeouts on unmount
   useEffect(() => {
     return () => {
-      if (moreDropdownTimeoutRef.current) {
-        clearTimeout(moreDropdownTimeoutRef.current)
-      }
-      if (moreCategoryTimeoutRef.current) {
-        clearTimeout(moreCategoryTimeoutRef.current)
-      }
+      if (categoryTimeoutRef.current) clearTimeout(categoryTimeoutRef.current)
+      if (categoryOpenTimeoutRef.current) clearTimeout(categoryOpenTimeoutRef.current)
+      if (subCategory1TimeoutRef.current) clearTimeout(subCategory1TimeoutRef.current)
+      if (subCategory2TimeoutRef.current) clearTimeout(subCategory2TimeoutRef.current)
+      if (subCategory3TimeoutRef.current) clearTimeout(subCategory3TimeoutRef.current)
     }
   }, [])
 
@@ -404,150 +653,60 @@ const Navbar = () => {
     setIsMobileSearchOpen(false)
   }
 
+  const visibleCategoryList = categories.slice(
+    categoryOffset,
+    categoryOffset + visibleCategoriesCount,
+  )
+  const canScrollPrev = categoryOffset > 0
+  const canScrollNext = categoryOffset + visibleCategoriesCount < categories.length
+
+  const scrollPrev = () => {
+    if (!canScrollPrev) return
+    setCategoryOffset((prev) => Math.max(prev - 1, 0))
+    resetMegaMenu()
+  }
+
+  const scrollNext = () => {
+    if (!canScrollNext) return
+    const maxOffset = Math.max(0, categories.length - visibleCategoriesCount)
+    setCategoryOffset((prev) => Math.min(prev + 1, maxOffset))
+    resetMegaMenu()
+  }
+
   return (
     <>
-      {/* Desktop Navbar - Canva Style Purple to Blue Gradient */}
-      <header className="hidden md:block bg-white shadow-sm sticky top-0 z-[100]">
-        {/* Top Bar: Logo | Search | Sign In | Cart - Purple to Blue Gradient */}
-        <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center justify-between py-4 gap-2">
-              {/* Logo */}
-              <Link to="/" className="flex-shrink-0">
-                <div className="text-white font-bold text-2xl">
-                  <img src="/bigboss.png" alt="Big Boss Logo" className="h-16 w-auto" />
-                </div>
-              </Link>
-              
-              {/* Enhanced Categories Dropdown Button - Moved closer to search */}
-              <div className="relative ml-2" ref={categoriesDropdownRef}>
-                <button
-                  onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                  className="bg-white text-purple-600 hover:bg-gray-50 rounded-lg px-4 py-2.5 transition-all flex items-center gap-2 shadow-md hover:shadow-lg border border-white/20 font-semibold"
-                  aria-label="Categories"
-                >
-                  <Grid3X3 size={20} strokeWidth={2.5} />
-                  <span className="text-sm font-semibold">Categories</span>
-                  <ChevronDown size={16} className={`transition-transform ${isCategoriesOpen ? 'rotate-180' : ''}`} />
-                </button>
+      {/* Desktop Navbar - Hidden on Mobile */}
+      <header className="hidden md:block bg-white shadow-sm sticky top-0 pt-4 z-50 w-full">
+        <div className="w-full max-w-[1920px] mx-auto space-y-4">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 h-14 xl:h-18 2xl:h-20">
+            {/* Logo - Exact Grabatoz Style */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-40 xl:w-44 2xl:w-48 h-auto flex items-center justify-center">
+                <img src="/new-logo.webp" alt="Logo" className="w-full h-full" />
+              </div>
+            </Link>
 
-                  {/* Categories Dropdown Menu - Smart Width & Height */}
-                  {isCategoriesOpen && (
-                    <div className="absolute top-full left-0 mt-2 bg-white shadow-2xl rounded-lg py-3 px-3 z-[110] border border-gray-200 w-[98vw] max-w-[1200px] max-h-[calc(100vh-120px)] overflow-y-auto categories-scrollbar">
-                      <h3 className="text-xs font-bold text-gray-900 mb-2 pb-2 border-b border-gray-200">
-                        All Categories
-                      </h3>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2">
-                        {categories.map((parentCategory) => {
-                          const categorySubCategories = getSubCategoriesForCategory(parentCategory._id)
-                          return (
-                            <div
-                              key={parentCategory._id}
-                              className="relative"
-                              onMouseEnter={() => setHoveredCategoryInDropdown(parentCategory._id)}
-                              onMouseLeave={() => setHoveredCategoryInDropdown(null)}
-                            >
-                              <Link
-                                to={generateShopURL({ parentCategory: parentCategory.name })}
-                                className="flex flex-col items-center gap-1.5 p-2 hover:bg-gray-50 rounded-lg transition-all group border border-transparent hover:border-primary-200 hover:shadow-sm"
-                                onClick={() => {
-                                  setIsCategoriesOpen(false)
-                                  setHoveredCategoryInDropdown(null)
-                                }}
-                              >
-                                {parentCategory.image ? (
-                                  <div className="w-14 h-14 flex items-center justify-center bg-white rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
-                                    <img
-                                      src={parentCategory.image}
-                                      alt={parentCategory.name}
-                                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="w-14 h-14 flex items-center justify-center bg-gray-100 rounded-lg flex-shrink-0">
-                                    <span className="text-2xl">📦</span>
-                                  </div>
-                                )}
-                                <div className="flex flex-col items-center gap-0.5 w-full">
-                                  <span className="text-[11px] font-medium text-gray-700 group-hover:text-primary-600 transition-colors text-center line-clamp-2 leading-tight w-full">
-                                    {parentCategory.name}
-                                  </span>
-                                  {categorySubCategories.length > 0 && (
-                                    <span className="text-[9px] text-gray-400 flex items-center gap-0.5">
-                                      {categorySubCategories.length} items <ChevronRight size={10} className="text-gray-400" />
-                                    </span>
-                                  )}
-                                </div>
-                              </Link>
-
-                              {/* Subcategories Dropdown - appears on hover, smart positioning */}
-                              {hoveredCategoryInDropdown === parentCategory._id && categorySubCategories.length > 0 && (
-                                <div className="absolute left-full top-0 ml-1 bg-white shadow-2xl rounded-lg py-2 px-2 z-[115] border border-gray-200 w-[300px] max-h-[350px] overflow-y-auto categories-scrollbar">
-                                  <h4 className="text-[10px] font-bold text-gray-900 mb-1.5 pb-1 border-b border-gray-200">
-                                    {parentCategory.name}
-                                  </h4>
-                                  <div className="grid grid-cols-2 gap-1.5">
-                                    {categorySubCategories.map((subCategory) => (
-                                      <Link
-                                        key={subCategory._id}
-                                        to={generateShopURL({ 
-                                          parentCategory: parentCategory.name, 
-                                          subcategory: subCategory.name 
-                                        })}
-                                        className="flex items-center gap-1.5 p-1.5 hover:bg-gray-50 rounded-lg transition-all group"
-                                        onClick={() => {
-                                          setIsCategoriesOpen(false)
-                                          setHoveredCategoryInDropdown(null)
-                                        }}
-                                      >
-                                        {subCategory.image ? (
-                                          <div className="w-7 h-7 flex items-center justify-center bg-white rounded overflow-hidden border border-gray-100 flex-shrink-0">
-                                            <img
-                                              src={subCategory.image}
-                                              alt={subCategory.name}
-                                              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                                            />
-                                          </div>
-                                        ) : (
-                                          <div className="w-7 h-7 flex items-center justify-center bg-gray-100 rounded flex-shrink-0">
-                                            <span className="text-xs">📦</span>
-                                          </div>
-                                        )}
-                                        <span className="text-[10px] text-gray-700 group-hover:text-primary-600 transition-colors line-clamp-2 flex-1 leading-tight">
-                                          {subCategory.name}
-                                        </span>
-                                      </Link>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-              {/* Search Bar - Reduced width */}
-              <div className="flex-1 max-w-2xl">
-                <form onSubmit={handleSearch} className="relative">
-                  <div className="flex items-center bg-white rounded-full overflow-hidden shadow-md">
+            {/* Search Bar - Exact Grabatoz Style */}
+            <div className="flex-1 max-w-2xl xl:max-w-3xl justify-center items-center px-6 xl:px-20 2xl:px-28">
+              <form onSubmit={handleSearch} className="relative">
+                <div className="">
+                  <div className="flex items-center gap-2 m-1">
                     <input
                       type="text"
-                      placeholder="Search all of Super Boss"
+                      placeholder="Search"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1 px-5 py-3 outline-none text-sm text-gray-700 placeholder-gray-500"
+                      className="pl-3 xl:pl-4 pr-3 xl:pr-4 py-2 xl:py-2.5 2xl:py-3 border border-gray-300 focus:outline-none focus:border-lime-500 w-[75%] xl:w-[78%] 2xl:w-[80%] text-sm xl:text-base"
                       ref={searchInputRef}
                       onFocus={() => {
                         if (searchResults.length > 0) setShowSearchDropdown(true)
                       }}
                     />
+                    {/* Loading spinner */}
                     {searchLoading && (
-                      <span className="pr-3">
+                      <span className="absolute right-36 top-1/2 transform -translate-y-1/2">
                         <svg
-                          className="animate-spin h-5 w-5 text-purple-600"
+                          className="animate-spin h-5 w-5 text-lime-500"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -568,30 +727,25 @@ const Navbar = () => {
                         </svg>
                       </span>
                     )}
-                    <button
-                      type="submit"
-                      className="p-3 hover:bg-gray-50 transition-colors rounded-full"
-                      aria-label="Search"
-                    >
-                      <Search size={22} className="text-gray-600" />
+                    <button type="submit" className="px-3 xl:px-3.5 2xl:px-4 py-3 xl:py-3.5 2xl:py-4 bg-lime-500 text-white hover:bg-green-600">
+                      <Search className="w-4 h-4 xl:w-[18px] xl:h-[18px] 2xl:w-5 2xl:h-5" />
                     </button>
                   </div>
-
                   {/* Autocomplete Dropdown */}
                   {showSearchDropdown && searchResults.length > 0 && (
                     <div
                       ref={searchDropdownRef}
-                      className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded-lg z-[110] mt-2 max-h-96 overflow-y-auto"
+                      className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded z-50 mt-2 max-h-96 overflow-y-auto"
                     >
                       {searchResults.map((product) => (
                         <Link
                           key={product._id}
-                          to={`/product/${product.slug || product._id}`}
+                          to={`/product/${encodeURIComponent(product.slug || product._id)}`}
                           className="flex items-start gap-4 px-4 py-3 hover:bg-gray-50 border-b last:border-b-0"
                           onClick={() => setShowSearchDropdown(false)}
                         >
                           <img
-                            src={product.image || "/placeholder.svg"}
+                            src={getFullImageUrl(product.image) || "/placeholder.svg"}
                             alt={product.name}
                             className="w-16 h-16 object-contain rounded"
                           />
@@ -603,329 +757,494 @@ const Navbar = () => {
                       ))}
                       <Link
                         to={`/shop?search=${encodeURIComponent(searchQuery.trim())}`}
-                        className="block text-center text-primary-600 hover:underline py-2 text-sm font-medium"
+                        className="block text-center text-lime-600 hover:underline py-2 text-sm font-medium"
                         onClick={() => setShowSearchDropdown(false)}
                       >
                         View all results
                       </Link>
                     </div>
                   )}
-                </form>
-              </div>
-
-              {/* Right Side: Sign In + Cart - iHerb style */}
-              <div className="flex items-center gap-3">
-                {/* Sign In / Account Button */}
-                <div className="relative">
-                  <button
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors px-3 py-2"
-                    ref={profileButtonRef}
-                  >
-                    <User size={24} />
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm leading-tight">
-                        {isAuthenticated ? 'Hi, ' + (user?.name?.split(' ')[0] || 'Account') : 'Sign In'}
-                      </span>
-                      {isAuthenticated && (
-                        <span className="text-sm font-semibold leading-tight flex items-center">
-                          Account <ChevronDown size={14} className="ml-1" />
-                        </span>
-                      )}
-                      {!isAuthenticated && (
-                        <span className="text-sm font-semibold leading-tight flex items-center">
-                          Create Account <ChevronDown size={14} className="ml-1" />
-                        </span>
-                      )}
-                    </div>
-                  </button>
-
-                  {isProfileOpen && (
-                    <div
-                      ref={profileRef}
-                      className="absolute right-0 w-64 py-2 mt-2 bg-white rounded-lg shadow-xl z-[110] border border-gray-200"
-                    >
-                      {isAuthenticated ? (
-                        <>
-                          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
-                            <p className="text-xs text-gray-500">{user?.email}</p>
-                          </div>
-                          <Link
-                            to="/profile"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            <UserCircle size={18} className="text-gray-600" />
-                            My Profile
-                          </Link>
-                          <Link
-                            to="/orders"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            <Package size={18} className="text-gray-600" />
-                            My Orders
-                          </Link>
-                          <Link
-                            to="/track-order"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            <Truck size={18} className="text-gray-600" />
-                            Track Order
-                          </Link>
-                          <Link
-                            to="/wishlist"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            <Heart size={18} className="text-gray-600" />
-                            <div className="flex items-center justify-between flex-1">
-                              <span>Wishlist</span>
-                              {wishlist.length > 0 && (
-                                <span className="bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                  {wishlist.length}
-                                </span>
-                              )}
-                            </div>
-                          </Link>
-                          <hr className="my-2" />
-                          <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            Logout
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <Link
-                            to="/login"
-                            className="block px-4 py-3 text-sm font-semibold text-primary-600 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Sign In
-                          </Link>
-                          <Link
-                            to="/register"
-                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            Create Account
-                          </Link>
-                          <hr className="my-2" />
-                          <Link
-                            to="/track-order"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setIsProfileOpen(false)}
-                          >
-                            <Truck size={18} className="text-gray-600" />
-                            Track Order
-                          </Link>
-                        </>
-                      )}
-                    </div>
-                  )}
                 </div>
-
-                {/* Cart - iHerb style with badge */}
-                <Link to="/cart" className="relative text-white hover:text-gray-200 transition-colors px-2 py-2">
-                  <div className="relative">
-                    <ShoppingCart size={32} />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              </div>
+              </form>
             </div>
-          </div>
-        </div>
 
-        {/* Bottom Bar: Categories Navigation - HIDDEN (Categories moved to dropdown icon) */}
-        <div className="bg-white border-b border-gray-200 hidden">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-center gap-6 h-16">
-              {/* Display limited categories horizontally */}
-              {categories.slice(0, visibleCategoriesCount).map((parentCategory, index) => {
-                const categorySubCategories = getSubCategoriesForCategory(parentCategory._id)
-                const totalVisible = Math.min(categories.length, visibleCategoriesCount)
-                // Position dropdown to the right for last 2 categories, left for others
-                const isNearEnd = index >= totalVisible - 2
-                
-                return (
+            {/* Right Side Icons - Exact Grabatoz Style */}
+            <div className="flex items-center space-x-2 xl:space-x-3 2xl:space-x-4">
+              {/* Wishlist */}
+              <Link to="/wishlist" className="relative p-2 xl:p-2.5 2xl:p-3 border border-black" aria-label="Wishlist">
+                <Heart className="w-[18px] h-[18px] xl:w-[19px] xl:h-[19px] 2xl:w-5 2xl:h-5 text-gray-600" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {wishlist.length}
+                  </span>
+                )}
+              </Link>
+
+              {/* Profile */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="p-2 xl:p-2.5 2xl:p-3 border border-black"
+                  ref={profileButtonRef}
+                >
+                  <User className="w-[18px] h-[18px] xl:w-[19px] xl:h-[19px] 2xl:w-5 2xl:h-5 text-gray-600" />
+                </button>
+
+                {isProfileOpen && (
                   <div
-                    key={parentCategory._id}
-                    className="relative flex-shrink-0"
-                    onMouseEnter={() => setHoveredCategory(parentCategory._id)}
-                    onMouseLeave={() => setHoveredCategory(null)}
+                    ref={profileRef}
+                    className="absolute right-0 w-48 py-2 mt-2 bg-white rounded-md shadow-xl z-20 border"
                   >
-                    <Link
-                      to={generateShopURL({ parentCategory: parentCategory.name })}
-                      className="text-gray-700 hover:text-primary-600 font-medium whitespace-nowrap text-sm transition-colors flex items-center gap-1"
-                    >
-                      {parentCategory.name}
-                      {categorySubCategories.length > 0 && (
-                        <ChevronDown size={16} className="text-gray-400" />
-                      )}
-                    </Link>
-                    
-                    {/* Dropdown for subcategories with images - Smart positioning */}
-                    {hoveredCategory === parentCategory._id && categorySubCategories.length > 0 && (
-                      <div className={`absolute top-full mt-0 bg-white shadow-2xl rounded-lg py-3 px-4 z-[105] border border-gray-200 min-w-[700px] ${isNearEnd ? 'right-0' : 'left-0'}`}>
-                        <h3 className="text-sm font-bold text-gray-900 mb-2 pb-1 border-b border-gray-200">
-                          {parentCategory.name}
-                        </h3>
-                        <div className="grid grid-cols-4 gap-3">
-                          {categorySubCategories.map((subCategory) => (
-                            <Link
-                              key={subCategory._id}
-                              to={generateShopURL({ 
-                                parentCategory: parentCategory.name, 
-                                subcategory: subCategory.name 
-                              })}
-                              className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                              onClick={() => setHoveredCategory(null)}
-                            >
-                              {subCategory.image ? (
-                                <div className="w-20 h-20 mb-2 flex items-center justify-center bg-white rounded-lg overflow-hidden border border-gray-100">
-                                  <img
-                                    src={subCategory.image}
-                                    alt={subCategory.name}
-                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-200"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-20 h-20 mb-2 flex items-center justify-center bg-gray-100 rounded-lg">
-                                  <span className="text-xl">📦</span>
-                                </div>
-                              )}
-                              <span className="text-xs text-center text-gray-700 group-hover:text-primary-600 font-medium transition-colors duration-200 line-clamp-2">
-                                {subCategory.name}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
+                    {isAuthenticated ? (
+                      <>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          My Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          My Orders
+                        </Link>
+                        <Link
+                          to="/track-order"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Track Order
+                        </Link>
+                        <hr className="my-1" />
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/login"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Login
+                        </Link>
+                        <Link
+                          to="/register"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Register
+                        </Link>
+                        <Link
+                          to="/track-order"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          Track Order
+                        </Link>
+                      </>
                     )}
                   </div>
-                )
-              })}
+                )}
+              </div>
 
-              {/* More dropdown for overflow categories */}
-              {categories.length > visibleCategoriesCount && (
-                <div className="relative flex-shrink-0">
-                  <button 
-                    className="text-gray-700 hover:text-primary-600 font-medium whitespace-nowrap text-sm transition-colors flex items-center gap-1"
-                    onMouseEnter={handleMoreDropdownEnter}
-                    onMouseLeave={handleMoreDropdownLeave}
-                  >
-                    More
-                    <ChevronDown size={16} className="text-gray-400" />
-                  </button>
-                  
-                  {isMoreDropdownOpen && (
-                    <div 
-                      className="absolute top-full left-0 mt-0 bg-white shadow-xl rounded-lg py-2 min-w-48 z-[105] border border-gray-200"
-                      onMouseEnter={handleMoreDropdownEnter}
-                      onMouseLeave={handleMoreDropdownLeave}
-                    >
-                      {categories.slice(visibleCategoriesCount).map((parentCategory) => {
-                        const categorySubCategories = getSubCategoriesForCategory(parentCategory._id)
-                        return (
+              {/* Cart */}
+              <Link to="/cart" className="relative p-2 xl:p-2.5 2xl:p-3">
+                <ShoppingCart className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-[30px] 2xl:h-[30px] text-gray-600" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
+
+          {/* Navigation Menu - Dynamic Categories with Dropdowns */}
+          <div className="bg-lime-500 mt-3 xl:mt-3.5 2xl:mt-4 flex relative">
+          <div className="w-full">
+            <div className="grid grid-cols-[auto,1fr,auto] items-center h-10 xl:h-11 2xl:h-12 px-4 xl:px-8 2xl:px-12 gap-2 xl:gap-2.5 2xl:gap-3">
+              <button
+                type="button"
+                onClick={scrollPrev}
+                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-lime-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!canScrollPrev}
+                aria-label="Previous categories"
+              >
+                <ChevronLeft className="w-4 h-4 xl:w-[17px] xl:h-[17px] 2xl:w-[18px] 2xl:h-[18px]" />
+              </button>
+              <div className="flex-1 overflow-hidden min-w-0">
+                <div className="flex items-center justify-evenly px-2">
+                  {visibleCategoryList.map((parentCategory) => {
+                    const categorySubCategories = getSubCategoriesForCategory(parentCategory._id)
+                    const isActiveCategory = hoveredCategory === parentCategory._id
+                    return (
+                      <div
+                        key={parentCategory._id}
+                        className="relative flex items-center h-full flex-1"
+                        onMouseEnter={(e) => {
+                          if (categoryTimeoutRef.current) {
+                            clearTimeout(categoryTimeoutRef.current)
+                          }
+                          if (categoryOpenTimeoutRef.current) {
+                            clearTimeout(categoryOpenTimeoutRef.current)
+                          }
+                          const target = e.currentTarget
+                          categoryOpenTimeoutRef.current = setTimeout(() => {
+                            setHoveredCategory(parentCategory._id)
+                            const rect = target.getBoundingClientRect()
+                            setActiveCategoryRect({
+                              top: rect.top,
+                              bottom: rect.bottom,
+                              left: rect.left,
+                              right: rect.right,
+                              width: rect.width,
+                            })
+                            categoryOpenTimeoutRef.current = null
+                          }, CATEGORY_OPEN_DELAY)
+                        }}
+                        onMouseLeave={() => {
+                          if (categoryOpenTimeoutRef.current) {
+                            clearTimeout(categoryOpenTimeoutRef.current)
+                            categoryOpenTimeoutRef.current = null
+                          }
+                          categoryTimeoutRef.current = setTimeout(() => {
+                            resetMegaMenu()
+                          }, 1000)
+                        }}
+                      >
+                        <Link
+                          to={generateShopURL({ parentCategory: parentCategory.name })}
+                          className={`text-white font-medium whitespace-nowrap text-[clamp(0.7rem,0.9vw,0.875rem)] px-1 py-2 text-center w-full leading-tight ${
+                            isActiveCategory ? "font-semibold" : ""
+                          }`}
+                        >
+                          {parentCategory.name}
+                        </Link>
+                        {isActiveCategory && (
+                          <span className="pointer-events-none absolute bottom-0 left-1 right-1 h-1.5 rounded-full bg-white shadow-sm" />
+                        )}
+                        {/* Mega menu panel: show all level-1 columns with their level-2 items at once */}
+                        {hoveredCategory === parentCategory._id && categorySubCategories.length > 0 && (
                           <div
-                            key={parentCategory._id}
-                            className="relative"
-                            onMouseEnter={() => handleMoreCategoryEnter(parentCategory._id)}
-                            onMouseLeave={handleMoreCategoryLeave}
+                            className="fixed bg-white mt-1 shadow-2xl rounded-lg p-5 z-[60] border border-gray-100 overflow-y-auto"
+                            role="menu"
+                            aria-label={`${parentCategory.name} menu`}
+                            style={{...getCategoryDropdownStyle(activeCategoryRect), maxWidth: 'calc(100vw - 32px)'}}
+                            onMouseEnter={() => {
+                              if (categoryTimeoutRef.current) clearTimeout(categoryTimeoutRef.current)
+                            }}
+                            onMouseLeave={() => {
+                              categoryTimeoutRef.current = setTimeout(() => {
+                                resetMegaMenu()
+                              }, 300)
+                            }}
                           >
-                            <Link
-                              to={generateShopURL({ parentCategory: parentCategory.name })}
-                              className="flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
-                              onClick={() => {
-                                setIsMoreDropdownOpen(false)
-                                setHoveredMoreCategory(null)
-                              }}
-                            >
-                              <span>{parentCategory.name}</span>
-                              {categorySubCategories.length > 0 && (
-                                <ChevronRight size={16} className="text-gray-400" />
+                            <div className="relative">
+                              {megaScrollState.canScrollLeft && (
+                                <button
+                                  type="button"
+                                  className="absolute left-0 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-full shadow-md w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-100"
+                                  onClick={() => handleMegaScroll("left")}
+                                  aria-label="Scroll menu left"
+                                >
+                                  <ChevronLeft size={16} />
+                                </button>
                               )}
-                            </Link>
-                            
-                            {/* Subcategories dropdown for More items - Always to the left */}
-                            {hoveredMoreCategory === parentCategory._id && categorySubCategories.length > 0 && (
-                              <div className="absolute right-full top-0 mr-1 bg-white shadow-2xl rounded-lg py-3 px-4 z-[106] border border-gray-200 min-w-[700px]">
-                                <h3 className="text-sm font-bold text-gray-900 mb-2 pb-1 border-b border-gray-200">
-                                  {parentCategory.name}
-                                </h3>
-                                <div className="grid grid-cols-4 gap-3">
-                                  {categorySubCategories.map((subCategory) => (
-                                    <Link
-                                      key={subCategory._id}
-                                      to={generateShopURL({ 
-                                        parentCategory: parentCategory.name, 
-                                        subcategory: subCategory.name 
-                                      })}
-                                      className="flex flex-col items-center p-2 hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                                      onClick={() => {
-                                        setIsMoreDropdownOpen(false)
-                                        setHoveredMoreCategory(null)
-                                      }}
-                                    >
-                                      {subCategory.image ? (
-                                        <div className="w-20 h-20 mb-2 flex items-center justify-center bg-white rounded-lg overflow-hidden border border-gray-100">
-                                          <img
-                                            src={subCategory.image}
-                                            alt={subCategory.name}
-                                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-200"
-                                          />
-                                        </div>
-                                      ) : (
-                                        <div className="w-20 h-20 mb-2 flex items-center justify-center bg-gray-100 rounded-lg">
-                                          <span className="text-xl">📦</span>
-                                        </div>
-                                      )}
-                                      <span className="text-xs text-center text-gray-700 group-hover:text-primary-600 font-medium transition-colors duration-200 line-clamp-2">
-                                        {subCategory.name}
-                                      </span>
-                                    </Link>
-                                  ))}
-                                </div>
+                              <div
+                                ref={megaContentRef}
+                                className="flex flex-nowrap items-start gap-4 overflow-x-auto hide-scrollbar px-6 py-2"
+                                onScroll={updateMegaScrollState}
+                              >
+                                {categorySubCategories.map((subCategory) => {
+                                  const level2Subs = getChildSubCategories(subCategory._id)
+                                  return (
+                                    <div key={subCategory._id} className="w-[150px] flex-shrink-0 flex flex-col gap-3">
+                                        <Link
+                                          to={generateShopURL({ parentCategory: parentCategory.name, subcategory: subCategory.name })}
+                                          className={`block text-red-600 text-xs font-semibold hover:text-red-600 ${MEGA_LABEL_LIMIT_CLASS}`}
+                                          onClick={() => resetMegaMenu()}
+                                        >
+                                          {subCategory.name}
+                                        </Link>
+                                      <ul className="flex flex-col gap-1 px-1 pb-1 bg-transparent border-none text-left">
+                                        {(level2Subs || []).slice(0, 12).map((sub2) => {
+                                          const level3Subs = getChildSubCategories(sub2._id)
+                                          const hasLevel3 = Array.isArray(level3Subs) && level3Subs.length > 0
+                                          return (
+                                            <li
+                                              key={sub2._id}
+                                              className="bg-transparent border-none p-0 m-0"
+                                            >
+                                              <Link
+                                                to={generateShopURL({
+                                                  parentCategory: parentCategory.name,
+                                                  subcategory: subCategory.name,
+                                                  subcategory2: sub2.name,
+                                                })}
+                                                className={`block w-full text-xs text-gray-700 hover:text-red-600 hover:underline leading-snug ${MEGA_LABEL_LIMIT_CLASS}`}
+                                                onClick={() => resetMegaMenu()}
+                                              >
+                                                <span className="flex items-start gap-2">
+                                                  <span className="flex-1 break-words leading-snug text-left">{sub2.name}</span>
+                                                  {hasLevel3 && (
+                                                    <span
+                                                      onMouseEnter={(e) => {
+                                                        e.stopPropagation()
+                                                        if (subCategory1TimeoutRef.current) clearTimeout(subCategory1TimeoutRef.current)
+                                                        const rect = e.currentTarget.closest('li').getBoundingClientRect()
+                                                        const direction = computeRightDir(rect)
+                                                        setLevel2Dir(direction)
+                                                        setHoveredSubCategory1({
+                                                          rootCategoryId: parentCategory._id,
+                                                          parentCategoryName: parentCategory.name,
+                                                          level1Name: subCategory.name,
+                                                          current: { id: sub2._id, name: sub2.name },
+                                                          rect,
+                                                          direction,
+                                                          items: level3Subs,
+                                                        })
+                                                        setHoveredSubCategory2(null)
+                                                        setHoveredSubCategory3(null)
+                                                      }}
+                                                      onMouseLeave={() => {
+                                                        subCategory1TimeoutRef.current = setTimeout(() => {
+                                                          setHoveredSubCategory1(null)
+                                                          setHoveredSubCategory2(null)
+                                                          setHoveredSubCategory3(null)
+                                                        }, 200)
+                                                      }}
+                                                      className="cursor-pointer"
+                                                    >
+                                                      <ChevronRight
+                                                        size={14}
+                                                        className={`mt-0.5 flex-shrink-0 text-gray-400 transition-transform duration-150 ${
+                                                          hoveredSubCategory1 && hoveredSubCategory1.current?.id === sub2._id
+                                                            ? "rotate-90"
+                                                            : ""
+                                                        }`}
+                                                      />
+                                                    </span>
+                                                  )}
+                                                </span>
+                                              </Link>
+                                            </li>
+                                          )
+                                        })}
+                                        {level2Subs.length > 12 && (
+                                          <li className="bg-transparent border-none p-0 m-0">
+                                            <Link
+                                              to={generateShopURL({ parentCategory: parentCategory.name, subcategory: subCategory.name })}
+                                              className="text-xs text-red-600 font-medium"
+                                              onClick={() => resetMegaMenu()}
+                                            >
+                                              View all
+                                            </Link>
+                                          </li>
+                                        )}
+                                      </ul>
+                                    </div>
+                                  )
+                                })}
                               </div>
-                            )}
+                              {megaScrollState.canScrollRight && (
+                                <button
+                                  type="button"
+                                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-full shadow-md w-8 h-8 flex items-center justify-center text-gray-700 hover:bg-gray-100"
+                                  onClick={() => handleMegaScroll("right")}
+                                  aria-label="Scroll menu right"
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                              )}
+                              {hoveredSubCategory1 &&
+                                hoveredSubCategory1.rootCategoryId === parentCategory._id &&
+                                Array.isArray(hoveredSubCategory1.items) &&
+                                hoveredSubCategory1.items.length > 0 && (
+                                  <div
+                                    className="fixed z-[65] bg-white shadow-lg border border-gray-200 rounded p-3 w-[280px] max-h-[500px] overflow-y-auto"
+                                    style={getPanelStyle(hoveredSubCategory1.rect, hoveredSubCategory1.direction, 280, 400)}
+                                    onMouseEnter={() => {
+                                      if (subCategory1TimeoutRef.current) clearTimeout(subCategory1TimeoutRef.current)
+                                    }}
+                                    onMouseLeave={() => {
+                                      subCategory1TimeoutRef.current = setTimeout(() => {
+                                        setHoveredSubCategory1(null)
+                                        setHoveredSubCategory2(null)
+                                        setHoveredSubCategory3(null)
+                                      }, 200)
+                                    }}
+                                  >
+                                    <div className="text-xs font-semibold text-red-600 mb-3">
+                                      {hoveredSubCategory1.current?.name || "Subcategories"}
+                                    </div>
+                                    <ul className="space-y-0.5">
+                                      {hoveredSubCategory1.items.map((sub3) => {
+                                        const level4Subs = getChildSubCategories(sub3._id)
+                                        const hasLevel4 = Array.isArray(level4Subs) && level4Subs.length > 0
+                                        return (
+                                          <li
+                                            key={sub3._id}
+                                            className="relative"
+                                          >
+                                            <Link
+                                              to={generateShopURL({
+                                                parentCategory: hoveredSubCategory1.parentCategoryName,
+                                                subcategory: hoveredSubCategory1.level1Name,
+                                                subcategory2: hoveredSubCategory1.current?.name,
+                                                subcategory3: sub3.name,
+                                              })}
+                                              className={`flex items-start gap-2 rounded px-2 py-1 text-xs text-gray-700 hover:text-red-600 hover:bg-gray-50 ${MEGA_LABEL_LIMIT_CLASS}`}
+                                              onClick={() => resetMegaMenu()}
+                                            >
+                                              <span className="flex-1 break-words leading-snug text-left">{sub3.name}</span>
+                                              {hasLevel4 && (
+                                                <span
+                                                  onMouseEnter={(e) => {
+                                                    e.stopPropagation()
+                                                    if (subCategory2TimeoutRef.current) clearTimeout(subCategory2TimeoutRef.current)
+                                                    const rect = e.currentTarget.closest('li').getBoundingClientRect()
+                                                    const dir = hoveredSubCategory1.direction === "right" ? computeRightDir(rect) : computeLeftDir(rect)
+                                                    setLevel3Dir(dir)
+                                                    setHoveredSubCategory2({
+                                                      rootCategoryId: hoveredSubCategory1.rootCategoryId,
+                                                      parentInfo: hoveredSubCategory1,
+                                                      subCategory: { id: sub3._id, name: sub3.name },
+                                                      items: level4Subs,
+                                                      rect,
+                                                      direction: dir,
+                                                    })
+                                                    setHoveredSubCategory3(null)
+                                                  }}
+                                                  onMouseLeave={() => {
+                                                    subCategory2TimeoutRef.current = setTimeout(() => {
+                                                      setHoveredSubCategory2(null)
+                                                      setHoveredSubCategory3(null)
+                                                    }, 200)
+                                                  }}
+                                                  className="cursor-pointer"
+                                                >
+                                                  {hoveredSubCategory2 && hoveredSubCategory2.subCategory?.id === sub3._id ? (
+                                                    hoveredSubCategory2.direction === "right" ? (
+                                                      <ChevronRight size={14} className="mt-0.5 flex-shrink-0 text-gray-400 transform rotate-90 transition-transform" />
+                                                    ) : (
+                                                      <ChevronLeft size={14} className="mt-0.5 flex-shrink-0 text-gray-400 transform -rotate-90 transition-transform" />
+                                                    )
+                                                  ) : hoveredSubCategory1.direction === "right" ? (
+                                                    <ChevronRight size={14} className="mt-0.5 flex-shrink-0 text-gray-400 transition-transform" />
+                                                  ) : (
+                                                    <ChevronLeft size={14} className="mt-0.5 flex-shrink-0 text-gray-400 transition-transform" />
+                                                  )}
+                                                </span>
+                                              )}
+                                            </Link>
+                                          </li>
+                                        )
+                                      })}
+                                    </ul>
+                                  </div>
+                                )}
+                              {hoveredSubCategory2 &&
+                                hoveredSubCategory1 &&
+                                hoveredSubCategory2.rootCategoryId === parentCategory._id &&
+                                Array.isArray(hoveredSubCategory2.items) &&
+                                hoveredSubCategory2.items.length > 0 && (
+                                  <div
+                                    className="fixed z-[66] bg-white shadow-lg border border-gray-200 rounded p-3 ml-3 w-[260px] max-h-[380px] overflow-y-auto"
+                                    style={getPanelStyle(hoveredSubCategory2.rect, hoveredSubCategory2.direction, 260, 350)}
+                                    onMouseEnter={() => {
+                                      if (subCategory2TimeoutRef.current) clearTimeout(subCategory2TimeoutRef.current)
+                                      if (subCategory1TimeoutRef.current) clearTimeout(subCategory1TimeoutRef.current)
+                                      if (categoryTimeoutRef.current) clearTimeout(categoryTimeoutRef.current)
+                                    }}
+                                    onMouseLeave={() => {
+                                      subCategory2TimeoutRef.current = setTimeout(() => {
+                                        setHoveredSubCategory2(null)
+                                        setHoveredSubCategory3(null)
+                                      }, 200)
+                                    }}
+                                  >
+                                    <div className="text-xs font-semibold text-red-600 mb-3">
+                                      {hoveredSubCategory2.subCategory?.name || "More"}
+                                    </div>
+                                    <ul className="space-y-0.5">
+                                      {hoveredSubCategory2.items.map((sub4) => (
+                                        <li key={sub4._id} className="relative">
+                                          <Link
+                                            to={generateShopURL({
+                                              parentCategory: hoveredSubCategory1.parentCategoryName,
+                                              subcategory: hoveredSubCategory1.level1Name,
+                                              subcategory2: hoveredSubCategory1.current?.name,
+                                              subcategory3: hoveredSubCategory2.subCategory?.name,
+                                              subcategory4: sub4.name,
+                                            })}
+                                            className={`block rounded px-2 py-1 text-xs text-gray-700 hover:text-red-600 hover:bg-gray-50 whitespace-normal break-words ${MEGA_LABEL_LIMIT_CLASS}`}
+                                            onMouseEnter={() => {
+                                              if (subCategory3TimeoutRef.current) clearTimeout(subCategory3TimeoutRef.current)
+                                            }}
+                                            onMouseLeave={() => {
+                                              subCategory3TimeoutRef.current = setTimeout(() => {
+                                                setHoveredSubCategory3(null)
+                                              }, 200)
+                                            }}
+                                              onClick={() => resetMegaMenu()}
+                                          >
+                                            {sub4.name}
+                                          </Link>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                            </div>
                           </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              )}
+              </div>
+              <button
+                type="button"
+                onClick={scrollNext}
+                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-lime-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!canScrollNext}
+                aria-label="Next categories"
+              >
+                <ChevronRight className="w-4 h-4 xl:w-[17px] xl:h-[17px] 2xl:w-[18px] 2xl:h-[18px]" />
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      </div>
+
+      
+    </header>
 
       {/* Mobile Navbar - Shown only on Mobile */}
-      <header className="md:hidden bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 shadow-sm sticky top-0 z-50">
+      <header className="md:hidden bg-white shadow-sm sticky top-0 z-50">
         {/* Mobile Top Bar */}
         <div className="flex items-center justify-between px-4 py-3">
           {/* Hamburger Menu */}
           <button onClick={toggleMobileMenu} className="p-2">
-            <Menu size={24} className="text-white" />
+            <Menu size={24} className="text-gray-700" />
           </button>
 
-          {/* Logo - Made larger and more visible on mobile */}
-          <Link to="/" className="flex items-center flex-1 justify-center">
-            <img src="/bigboss.png" alt="Big Boss Logo" className="h-12 w-auto object-contain" />
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <img src="/admin-logo.svg" alt="Logo" className="h-8" />
           </Link>
 
           {/* Search Icon */}
           <button className="p-2" onClick={handleMobileSearchOpen} aria-label="Open search">
-            <Search size={24} className="text-white" />
+            <Search size={24} className="text-gray-700" />
           </button>
         </div>
       </header>
@@ -987,7 +1306,7 @@ const Navbar = () => {
                       </svg>
                     </span>
                   )}
-                  <button type="submit" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+                  <button type="submit" className="px-4 py-2 bg-lime-500 text-white rounded hover:bg-green-600">
                     <Search size={18} />
                   </button>
                 </div>
@@ -1000,7 +1319,7 @@ const Navbar = () => {
                     {searchResults.map((product) => (
                       <Link
                         key={product._id}
-                        to={`/product/${product.slug || product._id}`}
+                        to={`/product/${encodeURIComponent(product.slug || product._id)}`}
                         className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 border-b last:border-b-0"
                         onClick={() => {
                           setShowSearchDropdown(false)
@@ -1008,7 +1327,7 @@ const Navbar = () => {
                         }}
                       >
                         <img
-                          src={product.image || "/placeholder.svg"}
+                          src={getFullImageUrl(product.image) || "/placeholder.svg"}
                           alt={product.name}
                           className="w-12 h-12 object-contain rounded flex-shrink-0"
                         />
@@ -1048,7 +1367,7 @@ const Navbar = () => {
           {/* Drawer */}
           <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto">
             {/* Drawer Header */}
-            <div className="flex items-center justify-between p-4 bg-primary-600 text-white">
+            <div className="flex items-center justify-between p-4 bg-lime-500 text-white">
               <div className="flex items-center">
                 <UserCircle size={24} className="text-white mr-2" />
                 {isAuthenticated ? (
@@ -1102,7 +1421,7 @@ const Navbar = () => {
 
               {/* Shop by Category */}
               <div>
-                <div className="flex items-center justify-between mb-4 bg-primary-600 text-white rounded px-3 py-2">
+                <div className="flex items-center justify-between mb-4 bg-lime-500 text-white rounded px-3 py-2">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
                     <Grid3X3 size={18} className="text-white" />
                     All Category
@@ -1135,13 +1454,13 @@ const Navbar = () => {
                     return (
                       <div key={parentCategory._id}>
                         {/* Parent Category Item */}
-            <div className="flex items-center justify-between py-3 px-2 text-gray-700 hover:bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between py-3 px-2 text-gray-700 hover:bg-gray-50 rounded-lg">
                           <Link
                             to={generateShopURL({ parentCategory: parentCategory.name })}
                             className="flex items-center flex-1"
                             onClick={closeMobileMenu}
                           >
-              <strong>{parentCategory.name}</strong>
+                            <strong>{parentCategory.name}</strong>
                           </Link>
 
                           {/* Toggle button for subcategories */}
@@ -1150,8 +1469,8 @@ const Navbar = () => {
                               onClick={() => toggleMobileCategory(parentCategory._id)}
                               aria-label={isExpanded ? "Collapse subcategories" : "Expand subcategories"}
                               aria-expanded={isExpanded}
-                              className="ml-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary-600 text-white shadow-sm hover:bg-lime-600 active:scale-95 transition"
-                           >
+                              className="ml-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-lime-500 text-white shadow-sm hover:bg-lime-600 active:scale-95 transition"
+                            >
                               {isExpanded ? (
                                 <ChevronDown size={20} className="text-white" />
                               ) : (
@@ -1165,33 +1484,20 @@ const Navbar = () => {
 
                         {/* Subcategories - Only show when expanded */}
                         {isExpanded && categorySubCategories.length > 0 && (
-          <div className="ml-4 space-y-2 pb-2">
-                            {categorySubCategories.map((subCategory) => (
-                              <Link
-                                key={subCategory._id}
-                                to={generateShopURL({
-                                  parentCategory: parentCategory.name,
-                                  subcategory: subCategory.name,
-                                })}
-                                className="flex items-center gap-3 py-2 px-2 text-red-600 hover:bg-gray-50 rounded-lg"
-                                onClick={closeMobileMenu}
-                              >
-                                {subCategory.image ? (
-                                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
-                                    <img
-                                      src={subCategory.image}
-                                      alt={subCategory.name}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-lg">
-                                    <span className="text-lg">📦</span>
-                                  </div>
-                                )}
-            <strong className="text-sm">{subCategory.name}</strong>
-                              </Link>
-                            ))}
+                          <div className="ml-4 space-y-1 pb-2">
+                            {categorySubCategories.map((subCategory) => {
+                              return (
+                                <MobileSubCategoryItem
+                                  key={subCategory._id}
+                                  subCategory={subCategory}
+                                  parentCategory={parentCategory}
+                                  level={1}
+                                  expandedId={expandedMobileSubCategories}
+                                  onToggle={handleMobileSubCategoryToggle}
+                                  closeMobileMenu={closeMobileMenu}
+                                />
+                              )
+                            })}
                           </div>
                         )}
                       </div>
@@ -1223,7 +1529,7 @@ const Navbar = () => {
           <Link to="/cart" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500 relative">
             <ShoppingCart size={20} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold hover:text-lime-500">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold hover:text-lime-500">
                 {cartCount}
               </span>
             )}
@@ -1238,7 +1544,7 @@ const Navbar = () => {
           >
             <Heart size={20} className="" />
             {wishlist.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {wishlist.length}
               </span>
             )}
@@ -1260,3 +1566,5 @@ const Navbar = () => {
 }
 
 export default Navbar
+
+

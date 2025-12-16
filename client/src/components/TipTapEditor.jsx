@@ -9,6 +9,8 @@ import Underline from "@tiptap/extension-underline"
 import BulletList from "@tiptap/extension-bullet-list"
 import OrderedList from "@tiptap/extension-ordered-list"
 import ListItem from "@tiptap/extension-list-item"
+import Heading from "@tiptap/extension-heading"
+import Placeholder from "@tiptap/extension-placeholder"
 import { useState, useEffect, useRef } from "react"
 import {
   Bold,
@@ -22,11 +24,63 @@ import {
   ImageIcon,
   LinkIcon,
   ChevronDown,
+  Video as VideoIcon,
 } from "lucide-react"
 import ImageUpload from "./ImageUpload"
+import VideoUpload from "./VideoUpload"
+import { Node } from "@tiptap/core"
+import { getFullImageUrl } from "../utils/imageUtils"
+import "./TipTapEditor.css"
+
+// Custom Video Extension for TipTap
+const Video = Node.create({
+  name: "video",
+  group: "block",
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      controls: {
+        default: true,
+      },
+      class: {
+        default: "max-w-full h-auto rounded-lg my-4",
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "video",
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["video", HTMLAttributes]
+  },
+
+  addCommands() {
+    return {
+      setVideo:
+        (options) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: options,
+          })
+        },
+    }
+  },
+})
 
 const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description..." }) => {
   const [showImageUpload, setShowImageUpload] = useState(false)
+  const [showVideoUpload, setShowVideoUpload] = useState(false)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
   const [linkText, setLinkText] = useState("")
@@ -36,20 +90,31 @@ const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description
   // Create editor instance
   const editor = useEditor({
     extensions: [
+      // Disable list & heading from StarterKit so we can add configured versions below
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
         listItem: false,
+        heading: false,
       }),
       Underline,
+      // list item must be registered before list containers
+      ListItem,
       BulletList,
       OrderedList,
-      ListItem,
+      // Add heading explicitly to ensure heading levels are available and work with TextAlign
+      Heading.configure({
+        levels: [1, 2, 3, 4, 5, 6],
+      }),
+      Placeholder.configure({
+        placeholder: placeholder,
+      }),
       Image.configure({
         HTMLAttributes: {
           class: "max-w-full h-auto rounded-lg my-4",
         },
       }),
+      Video,
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -70,7 +135,7 @@ const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4",
+        class: "focus:outline-none min-h-[200px] p-4",
       },
     },
   })
@@ -92,8 +157,15 @@ const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description
   }
 
   const handleImageUpload = (imageUrl) => {
-    editor.chain().focus().setImage({ src: imageUrl }).run()
+    const fullImageUrl = getFullImageUrl(imageUrl)
+    editor.chain().focus().setImage({ src: fullImageUrl }).run()
     setShowImageUpload(false)
+  }
+
+  const handleVideoUpload = (videoUrl) => {
+    const fullVideoUrl = getFullImageUrl(videoUrl)
+    editor.chain().focus().setVideo({ src: fullVideoUrl, controls: true }).run()
+    setShowVideoUpload(false)
   }
 
   const insertLink = () => {
@@ -270,6 +342,15 @@ const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description
 
         <button
           type="button"
+          onClick={() => setShowVideoUpload(true)}
+          className="p-2 rounded hover:bg-gray-200 transition-colors text-gray-700"
+          title="Insert Video"
+        >
+          <VideoIcon size={16} />
+        </button>
+
+        <button
+          type="button"
           onClick={() => setShowLinkDialog(true)}
           className="p-2 rounded hover:bg-gray-200 transition-colors text-gray-700"
           title="Insert Link"
@@ -280,19 +361,38 @@ const TipTapEditor = ({ content = "", onChange, placeholder = "Enter description
 
       {/* Editor Content */}
       <div className="min-h-[200px]">
-        <EditorContent editor={editor} className="prose prose-sm max-w-none" placeholder={placeholder} />
+        <EditorContent editor={editor} />
       </div>
 
       {/* Image Upload Modal */}
       {showImageUpload && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Upload Image</h3>
-            <ImageUpload onImageUpload={handleImageUpload} />
+            <h3 className="text-lg font-semibold mb-4">Upload Image (WebP only)</h3>
+            <ImageUpload onImageUpload={handleImageUpload} isProduct={true} />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 type="button"
                 onClick={() => setShowImageUpload(false)}
+                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Upload Modal */}
+      {showVideoUpload && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Upload Video</h3>
+            <VideoUpload onVideoUpload={handleVideoUpload} />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setShowVideoUpload(false)}
                 className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
               >
                 Cancel

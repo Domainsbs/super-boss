@@ -51,12 +51,12 @@ export default function TabbyModal({ amount = 0, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto"
       role="dialog"
       aria-modal="true"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="max-w-md w-full mx-4 mt-10 mb-10 rounded-3xl shadow-2xl border bg-white border-gray-200 overflow-hidden flex flex-col animate-fadeIn">
+      <div className="max-w-md w-full mx-4 mt-10 mb-10 rounded-3xl shadow-lg border bg-white border-gray-200 overflow-hidden flex flex-col">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">

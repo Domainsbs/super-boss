@@ -1013,7 +1013,7 @@ const AdminSidebar = () => {
           to={subItem.path}
           className={`block ${paddingLeft} py-3 ${textSize} transition-colors duration-200 flex items-center space-x-3 ${
             isActive(subItem.path)
-              ? "bg-lime-100 text-lime-800 border-r-2 border-lime-400"
+              ? "bg-blue-100 text-blue-800 border-r-2 border-blue-400"
               : "text-gray-600 hover:bg-gray-200"
           }`}
         >
@@ -1051,7 +1051,7 @@ const AdminSidebar = () => {
           to={item.path}
           className={`block ${paddingLeft} py-2 ${textSize} transition-colors duration-200 ${
             isActive(item.path)
-              ? "bg-lime-100 text-lime-800 border-r-4 border-lime-400"
+              ? "bg-blue-100 text-blue-800 border-r-4 border-blue-400"
               : "text-gray-700 hover:bg-gray-100"
           }`}
         >
@@ -1064,8 +1064,8 @@ const AdminSidebar = () => {
   return (
     <div className="w-64 bg-white shadow-lg h-screen overflow-y-auto fixed left-0 top-0 z-50">
       <div className="p-6 border-b">
-        <Link to="/admin/dashboard" className="flex items-center space-x-2">
-          <img src="/admin-logo.svg" alt="Admin" className="" />
+        <Link to="/admin/dashboard" className="flex items-center justify-center space-x-2">
+          <img src="/bigbossblack2.png" alt="Super Boss Admin" className="h-20 w-auto" />
         </Link>
       </div>
 
@@ -1079,7 +1079,7 @@ const AdminSidebar = () => {
                 to={item.path}
                 className={`flex items-center space-x-3 px-6 py-3 transition-colors duration-200 ${
                   isActive(item.path)
-                    ? "bg-lime-100 text-lime-800 border-r-4 border-lime-400"
+                    ? "bg-blue-100 text-blue-800 border-r-4 border-blue-400"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >

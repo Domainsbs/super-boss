@@ -27,12 +27,12 @@ export default function TamaraModal({ amount = 0, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-95 p-6"
       role="dialog"
       aria-modal="true"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-md rounded-2xl shadow-2xl bg-white p-6 relative font-sans max-h-[90vh] overflow-y-auto animate-fadeIn">
+      <div className="w-full max-w-md rounded-lg shadow-md bg-white p-6 relative font-sans max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}

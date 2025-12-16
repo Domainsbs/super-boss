@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
+import { getFullImageUrl } from "../utils/imageUtils"
 import { useAuth } from "../context/AuthContext"
 import { useToast } from "../context/ToastContext"
 import axios from "axios"
 import { Calendar, User, Eye, Star, ArrowLeft, Share2 } from "lucide-react"
-import LoadingSpinner from "../components/LoadingSpinner"
 
 import config from "../config/config"
 
@@ -208,7 +208,7 @@ const BlogPost = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="medium" />
+        <img src="/g.png" alt="Loading..." style={{ width: 80, height: 80, ...bounceStyle }} />
       </div>
     )
   }
@@ -243,7 +243,7 @@ const BlogPost = () => {
           {blog.image && (
             <div className="aspect-w-16 aspect-h-9">
               <img
-                src={blog.image || "/placeholder.svg"}
+                src={getFullImageUrl(blog.image) || "/placeholder.svg"}
                 alt={blog.title}
                 className="w-full h-64 md:h-96 object-cover"
               />
@@ -389,7 +389,7 @@ const BlogPost = () => {
                 <article key={relatedBlog._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                   {relatedBlog.image && (
                     <img
-                      src={relatedBlog.image || "/placeholder.svg"}
+                      src={getFullImageUrl(relatedBlog.image) || "/placeholder.svg"}
                       alt={relatedBlog.title}
                       className="w-full h-48 object-cover"
                     />

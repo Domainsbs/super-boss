@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Mail, Phone, Clock, MapPin, Shield } from "lucide-react"
+import { Mail, Phone, Clock, MapPin } from "lucide-react"
 
 export default function PrivacyPolicy() {
   const [language, setLanguage] = useState("english")
@@ -10,11 +10,11 @@ export default function PrivacyPolicy() {
     english: {
       title: "Privacy Policy",
       
-      company: "Company: Super Boss - Your Trusted Technology Partner",
+      company: "Company: Grabatoz powered by Crown Excel General Trading LLC",
       sections: {
         introduction: {
           title: "Introduction",
-          content: `Super Boss ("we," "us," or "our") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, and protect your information when you use our services.`,
+          content: `Grabatoz, powered by Crown Excel General Trading LLC ("we," "us," or "our"), respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, and protect your information when you use our website grabatoz.ae and related services.`,
         },
         dataCollection: {
           title: "Data Collection and Usage",
@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
           points: [
             "You have the right to access, correct, or delete your personal data.",
             "You may opt out of marketing communications at any time.",
-            "For any privacy-related inquiries or to exercise your rights, please contact us at: sales@superboss.ae",
+            "For any privacy-related inquiries or to exercise your rights, please contact us at: customercare@grabatoz.ae",
           ],
         },
         security: {
@@ -53,12 +53,12 @@ export default function PrivacyPolicy() {
         contact: {
           title: "Contact Information",
           details: {
-            website: "Super Boss",
-            poweredBy: "Your Trusted Technology Partner",
-            poBox: "Shop:11, Khurram Building, Al Raffa Street, Bur Dubai, Dubai, UAE",
+            website: "Grabatoz.ae",
+            poweredBy: "Powered by Crown Excel General Trading LLC",
+            poBox: "P.O. Box No: 241975, Dubai, UAE",
             customerService: "Customer Service:",
-            phone: "Tel: +971 50 450 2681 / +971 50 764 6297",
-            email: "Email: sales@superboss.ae",
+            phone: "Tel: +971 4 354 0566",
+            email: "Email: customercare@grabatoz.ae",
             hours: "Customer service hours: Daily from 9:00 AM to 7:00 PM",
           },
         },
@@ -67,11 +67,11 @@ export default function PrivacyPolicy() {
     arabic: {
       title: "سياسة الخصوصية",
       effectiveDate: "تاريخ النفاذ: [أدخل التاريخ]",
-      company: "شركة: Super Boss - شريكك التقني الموثوق",
+      company: "شركة: Grabatoz powered by Crown Excel General Trading LLC",
       sections: {
         introduction: {
           title: "مقدمة",
-          content: `تحترم شركة Super Boss ("نحن"، "لنا" أو "خاصتنا") خصوصيتك وتلتزم بحماية بياناتك الشخصية. توضح سياسة الخصوصية هذه كيفية جمع معلوماتك واستخدامها وحمايتها عند استخدامك لخدماتنا.`,
+          content: `تحترم شركة Grabatoz المدعومة من Crown Excel General Trading LLC ("نحن"، "لنا" أو "خاصتنا") خصوصيتك وتلتزم بحماية بياناتك الشخصية. توضح سياسة الخصوصية هذه كيفية جمع معلوماتك واستخدامها وحمايتها عند استخدامك لموقعنا الإلكتروني grabatoz.ae والخدمات ذات الصلة.`,
         },
         dataCollection: {
           title: "جمع واستخدام البيانات",
@@ -94,7 +94,7 @@ export default function PrivacyPolicy() {
           points: [
             "لديك الحق في الوصول إلى بياناتك الشخصية وتصحيحها أو حذفها.",
             "يمكنك إلغاء الاشتراك في الاتصالات التسويقية في أي وقت.",
-            "لأي استفسارات متعلقة بالخصوصية أو لممارسة حقوقك، يرجى التواصل معنا على: sales@superboss.ae",
+            "لأي استفسارات متعلقة بالخصوصية أو لممارسة حقوقك، يرجى التواصل معنا على: customercare@grabatoz.ae",
           ],
         },
         security: {
@@ -110,12 +110,12 @@ export default function PrivacyPolicy() {
         contact: {
           title: "معلومات الاتصال",
           details: {
-            website: "Super Boss",
-            poweredBy: "شريكك التقني الموثوق",
-            poBox: "محل:11، مبنى خرام، شارع الرفاعة، بر دبي، دبي، الإمارات",
+            website: "Grabatoz.ae",
+            poweredBy: "شركة Crown Excel General Trading LLC",
+            poBox: "صندوق بريد: 241975، دبي",
             customerService: "خدمة العملاء:",
-            phone: "هاتف: +971 50 450 2681 / +971 50 764 6297",
-            email: "البريد الإلكتروني: sales@superboss.ae",
+            phone: "هاتف: +971 4 354 0566",
+            email: "البريد الإلكتروني: customercare@grabatoz.ae",
             hours: "ساعات خدمة العملاء: يوميًا من 9:00 صباحًا حتى 7:00 مساءً",
           },
         },
@@ -127,29 +127,16 @@ export default function PrivacyPolicy() {
   const isArabic = language === "arabic"
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isArabic ? "rtl" : "ltr"}`}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-12">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex justify-center mb-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-              <Shield className="w-12 h-12 text-white" />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-center mb-4">{currentContent.title}</h1>
-          <p className="text-center text-purple-100 text-lg">{currentContent.company}</p>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className={`min-h-screen bg-white py-8 px-4 ${isArabic ? "rtl" : "ltr"}`}>
+      <div className="max-w-4xl mx-auto">
         {/* Language Toggle Buttons */}
         <div className="flex justify-center gap-4 mb-8">
           <button
             onClick={() => setLanguage("english")}
             className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
               language === "english"
-                ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
-                : "bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                ? "bg-lime-500 text-white hover:bg-lime-600"
+                : "bg-white border-2 border-lime-500 text-lime-500 hover:bg-lime-50"
             }`}
           >
             English
@@ -158,8 +145,8 @@ export default function PrivacyPolicy() {
             onClick={() => setLanguage("arabic")}
             className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
               language === "arabic"
-                ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
-                : "bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                ? "bg-lime-500 text-white hover:bg-lime-600"
+                : "bg-white border-2 border-lime-500 text-lime-500 hover:bg-lime-50"
             }`}
           >
             العربية
@@ -167,178 +154,139 @@ export default function PrivacyPolicy() {
         </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="bg-white">
+          <div className="p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentContent.title}</h1>
+              <p className="text-gray-600 mb-2">{currentContent.effectiveDate}</p>
+              <p className="text-gray-700 font-medium">{currentContent.company}</p>
+            </div>
+
             {/* Introduction */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.introduction.title}
               </h2>
-              <div className="bg-purple-50 rounded-lg p-6">
-                <p className="text-gray-700 leading-relaxed">{currentContent.sections.introduction.content}</p>
-              </div>
+              <p className="text-gray-700 leading-relaxed">{currentContent.sections.introduction.content}</p>
             </section>
 
             {/* Data Collection and Usage */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.dataCollection.title}
               </h2>
-              <div className="bg-blue-50 rounded-lg p-6">
-                <ul className="space-y-3">
-                  {currentContent.sections.dataCollection.points.map((point, index) => (
-                    <li key={index} className="text-gray-700 leading-relaxed flex items-start">
-                      <span className="inline-block w-2 h-2 bg-purple-600 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-3">
+                {currentContent.sections.dataCollection.points.map((point, index) => (
+                  <li key={index} className="text-gray-700 leading-relaxed flex items-start">
+                    <span className="inline-block w-2 h-2 bg-lime-500 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
 
             {/* Cookies and Tracking Technologies */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.cookies.title}
               </h2>
-              <div className="bg-purple-50 rounded-lg p-6">
-                <ul className="space-y-3">
-                  {currentContent.sections.cookies.points.map((point, index) => (
-                    <li key={index} className="text-gray-700 leading-relaxed flex items-start">
-                      <span className="inline-block w-2 h-2 bg-purple-600 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-3">
+                {currentContent.sections.cookies.points.map((point, index) => (
+                  <li key={index} className="text-gray-700 leading-relaxed flex items-start">
+                    <span className="inline-block w-2 h-2 bg-lime-500 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
 
             {/* Your Rights */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.rights.title}
               </h2>
-              <div className="bg-blue-50 rounded-lg p-6">
-                <ul className="space-y-3">
-                  {currentContent.sections.rights.points.map((point, index) => (
-                    <li key={index} className="text-gray-700 leading-relaxed flex items-start">
-                      <span className="inline-block w-2 h-2 bg-purple-600 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-3">
+                {currentContent.sections.rights.points.map((point, index) => (
+                  <li key={index} className="text-gray-700 leading-relaxed flex items-start">
+                    <span className="inline-block w-2 h-2 bg-lime-500 rounded-full mt-2 mr-3 ml-1 flex-shrink-0"></span>
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
 
             {/* Data Security */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.security.title}
               </h2>
-              <div className="bg-purple-50 rounded-lg p-6">
-                <p className="text-gray-700 leading-relaxed">{currentContent.sections.security.content}</p>
-              </div>
+              <p className="text-gray-700 leading-relaxed">{currentContent.sections.security.content}</p>
             </section>
 
             {/* Changes to This Policy */}
-            <section className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-2">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b-2 border-lime-500 pb-2">
                 {currentContent.sections.changes.title}
               </h2>
-              <div className="bg-blue-50 rounded-lg p-6">
-                <p className="text-gray-700 leading-relaxed">{currentContent.sections.changes.content}</p>
-              </div>
+              <p className="text-gray-700 leading-relaxed">{currentContent.sections.changes.content}</p>
             </section>
+
+
+          </div>
         </div>
       </div>
 
       {/* Contact Information */}
-      <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-12">
-        <div className="max-w-4xl mx-auto px-6">
+      <section className="bg-gray-50 text-black p-4">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Contact Information</h2>
-            <p className="text-purple-100">Get in touch with our team for any questions or concerns</p>
+            <h2 className="text-2xl font-semibold mb-2">Contact Information</h2>
+            <p className="text-black">Get in touch with our team for any questions or concerns</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all">
-              <div className="flex justify-center mb-3">
-                <div className="bg-white/20 rounded-lg p-3">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div className="text-center">
+              <div className="flex justify-center mb-2">
+                <Phone className="w-5 h-5 text-lime-500" />
               </div>
-              <h3 className="font-semibold mb-2">Call Us</h3>
-              <div className="space-y-1">
-                <a href="tel:+971504502681" className="block text-purple-100 hover:text-white transition-colors">
-                  +971 50 450 2681
-                </a>
-                <a href="tel:+971507646297" className="block text-purple-100 hover:text-white transition-colors">
-                  +971 50 764 6297
-                </a>
-              </div>
+              <h3 className="font-medium mb-1">Phone</h3>
+              <a href="tel:+97143540566" className="text-black">
+                +971 4 354 0566
+              </a>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all">
-              <div className="flex justify-center mb-3">
-                <div className="bg-white/20 rounded-lg p-3">
-                  <Mail className="w-6 h-6 text-white" />
-                </div>
+            <div className="text-center">
+              <div className="flex justify-center mb-2">
+                <Mail className="w-5 h-5 text-lime-500" />
               </div>
-              <h3 className="font-semibold mb-2">Email Us</h3>
-              <div className="space-y-1">
-                <a href="mailto:sales@superboss.ae" className="block text-purple-100 hover:text-white transition-colors text-sm break-words">
-                  sales@superboss.ae
-                </a>
-                <a href="mailto:superbosscomputer@gmail.com" className="block text-purple-100 hover:text-white transition-colors text-xs break-all">
-                  superbosscomputer@gmail.com
-                </a>
-              </div>
+              <h3 className="font-medium mb-1">Email</h3>
+              <a href="mailto:customercare@grabatoz.ae" className="text-black">
+                customercare@grabatoz.ae
+              </a>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all">
-              <div className="flex justify-center mb-3">
-                <div className="bg-white/20 rounded-lg p-3">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
+            <div className="text-center">
+              <div className="flex justify-center mb-2">
+                <Clock className="w-5 h-5 text-lime-500" />
               </div>
-              <h3 className="font-semibold mb-2">Business Hours</h3>
-              <p className="text-purple-100">Daily<br/>9:00 AM - 7:00 PM</p>
+              <h3 className="font-medium mb-1">Hours</h3>
+              <p className="text-black">Daily 9:00 AM - 7:00 PM</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all">
-              <div className="flex justify-center mb-3">
-                <div className="bg-white/20 rounded-lg p-3">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
+            <div className="text-center">
+              <div className="flex justify-center mb-2">
+                <MapPin className="w-5 h-5 text-lime-500" />
               </div>
-              <h3 className="font-semibold mb-2">Visit Us</h3>
-              <p className="text-purple-100 text-sm">Shop:11, Khurram Building<br/>Al Raffa Street, Bur Dubai<br/>Dubai, UAE</p>
+              <h3 className="font-medium mb-1">Address</h3>
+              <p className="text-black">P.O. Box 241975, Dubai, UAE</p>
             </div>
           </div>
 
-          <div className="text-center mt-8 pt-6 border-t border-white/20">
-            <p className="text-white text-lg font-semibold">
-              Super Boss
-            </p>
-            <p className="text-purple-100 text-sm mt-1">
-              Your Trusted Technology Partner
+          <div className="text-center pt-4 border-t border-gray-700">
+            <p className="text-black">
+              <strong>Grabatoz.ae</strong><br />
+              <b>Powered by Crown Excel General Trading LLC</b>
             </p>
           </div>
         </div>

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import AdminSidebar from "../../components/admin/AdminSidebar"
 import { Search, Eye, Mail, ChevronDown, RefreshCw } from "lucide-react"
-import LoadingSpinner from "../../components/LoadingSpinner"
+import { getFullImageUrl } from "../../utils/imageUtils"
+import { getPaymentMethodDisplay, getPaymentMethodBadgeColor, getPaymentInfo } from "../../utils/paymentUtils"
 
 import config from "../../config/config"
 const AdminOrders = () => {
@@ -59,7 +60,12 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get(`${config.API_URL}/api/admin/orders`)
+      const token = localStorage.getItem('adminToken')
+      const { data } = await axios.get(`${config.API_URL}/api/admin/orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       setOrders(data)
       setLoading(false)
     } catch (error) {
@@ -79,7 +85,12 @@ const AdminOrders = () => {
   const handleUpdateStatus = async (orderId, status) => {
     try {
       setProcessingAction(true)
-      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/status`, { status })
+      const token = localStorage.getItem('adminToken')
+      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/status`, { status }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       setOrders(orders.map((order) => (order._id === orderId ? { ...order, status } : order)))
 
@@ -98,7 +109,12 @@ const AdminOrders = () => {
   const handleUpdatePaymentStatus = async (orderId, isPaid) => {
     try {
       setProcessingAction(true)
-      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/payment`, { isPaid })
+      const token = localStorage.getItem('adminToken')
+      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/payment`, { isPaid }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       setOrders(orders.map((order) => (order._id === orderId ? { ...order, isPaid } : order)))
 
@@ -117,7 +133,12 @@ const AdminOrders = () => {
   const handleUpdateTracking = async (orderId, trackingId) => {
     try {
       setProcessingAction(true)
-      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/tracking`, { trackingId })
+      const token = localStorage.getItem('adminToken')
+      await axios.put(`${config.API_URL}/api/admin/orders/${orderId}/tracking`, { trackingId }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       setOrders(orders.map((order) => (order._id === orderId ? { ...order, trackingId } : order)))
 
@@ -135,7 +156,12 @@ const AdminOrders = () => {
   const handleSendNotification = async (orderId) => {
     try {
       setProcessingAction(true)
-      await axios.post(`${config.API_URL}/api/admin/orders/${orderId}/notify`)
+      const token = localStorage.getItem('adminToken')
+      await axios.post(`${config.API_URL}/api/admin/orders/${orderId}/notify`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
       setProcessingAction(false)
       alert("Notification email sent successfully!")
     } catch (error) {
@@ -268,11 +294,11 @@ const AdminOrders = () => {
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <LoadingSpinner size="medium" />
+            <img src="/g.png" alt="Loading..." style={{ width: 48, height: 48, ...bounceStyle }} />
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-lg shadow-sm" style={{ overflow: 'visible' }}>
+            <div className="overflow-x-auto" style={{ overflow: 'visible' }}>
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -321,8 +347,8 @@ const AdminOrders = () => {
                         <div className="text-sm text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</div>
                       </td>
                       {/* Clickable Status Column */}
-                      <td className="px-6 py-4 whitespace-nowrap relative">
-                        <div className="relative">
+                      <td className="px-6 py-4 whitespace-nowrap" style={{ overflow: 'visible' }}>
+                        <div style={{ position: 'relative' }}>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
@@ -350,7 +376,7 @@ const AdminOrders = () => {
                           </button>
 
                           {showStatusDropdown[order._id] && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', width: '192px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 9999 }}>
                               {orderStatusOptions.map((status) => (
                                 <button
                                   key={status}
@@ -369,8 +395,13 @@ const AdminOrders = () => {
                         </div>
                       </td>
                       {/* Clickable Payment Status Column */}
-                      <td className="px-6 py-4 whitespace-nowrap relative">
-                        <div className="relative">
+                      <td className="px-6 py-4 whitespace-nowrap" style={{ overflow: 'visible' }}>
+                        <div className="flex flex-col gap-1" style={{ position: 'relative' }}>
+                          {/* Payment Method Badge */}
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPaymentMethodBadgeColor(order)}`}>
+                            {getPaymentMethodDisplay(order)}
+                          </span>
+                          {/* Payment Status Button */}
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
@@ -384,7 +415,7 @@ const AdminOrders = () => {
                           </button>
 
                           {showPaymentDropdown[order._id] && (
-                            <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20">
+                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '4px', width: '128px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 9999 }}>
                               {paymentStatusOptions.map((status) => (
                                 <button
                                   key={status}
@@ -510,7 +541,7 @@ const AdminOrders = () => {
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0">
                                 <img
-                                  src={item.image || "/placeholder.svg?height=40&width=40"}
+                                  src={getFullImageUrl(item.image) || "/placeholder.svg?height=40&width=40"}
                                   alt={item.name}
                                   className="h-10 w-10 rounded-md object-cover"
                                 />
@@ -579,10 +610,28 @@ const AdminOrders = () => {
                       <span className="text-gray-600">Shipping</span>
                       <span className="text-gray-900">{formatPrice(selectedOrder.shippingPrice)}</span>
                     </div>
-                    <div className="flex justify-between py-2 font-medium">
+                    <div className="flex justify-between py-2 border-b font-medium">
                       <span className="text-gray-900">Total</span>
                       <span className="text-blue-600">{formatPrice(selectedOrder.totalPrice)}</span>
                     </div>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-gray-600">Payment Method</span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPaymentMethodBadgeColor(selectedOrder)}`}>
+                        {getPaymentMethodDisplay(selectedOrder)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-2">
+                      <span className="text-gray-600">Payment Status</span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${selectedOrder.isPaid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                        {selectedOrder.isPaid ? "Paid" : "Unpaid"}
+                      </span>
+                    </div>
+                    {selectedOrder.paidAt && (
+                      <div className="flex justify-between py-2 text-sm">
+                        <span className="text-gray-600">Paid At</span>
+                        <span className="text-gray-900">{new Date(selectedOrder.paidAt).toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

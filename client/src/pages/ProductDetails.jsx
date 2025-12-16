@@ -6,7 +6,10 @@ import { useCart } from "../context/CartContext"
 import { useAuth } from "../context/AuthContext"
 import { useToast } from "../context/ToastContext"
 import { useWishlist } from "../context/WishlistContext"
-import LoadingSpinner from "../components/LoadingSpinner"
+import { getFullImageUrl } from "../utils/imageUtils"
+import PhoneInput from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
+import '../styles/phoneInput.css'
 import {
   Star,
   Minus,
@@ -26,6 +29,7 @@ import {
   Award,
   Mail,
   Percent,
+  CheckCircle,
 } from "lucide-react"
 import { productsAPI } from "../services/api.js"
 import { trackProductView } from "../utils/gtmTracking"
@@ -37,6 +41,8 @@ import ReviewSection from "../components/ReviewSection"
 import TabbyModal from "../components/payments/TabbyModal"
 import TamaraModal from "../components/payments/TamaraModal"
 import SEO from "../components/SEO"
+import TipTapRenderer from "../components/TipTapRenderer"
+import BuyerProtectionSection from "../components/BuyerProtectionSection"
 
 const WHATSAPP_NUMBER = "971508604360" // Replace with your WhatsApp number
 
@@ -53,6 +59,8 @@ const ProductDetails = () => {
   const [error, setError] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [selectedColorIndex, setSelectedColorIndex] = useState(null)
+  const [selectedDosIndex, setSelectedDosIndex] = useState(null)
   const [activeTab, setActiveTab] = useState("description")
   const [showImageModal, setShowImageModal] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
@@ -78,6 +86,11 @@ const ProductDetails = () => {
 
   const [showTabbyModal, setShowTabbyModal] = useState(false)
   const [showTamaraModal, setShowTamaraModal] = useState(false)
+  const [showVideoModal, setShowVideoModal] = useState(false)
+  
+  // Buyer Protection state
+  const [selectedProtections, setSelectedProtections] = useState([])
+  const [hasProtectionPlans, setHasProtectionPlans] = useState(false)
 
   // Keyboard navigation
   useEffect(() => {
@@ -139,9 +152,20 @@ const ProductDetails = () => {
   }, [isMobile, showRatingDropdown])
 
   const [showCallbackModal, setShowCallbackModal] = useState(false)
-  const [callbackForm, setCallbackForm] = useState({ name: user?.name || "", email: user?.email || "", phone: "" })
+  const [callbackForm, setCallbackForm] = useState({ 
+    name: user?.name || "", 
+    email: user?.email || "", 
+    phone: "",
+    customerNote: ""
+  })
   const [callbackLoading, setCallbackLoading] = useState(false)
   const [callbackSuccess, setCallbackSuccess] = useState(false)
+  const [emailChanged, setEmailChanged] = useState(false)
+  const [verificationCode, setVerificationCode] = useState("")
+  const [verificationSent, setVerificationSent] = useState(false)
+  const [verificationVerified, setVerificationVerified] = useState(false)
+  const [verificationLoading, setVerificationLoading] = useState(false)
+  const [phoneValue, setPhoneValue] = useState("")
 
   const [relatedLoading, setRelatedLoading] = useState(true)
   const [showCouponsModal, setShowCouponsModal] = useState(false)
@@ -174,12 +198,121 @@ const ProductDetails = () => {
     return formatPrice(discountedPrice)
   }
 
+  // Get current color variation
+  const getCurrentColor = () => {
+    if (selectedColorIndex !== null && product?.colorVariations && product.colorVariations.length > 0) {
+      return product.colorVariations[selectedColorIndex]
+    }
+    return null
+  }
+
+  // Get current DOS/Windows variation
+  const getCurrentDos = () => {
+    if (selectedDosIndex !== null && product?.dosVariations && product.dosVariations.length > 0) {
+      return product.dosVariations[selectedDosIndex]
+    }
+    return null
+  }
+
+  // Helper function to check if a URL is a YouTube URL
+  const isYouTubeUrl = (url) => {
+    if (!url) return false
+    return url.includes('youtube.com') || url.includes('youtu.be')
+  }
+
+  // Helper function to get YouTube embed URL
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return ''
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    if (url.includes('youtube.com/watch')) {
+      const videoId = url.split('v=')[1]?.split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    return url
+  }
+
+  // Get current images based on selected color or DOS variation (includes videos)
+  const getCurrentImages = () => {
+    const currentColor = getCurrentColor()
+    const currentDos = getCurrentDos()
+    const media = []
+    
+    // Check DOS variation first (if selected)
+    if (currentDos && currentDos.image) {
+      media.push({ type: 'image', url: currentDos.image })
+      if (currentDos.galleryImages && currentDos.galleryImages.length > 0) {
+        currentDos.galleryImages.filter(img => img).forEach(img => {
+          media.push({ type: 'image', url: img })
+        })
+      }
+      return media
+    }
+    
+    // Check color variation
+    if (currentColor && currentColor.image) {
+      media.push({ type: 'image', url: currentColor.image })
+      if (currentColor.galleryImages && currentColor.galleryImages.length > 0) {
+        currentColor.galleryImages.filter(img => img).forEach(img => {
+          media.push({ type: 'image', url: img })
+        })
+      }
+      return media
+    }
+    
+    // Fallback to product images and videos
+    if (product?.image) {
+      media.push({ type: 'image', url: product.image })
+    }
+    
+    if (product?.galleryImages && product.galleryImages.length > 0) {
+      product.galleryImages.filter(img => img).forEach(img => {
+        media.push({ type: 'image', url: img })
+      })
+    }
+    
+    // Add main product video if exists
+    if (product?.video) {
+      media.push({ type: 'video', url: product.video })
+    }
+    
+    // Add video gallery if exists
+    if (product?.videoGallery && product.videoGallery.length > 0) {
+      product.videoGallery.filter(vid => vid).forEach(vid => {
+        media.push({ type: 'video', url: vid })
+      })
+    }
+    
+    return media
+  }
+
   const getEffectivePrice = () => {
-    const basePrice = Number(product?.price) || 0
-    const offerPrice = Number(product?.offerPrice) || 0
-    const hasValidOffer = offerPrice > 0 && basePrice > 0 && offerPrice < basePrice
-    if (hasValidOffer) return offerPrice
-    return basePrice > 0 ? basePrice : offerPrice
+    const currentColor = getCurrentColor()
+    const currentDos = getCurrentDos()
+    
+    // Get base price (from color if selected, otherwise from product)
+    let basePrice = 0
+    if (currentColor) {
+      const colorBasePrice = Number(currentColor.price) || 0
+      const colorOfferPrice = Number(currentColor.offerPrice) || 0
+      basePrice = (colorOfferPrice > 0 && colorOfferPrice < colorBasePrice) ? colorOfferPrice : colorBasePrice
+    } else {
+      const productBasePrice = Number(product?.price) || 0
+      const productOfferPrice = Number(product?.offerPrice) || 0
+      basePrice = (productOfferPrice > 0 && productOfferPrice < productBasePrice) ? productOfferPrice : productBasePrice
+    }
+    
+    // Add DOS price if selected (additive)
+    if (currentDos) {
+      const dosBasePrice = Number(currentDos.price) || 0
+      const dosOfferPrice = Number(currentDos.offerPrice) || 0
+      const dosPrice = (dosOfferPrice > 0 && dosOfferPrice < dosBasePrice) ? dosOfferPrice : dosBasePrice
+      basePrice += dosPrice
+    }
+    
+    return basePrice
   }
   const formatPerMonth = (n) =>
     `AED ${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mo`
@@ -235,10 +368,15 @@ const ProductDetails = () => {
   }
 
   useEffect(() => {
-    console.log("slug from useParams:", slug)
-    if (slug) {
-      fetchProduct()
+    if (!slug) return
+    let normalizedSlug = slug
+    try {
+      normalizedSlug = decodeURIComponent(slug)
+    } catch (decodeError) {
+      console.warn("Slug already decoded or invalid encoding", slug, decodeError.message)
     }
+    console.log("ProductDetails param slug:", slug, "using:", normalizedSlug)
+    fetchProduct(normalizedSlug)
   }, [slug])
 
   useEffect(() => {
@@ -249,10 +387,38 @@ const ProductDetails = () => {
     }
   }, [product])
 
-  const fetchProduct = async () => {
+  const fetchProduct = async (rawSlug) => {
     try {
-      console.log("Fetching product for slug:", slug)
-      const data = await productsAPI.getBySlug(slug)
+      const attemptSlug = (rawSlug || slug || '').trim()
+      console.log("Fetching product for slug:", attemptSlug)
+      let data
+      try {
+        data = await productsAPI.getBySlug(attemptSlug)
+      } catch (e) {
+        // If slug contains unsafe chars or lookup failed, try a sanitized variant
+        console.warn("Primary slug fetch failed, trying fallback sanitization", e.message)
+        const fallback = attemptSlug
+          .toLowerCase()
+          .replace(/[^a-z0-9\-]+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')
+        if (fallback && fallback !== attemptSlug) {
+          try {
+            data = await productsAPI.getBySlug(fallback)
+          } catch (e2) {
+            console.warn("Fallback slug also failed", e2.message)
+          }
+        }
+      }
+      // If still no data and looks like an ObjectId, attempt by ID
+      if (!data && attemptSlug.match(/^[0-9a-fA-F]{24}$/)) {
+        try {
+          data = await productsAPI.getById(attemptSlug)
+        } catch (e3) {
+          console.warn("ID fetch attempt failed", e3.message)
+        }
+      }
+      if (!data) throw new Error("Product not found via slug or ID attempts")
       console.log("API response for product:", data)
       setProduct(data)
       setError(null)
@@ -266,8 +432,8 @@ const ProductDetails = () => {
         }
       }
     } catch (error) {
-      console.error("Error fetching product:", error)
-      setError("Failed to load product details. Please try again later.")
+      console.error("Error fetching product after fallbacks:", error)
+      setError("Failed to load product details. Please check the URL or try again later.")
     } finally {
       setLoading(false)
     }
@@ -279,7 +445,7 @@ const ProductDetails = () => {
       // Try to get related products from the same category
       const { data } = await axios.get(`${config.API_URL}/api/products?category=${product.category._id}&limit=12`)
       let filtered = data.filter((p) => p._id !== product._id)
-      if (filtered.length === 0) {
+      if (filtered.length === 0) { 
         // If no related products, fetch all products and pick random ones (excluding current)
         const allRes = await axios.get(`${config.API_URL}/api/products`)
         filtered = allRes.data.filter((p) => p._id !== product._id)
@@ -402,7 +568,7 @@ const ProductDetails = () => {
               className="w-5 h-5 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
             />
             <img
-              src={product.image || "/placeholder.svg"}
+              src={getFullImageUrl(product.image) || "/placeholder.svg"}
               alt={product.name}
               className="w-16 h-16 object-cover rounded-md"
             />
@@ -433,7 +599,7 @@ const ProductDetails = () => {
                   className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <img
-                  src={item.image || "/placeholder.svg"}
+                  src={getFullImageUrl(item.image) || "/placeholder.svg"}
                   alt={item.name}
                   className="w-16 h-16 object-cover rounded-md"
                 />
@@ -503,12 +669,94 @@ const ProductDetails = () => {
   }
 
   const handleAddToCart = () => {
-    if (product.stockStatus === "Out of Stock") {
+    // Check stock status based on selected color, DOS variation, or main product
+    const currentColor = getCurrentColor()
+    const currentDos = getCurrentDos()
+    
+    if (currentDos && currentDos.countInStock <= 0) {
+      showToast("Selected OS option is out of stock", "error")
+      return
+    }
+    if (currentColor && currentColor.countInStock <= 0) {
+      showToast("Selected color is out of stock", "error")
+      return
+    }
+    if (!currentColor && !currentDos && product.stockStatus === "Out of Stock") {
       showToast("Product is out of stock", "error")
       return
     }
-    addToCart(product, quantity)
-    showToast("Product added to cart!", "success")
+    
+    // Calculate the final price based on variations:
+    // If color is selected: use color price as base
+    // If DOS is selected: add DOS price to base price (additive)
+    let finalPrice = 0
+    let baseImageUrl = product.image
+    
+    // Get base price from color or product
+    if (currentColor) {
+      const colorPrice = currentColor.offerPrice > 0 ? currentColor.offerPrice : currentColor.price
+      finalPrice = Number(colorPrice) || 0
+      baseImageUrl = currentColor.image || product.image
+    } else {
+      finalPrice = product.offerPrice > 0 ? Number(product.offerPrice) : Number(product.price) || 0
+    }
+    
+    // Add DOS price if selected (additive)
+    if (currentDos) {
+      const dosPrice = currentDos.offerPrice > 0 ? currentDos.offerPrice : currentDos.price
+      finalPrice += Number(dosPrice) || 0
+    }
+    
+    // Prepare product with variation data
+    const productToAdd = {
+      ...product,
+      selectedColorIndex,
+      selectedColorData: currentColor ? {
+        color: currentColor.color,
+        image: currentColor.image,
+        price: currentColor.price,
+        offerPrice: currentColor.offerPrice,
+        sku: currentColor.sku,
+      } : null,
+      selectedDosIndex,
+      selectedDosData: currentDos ? {
+        dosType: currentDos.dosType,
+        image: currentDos.image,
+        price: currentDos.price,
+        offerPrice: currentDos.offerPrice,
+        sku: currentDos.sku,
+      } : null,
+      // Final calculated price (color/product base + DOS if selected)
+      // Clear offerPrice so CartContext uses 'price' as the effective price
+      price: finalPrice,
+      offerPrice: 0, // Reset so computeUnit uses price field
+      // Override image with color-specific image if available
+      image: baseImageUrl,
+    }
+    
+    // Add main product to cart
+    addToCart(productToAdd, quantity)
+    
+    // Add selected protections to cart as separate items linked to the product
+    if (selectedProtections.length > 0) {
+      selectedProtections.forEach((protection) => {
+        const protectionItem = {
+          _id: `protection_${protection._id}_${product._id}_${Date.now()}`,
+          name: `${protection.name} for ${product.name}`,
+          price: protection.calculatedPrice || protection.price,
+          image: product.image, // Use product image as reference
+          isProtection: true,
+          protectionFor: product._id,
+          protectionData: protection,
+          countInStock: 999, // Protection plans don't have stock limits
+          quantity: 1, // Always 1 per product
+        }
+        addToCart(protectionItem, 1)
+      })
+      showToast(`Product and ${selectedProtections.length} protection plan(s) added to cart!`, "success")
+    } else {
+      showToast("Product added to cart!", "success")
+    }
   }
 
   const handleBuyNow = () => {
@@ -1602,19 +1850,47 @@ const ProductDetails = () => {
 
   const handleCallbackSubmit = async (e) => {
     e.preventDefault()
+    
+    // Check if email verification is needed and completed
+    if (emailChanged && !verificationVerified) {
+      showToast("Please verify your email address", "error")
+      return
+    }
+    
     setCallbackLoading(true)
 
     try {
-      await axios.post(`${config.API_URL}/api/callback-requests`, {
-        ...callbackForm,
+      // Get product link
+      const productLink = `${window.location.origin}/product/${product.slug || product._id}`
+      
+      // Extract country code from phone number (e.g., "+971501234567" -> "+971")
+      const countryCode = phoneValue ? phoneValue.split(/\d/)[0] : ""
+      
+      await axios.post(`${config.API_URL}/api/request-callback`, {
+        name: callbackForm.name,
+        email: callbackForm.email,
+        phone: phoneValue,
+        countryCode: countryCode,
+        customerNote: callbackForm.customerNote,
         productId: product._id,
         productName: product.name,
+        productLink: productLink,
       })
       setCallbackSuccess(true)
       setTimeout(() => {
         setShowCallbackModal(false)
         setCallbackSuccess(false)
-        setCallbackForm({ name: user?.name || "", email: user?.email || "", phone: "" })
+        setCallbackForm({ 
+          name: user?.name || "", 
+          email: user?.email || "", 
+          phone: "",
+          customerNote: ""
+        })
+        setPhoneValue("")
+        setEmailChanged(false)
+        setVerificationCode("")
+        setVerificationSent(false)
+        setVerificationVerified(false)
       }, 2000)
     } catch (error) {
       console.error("Error submitting callback request:", error)
@@ -1626,10 +1902,79 @@ const ProductDetails = () => {
 
   const handleCallbackChange = (e) => {
     const { name, value } = e.target
+    
+    // Check if email is being changed
+    if (name === 'email') {
+      // Get the logged-in user's email (if logged in)
+      const loggedInEmail = user?.email || ""
+      
+      // If user is logged in
+      if (loggedInEmail !== "") {
+        // Compare entered email with logged-in user's email ONLY
+        if (value.trim().toLowerCase() === loggedInEmail.trim().toLowerCase()) {
+          // Email matches logged-in email - no verification needed
+          setEmailChanged(false)
+          setVerificationVerified(true)
+          setVerificationSent(false)
+          setVerificationCode("")
+        } else {
+          // Email is different from logged-in email - verification required
+          setEmailChanged(true)
+          setVerificationVerified(false)
+          setVerificationSent(false)
+          setVerificationCode("")
+        }
+      } else {
+        // User is NOT logged in - verification required for any email
+        if (value.trim() !== "") {
+          setEmailChanged(true)
+          setVerificationVerified(false)
+          setVerificationSent(false)
+          setVerificationCode("")
+        } else {
+          setEmailChanged(false)
+          setVerificationVerified(false)
+        }
+      }
+    }
+    
     setCallbackForm((prev) => ({
       ...prev,
       [name]: value,
     }))
+  }
+  
+  const handleSendVerificationCode = async () => {
+    setVerificationLoading(true)
+    try {
+      await axios.post(`${config.API_URL}/api/request-callback/send-verification`, {
+        email: callbackForm.email
+      })
+      setVerificationSent(true)
+      showToast("Verification code sent to your email", "success")
+    } catch (error) {
+      console.error("Error sending verification code:", error)
+      showToast("Failed to send verification code", "error")
+    } finally {
+      setVerificationLoading(false)
+    }
+  }
+  
+  const handleVerifyCode = async () => {
+    setVerificationLoading(true)
+    try {
+      await axios.post(`${config.API_URL}/api/request-callback/verify-code`, {
+        email: callbackForm.email,
+        code: verificationCode
+      })
+      setVerificationVerified(true)
+      showToast("Email verified successfully", "success")
+    } catch (error) {
+      console.error("Error verifying code:", error)
+      showToast(error.response?.data?.message || "Invalid verification code", "error")
+    } finally {
+      setVerificationLoading(false)
+    }
   }
 
   const handleOpenCouponsModal = async () => {
@@ -1713,7 +2058,7 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="large" />
+        <img src="/g.png" alt="Loading" className="w-24 h-24 animate-bounce" style={{ animationDuration: "1.5s" }} />
       </div>
     )
   }
@@ -1741,12 +2086,9 @@ const ProductDetails = () => {
         .slice(0, 160)) ||
     `${product.name} available at Grabatoz.`
 
-  const pdCanonicalPath = `/product/${product.slug || product._id}`
+  const pdCanonicalPath = `/product/${encodeURIComponent(product.slug || product._id)}`
 
-  const productImages =
-    product.galleryImages && product.galleryImages.length > 0
-      ? [product.image, ...product.galleryImages.filter((img) => img)]
-      : [product.image]
+  const productImages = getCurrentImages()
 
   // Helper function to get stock badge
   const getStockBadge = () => {
@@ -1756,7 +2098,7 @@ const ProductDetails = () => {
     switch (product.stockStatus) {
       case "Available Product":
         return (
-          <span className={baseClass + " bg-green-600 text-white"}>In Stock</span>
+          <span className={baseClass + " bg-lime-500 text-white"}>In Stock</span>
         );
       case "Out of Stock":
         return (
@@ -1802,23 +2144,82 @@ const ProductDetails = () => {
       <SEO title={pdTitle} description={pdDescription} canonicalPath={pdCanonicalPath} image={product.image} />
       <div className="max-w-8xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-          <Link to="/" className="hover:text-blue-600">
+        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6 overflow-x-auto">
+          <Link to="/" className="hover:text-green-600 whitespace-nowrap">
             Home
           </Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-blue-600">
+          <Link to="/shop" className="hover:text-green-600 whitespace-nowrap">
             Shop
           </Link>
+          
+          {/* Parent Category */}
+          {product.parentCategory && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?parentCategory=${product.parentCategory._id}`}
+                className="hover:text-green-600 whitespace-nowrap"
+              >
+                {product.parentCategory.name}
+              </Link>
+            </>
+          )}
+          
+          {/* Subcategory Level 1 */}
+          {product.category && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?category=${product.category._id}`}
+                className="hover:text-green-600 whitespace-nowrap"
+              >
+                {product.category.name}
+              </Link>
+            </>
+          )}
+          
+          {/* Subcategory Level 2 */}
+          {product.subCategory2 && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?subcategory=${product.subCategory2._id}`}
+                className="hover:text-green-600 whitespace-nowrap"
+              >
+                {product.subCategory2.name}
+              </Link>
+            </>
+          )}
+          
+          {/* Subcategory Level 3 */}
+          {product.subCategory3 && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?subcategory=${product.subCategory3._id}`}
+                className="hover:text-green-600 whitespace-nowrap"
+              >
+                {product.subCategory3.name}
+              </Link>
+            </>
+          )}
+          
+          {/* Subcategory Level 4 */}
+          {product.subCategory4 && (
+            <>
+              <span>/</span>
+              <Link
+                to={`/shop?subcategory=${product.subCategory4._id}`}
+                className="hover:text-green-600 whitespace-nowrap"
+              >
+                {product.subCategory4.name}
+              </Link>
+            </>
+          )}
+          
           <span>/</span>
-          <Link
-            to={`/shop?category=${product.category?.name || product.category || ""}`}
-            className="hover:text-blue-600"
-          >
-            {product.category?.name || product.category || "N/A"}
-          </Link>
-          <span>/</span>
-          <span className="text-black block truncate max-w-[120px] sm:max-w-none">{product.name}</span>
+          <span className="text-black block truncate max-w-[120px] sm:max-w-none whitespace-nowrap">{product.name}</span>
         </nav>
 
         {/* Product Images and Info Grid */}
@@ -1826,14 +2227,39 @@ const ProductDetails = () => {
           {/* Product Images - Left Side */}
           <div className="lg:col-span-4">
             <div className="rounded-lg ">
-              {/* Main Image */}
+              {/* Main Image/Video */}
               <div className="relative rounded-lg p-4 group mb-4">
-                <img
-                  src={productImages[selectedImage] || "/placeholder.svg?height=400&width=400"}
-                  alt={product.name}
-                  className="w-full h-96 object-contain cursor-pointer transition-transform hover:scale-105"
-                  onClick={() => handleImageClick(selectedImage)}
-                />
+                {productImages[selectedImage]?.type === 'video' ? (
+                  isYouTubeUrl(productImages[selectedImage]?.url) ? (
+                    <iframe
+                      key={selectedImage}
+                      src={getYouTubeEmbedUrl(productImages[selectedImage]?.url)}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="w-full h-96 rounded-lg"
+                    ></iframe>
+                  ) : (
+                    <video
+                      key={selectedImage}
+                      src={getFullImageUrl(productImages[selectedImage]?.url) || ""}
+                      controls
+                      autoPlay
+                      className="w-full h-96 object-contain rounded-lg"
+                      poster={getFullImageUrl(product.image)}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  )
+                ) : (
+                  <img
+                    src={getFullImageUrl(productImages[selectedImage]?.url) || "/placeholder.svg?height=400&width=400"}
+                    alt={product.name}
+                    className="w-full h-96 object-contain cursor-pointer transition-transform hover:scale-105"
+                    onClick={() => handleImageClick(selectedImage)}
+                  />
+                )}
 
                 <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                   <ZoomIn size={16} />
@@ -1857,13 +2283,30 @@ const ProductDetails = () => {
                 )}
               </div>
 
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+          
+          
+
               {/* Thumbnail Images */}
               {productImages.length > 1 && (
                 <div className="relative w-full">
                   {/* Left Arrow */}
                   {thumbScroll > 0 && (
                     <button
-                      className="absolute  left-0 top-1/2 -translate-y-1/2 z-10 bg-blue-600  shadow rounded-full p-1"
+                      className="absolute  left-0 top-1/2 -translate-y-1/2 z-10 bg-lime-500  shadow rounded-full p-1"
                       onClick={() => {
                         if (thumbnailRowRef.current) {
                           thumbnailRowRef.current.scrollBy({ left: -100, behavior: "smooth" })
@@ -1880,21 +2323,45 @@ const ProductDetails = () => {
                     onScroll={(e) => setThumbScroll(e.target.scrollLeft)}
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
-                    {productImages.map((image, index) => (
+                    {productImages.map((media, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        className={`flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-all  ${
+                        className={`relative flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-all  ${
                           selectedImage === index
-                            ? "border-blue-500 ring-2 ring-blue-200"
+                            ? "border-green-500 ring-2 ring-green-200"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        <img
-                          src={image || "/placeholder.svg?height=64&width=64"}
-                          alt={`${product.name} - view ${index + 1}`}
-                          className="w-full h-full object-contain"
-                        />
+                        {media?.type === 'video' ? (
+                          <>
+                            {isYouTubeUrl(media.url) ? (
+                              <img
+                                src={`https://img.youtube.com/vi/${media.url.includes('youtu.be/') 
+                                  ? media.url.split('youtu.be/')[1]?.split('?')[0] 
+                                  : media.url.split('v=')[1]?.split('&')[0]}/mqdefault.jpg`}
+                                alt="YouTube video thumbnail"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <video
+                                src={getFullImageUrl(media.url)}
+                                className="w-full h-full object-contain"
+                              />
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                              </svg>
+                            </div>
+                          </>
+                        ) : (
+                          <img
+                            src={getFullImageUrl(media?.url) || "/placeholder.svg?height=64&width=64"}
+                            alt={`${product.name} - view ${index + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1903,7 +2370,7 @@ const ProductDetails = () => {
                     thumbnailRowRef.current.scrollLeft + thumbnailRowRef.current.offsetWidth <
                       thumbnailRowRef.current.scrollWidth && (
                       <button
-                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-blue-600 shadow rounded-full p-1"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-lime-500 shadow rounded-full p-1"
                         onClick={() => {
                           if (thumbnailRowRef.current) {
                             thumbnailRowRef.current.scrollBy({ left: 100, behavior: "smooth" })
@@ -1919,50 +2386,65 @@ const ProductDetails = () => {
                   `}</style>
                 </div>
               )}
-
-              {/* Tabby/Tamara info rows (triggers) - Moved under images */}
-              <div className="space-y-3 mt-4">
-                {/* Tamara row */}
-                <button
-                  type="button"
-                  onClick={() => setShowTamaraModal(true)}
-                  className="w-full font-medium text-gray-900 hover:text-black"
-                >
-                  <div className="border rounded-xl p-3 bg-white hover:shadow-md transition-shadow">
-                    <div className="text-sm text-gray-700">
-                      Or split in 4 payments of{" "}
-                      <span className="font-semibold text-gray-900">{formatPerMonth(getEffectivePrice() / 4)}</span>
-                      {" "}- No late fees, Sharia compliant! <br /> More options
-                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold text-gray-900 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 align-middle">
-                        tamara
-                      </span>
-                    </div>
-                  </div>
-                </button>
-
-                {/* Tabby row */}
-                <button
-                  type="button"
-                  onClick={() => setShowTabbyModal(true)}
-                  className="w-full font-medium text-gray-900 hover:text-black"
-                >
-                  <div className="border rounded-xl p-3 bg-white hover:shadow-md transition-shadow">
-                    <div className="text-sm text-gray-700 flex items-center gap-2 flex-wrap">
-                      <span>
-                        As low as{" "}
-                        <span className="font-semibold text-gray-900">{formatPerMonth(getEffectivePrice() / 12)}</span> or
-                        4 interest-free payments.
-                      </span>
-                      Learn more
-                      <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-extrabold text-white bg-emerald-600">
-                        tabby
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              </div>
             </div>
+
+
+
+            {/* Product Video Section - Only show if product has video */}
+              {product?.video && (
+                <div 
+                  className="mt-12 border border-gray-200 rounded-lg overflow-hidden cursor-pointer group"
+                  onClick={() => setShowVideoModal(true)}
+                >
+                  <div className="bg-gray-100 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                    <h4 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      </svg>
+                      Product Video
+                    </h4>
+                    <span className="text-xs text-gray-500 group-hover:text-blue-600">Click to expand</span>
+                  </div>
+                  <div className="aspect-video w-full bg-black relative">
+                    {isYouTubeUrl(product.video) ? (
+                      <iframe
+                        src={`${getYouTubeEmbedUrl(product.video)}?autoplay=1&mute=1`}
+                        title="Product Video"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="w-full h-full pointer-events-none"
+                      ></iframe>
+                    ) : (
+                      <video
+                        src={getFullImageUrl(product.video)}
+                        autoPlay
+                        muted
+                        loop
+                        className="w-full h-full object-contain pointer-events-none"
+                        poster={getFullImageUrl(product.image)}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                    {/* Overlay for click */}
+                    <div className="absolute inset-0 bg-transparent group-hover:bg-black group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white bg-opacity-90 rounded-full p-3">
+                        <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+
+
+
+
           </div>
+          
 
           {/* Product Info - Middle */}
           <div className="lg:col-span-5">
@@ -1980,16 +2462,16 @@ const ProductDetails = () => {
               <div className="flex items-center gap-4 mb-4 text-sm">
                 <span className="text-gray-600">
                   Brand:{" "}
-                  <span className="font-medium text-blue-600">{product.brand?.name || product.brand || "N/A"}</span>
+                  <span className="font-medium text-green-600">{product.brand?.name || product.brand || "N/A"}</span>
                 </span>
                 <span className="text-gray-600">
                   Category:{" "}
-                  <span className="font-medium text-blue-600">
+                  <span className="font-medium text-green-600">
                     {product.category?.name || product.category || "N/A"}
                   </span>
                 </span>
                 <span className="text-gray-600">
-                  SKU: <span className="font-medium text-blue-600">{product.sku || "N/A"}</span>
+                  SKU: <span className="font-medium text-green-600">{product.sku || "N/A"}</span>
                 </span>
               </div>
 
@@ -2058,18 +2540,21 @@ const ProductDetails = () => {
               {/* Price */}
               <div className="mb-6">
                 {(() => {
-                  const basePrice = Number(product.price) || 0
-                  const offerPrice = Number(product.offerPrice) || 0
-                  const hasValidOffer = offerPrice > 0 && basePrice > 0 && offerPrice < basePrice
-
-                  let priceToShow = 0
-                  if (hasValidOffer) {
-                    priceToShow = offerPrice
-                  } else if (basePrice > 0) {
-                    priceToShow = basePrice
-                  } else if (offerPrice > 0) {
-                    priceToShow = offerPrice
+                  const currentColor = getCurrentColor()
+                  let basePrice = 0
+                  let offerPrice = 0
+                  
+                  if (currentColor) {
+                    basePrice = Number(currentColor.price) || 0
+                    offerPrice = Number(currentColor.offerPrice) || 0
+                  } else {
+                    basePrice = Number(product.price) || 0
+                    offerPrice = Number(product.offerPrice) || 0
                   }
+                  
+                  const hasValidOffer = offerPrice > 0 && basePrice > 0 && offerPrice < basePrice
+                  const priceToShow = getEffectivePrice()
+                  const discount = hasValidOffer ? Math.round(((basePrice - offerPrice) / basePrice) * 100) : 0
 
                   return (
                     <>
@@ -2081,13 +2566,10 @@ const ProductDetails = () => {
                       </div>
                       <div className="text-md text-black">Including VAT</div>
                       {hasValidOffer && (
-                        <div className="text-lg text-blue-600 font-medium">
+                        <div className="text-lg text-emerald-800 font-medium">
                           You Save {formatPrice(basePrice - priceToShow)}
-                          {product.discount > 0 && ` (${product.discount}%)`}
+                          {discount > 0 && ` (${discount}%)`}
                         </div>
-                      )}
-                      {product.discount > 0 && !hasValidOffer && (
-                        <div className="text-sm text-blue-600 font-medium">You Save {product.discount}%</div>
                       )}
                     </>
                   )
@@ -2111,16 +2593,294 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              {/* Key Features */}
+          
+
+              {/* Color Variations */}
+              {product.colorVariations && product.colorVariations.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-900 mb- flex items-center">
+                    <span className="text-purple-600 mr-2"></span>
+                    Color: {selectedColorIndex !== null && product.colorVariations[selectedColorIndex]?.color ? product.colorVariations[selectedColorIndex].color : "Select Color"}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {product.colorVariations
+                      .filter(colorVar => colorVar.color)
+                      .map((colorVar, index) => {
+                        const isSelected = index === selectedColorIndex
+                        const colorPrice = colorVar.offerPrice > 0 ? colorVar.offerPrice : colorVar.price
+                        
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              // Toggle: if already selected, deselect to show original product
+                              setSelectedColorIndex(isSelected ? null : index)
+                              setSelectedImage(0)
+                            }}
+                            className={`relative border-2 rounded-lg p-3 transition-all duration-200 hover:shadow-lg ${
+                              isSelected 
+                                ? 'border-purple-500 bg-purple-50' 
+                                : 'border-gray-200 hover:border-purple-300'
+                            }`}
+                          >
+                            {/* Product Image */}
+                            <div className="aspect-square mb-2 bg-white rounded-md overflow-hidden">
+                              <img
+                                src={getFullImageUrl(colorVar.image) || "/placeholder.svg"}
+                                alt={colorVar.color}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                            
+                            {/* Color Name */}
+                            <p className={`text-xs font-semibold text-center mb-1 ${
+                              isSelected ? 'text-purple-700' : 'text-gray-700'
+                            }`}>
+                              {colorVar.color}
+                            </p>
+                            
+                            {/* Price */}
+                            <p className="text-sm font-bold text-center text-gray-900">
+                              {formatPrice(colorPrice)}
+                            </p>
+                            
+                            {/* Current Selection Indicator */}
+                            {isSelected && (
+                              <div className="absolute top-1 right-1 bg-purple-500 text-white rounded-full p-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                            
+                            {/* Stock Badge */}
+                            {colorVar.countInStock <= 0 && (
+                              <div className="absolute bottom-2 left-2 right-2 bg-red-500 text-white text-xs py-1 px-2 rounded text-center">
+                                Out of Stock
+                              </div>
+                            )}
+                          </button>
+                        )
+                      })}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Select a color to view its image and price
+                  </p>
+                </div>
+              )}
+
+              {/* DOS/Windows Variations */}
+              {product.dosVariations && product.dosVariations.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-900 mb-3 flex items-center">
+                    <span className="text-blue-600 mr-2">💻</span>
+                    Windows: {selectedDosIndex !== null && product.dosVariations[selectedDosIndex]?.dosType ? product.dosVariations[selectedDosIndex].dosType : "Select Option"}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {product.dosVariations
+                      .filter(dosVar => dosVar.dosType)
+                      .map((dosVar, index) => {
+                        const isSelected = index === selectedDosIndex
+                        const dosPrice = dosVar.offerPrice > 0 ? dosVar.offerPrice : dosVar.price
+                        
+                        return (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              // Toggle: if already selected, deselect to show original product
+                              setSelectedDosIndex(isSelected ? null : index)
+                              setSelectedImage(0)
+                            }}
+                            className={`relative border-2 rounded-lg p-3 transition-all duration-200 hover:shadow-lg ${
+                              isSelected 
+                                ? 'border-blue-500 bg-blue-50' 
+                                : 'border-gray-200 hover:border-blue-300'
+                            }`}
+                          >
+                            {/* Product Image */}
+                           
+                            
+                            {/* OS Type Name */}
+                            <p className={`text-xs font-semibold text-center mb-1 ${
+                              isSelected ? 'text-blue-700' : 'text-gray-700'
+                            }`}>
+                              {dosVar.dosType}
+                            </p>
+                            
+                            {/* Price */}
+                            <p className="text-sm font-bold text-center text-gray-900">
+                              {formatPrice(dosPrice)}
+                            </p>
+                            
+                            {/* Current Selection Indicator */}
+                            {isSelected && (
+                              <div className="absolute top-1 right-1 bg-blue-500 text-white rounded-full p-1">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                            
+                            {/* Stock Badge */}
+                            {dosVar.countInStock <= 0 && (
+                              <div className="absolute bottom-2 left-2 right-2 bg-red-500 text-white text-xs py-1 px-2 rounded text-center">
+                                Out of Stock
+                              </div>
+                            )}
+                          </button>
+                        )
+                      })}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Select an OS option to view its image and price
+                  </p>
+                </div>
+              )}
+
+              {/* Product Variations */}
+              {product.variations && product.variations.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-900 mb-3 flex items-center">
+                    <span className="text-blue-600 mr-2"></span>
+                   Available Options:
+                  </h3>
+                  <div className="flex flex-wrap gap-3 ">
+                    {/* Combine current product and all variations, then sort alphabetically */}
+                    {(() => {
+                      // Build array of all variations including current product
+                      const allVariations = []
+                      
+                      // Add current product if it has selfVariationText (or fallback to reverseVariationText)
+                      const currentProductText = product.selfVariationText || product.reverseVariationText
+                      if (currentProductText) {
+                        allVariations.push({
+                          id: product._id,
+                          text: currentProductText,
+                          slug: product.slug,
+                          isCurrent: true
+                        })
+                      }
+                      
+                      // Add other variations - use their selfVariationText, fallback to variationText
+                      product.variations
+                        .filter(variation => {
+                          const varProduct = variation.product
+                          if (!varProduct) return false
+                          // Get the text: prefer selfVariationText from the product, fallback to variationText
+                          const varText = (typeof varProduct === 'object' && (varProduct.selfVariationText || varProduct.reverseVariationText)) 
+                            || variation.variationText 
+                            || ""
+                          return varText.trim() !== ""
+                        })
+                        .forEach(variation => {
+                          const varProduct = variation.product
+                          const varId = typeof varProduct === 'object' ? varProduct._id : varProduct
+                          const varSlug = typeof varProduct === 'object' ? varProduct.slug : null
+                          // Get the text: prefer selfVariationText from the product, fallback to variationText
+                          const varText = (typeof varProduct === 'object' && (varProduct.selfVariationText || varProduct.reverseVariationText)) 
+                            || variation.variationText 
+                            || ""
+                          
+                          allVariations.push({
+                            id: varId,
+                            text: varText,
+                            slug: varSlug || varId,
+                            isCurrent: false
+                          })
+                        })
+                      
+                      // Sort alphabetically by text to maintain consistent order
+                      allVariations.sort((a, b) => a.text.localeCompare(b.text))
+                      
+                      return allVariations.map((variation) => (
+                        <div key={variation.id} className="relative">
+                          {variation.isCurrent ? (
+                            <div className="px-5 py-2 bg-blue-200 text-gray-700 rounded-lg font-medium text-sm border-2 border-blue-400 cursor-default">
+                              {variation.text}
+                            </div>
+                          ) : (
+                            <Link
+                              to={`/product/${encodeURIComponent(variation.slug)}`}
+                              className="block px-5 py-2 bg-white text-gray-700 rounded-lg font-medium text-sm border border-gray-400 hover:bg-blue-100 hover:border-blue-400 transition-all duration-200"
+                            >
+                              {variation.text}
+                            </Link>
+                          )}
+                        </div>
+                      ))
+                    })()}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Click on any variation to view its details
+                  </p>
+                </div>
+              )}
+
+
+                  {/* Key Features */}
               {product.shortDescription && (
                 <div className="mb-6">
                   <h3 className="font-bold text-gray-900 mb-3">Key Features:</h3>
-                  <div
-                    className="text-sm text-gray-700 prose prose-sm max-w-none line-clamp-5 sm:line-clamp-none"
-                    dangerouslySetInnerHTML={{ __html: product.shortDescription }}
+                  <TipTapRenderer 
+                    content={product.shortDescription} 
+                    className="text-sm line-clamp-5 sm:line-clamp-none"
                   />
                 </div>
               )}
+
+              {/* Tabby/Tamara info rows (triggers) */}
+              <div className="space-y-3 mb-4">
+                {/* Tamara row */}
+                <button
+                  type="button"
+                  onClick={() => setShowTamaraModal(true)}
+                  className="w-full text-left hover:opacity-90 transition-opacity"
+                >
+                  <div className="border rounded-xl p-4 bg-gradient-to-r from-pink-50 to-purple-50 flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10  rounded-lg flex items-center justify-center shadow-sm">
+                      <span className="text-4xl">💳</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-gray-800 leading-relaxed">
+                        Pay in 4 simple, interest free payments of{" "}
+                        <span className="font-bold text-gray-900">{formatPerMonth(getEffectivePrice() / 4)}</span>
+                        <br />
+                        <span className="text-blue-600 underline font-medium">Learn more</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 shadow-sm">
+                      tamara
+                    </span>
+                  </div>
+                </button>
+
+                {/* Tabby row */}
+                <button
+                  type="button"
+                  onClick={() => setShowTabbyModal(true)}
+                  className="w-full text-left hover:opacity-90 transition-opacity"
+                >
+                  <div className="border rounded-xl p-4 bg-gradient-to-r from-emerald-50 to-teal-50 flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center shadow-sm">
+                      <span className="text-4xl">💰</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-gray-800 leading-relaxed">
+                        As low as{" "}
+                        <span className="font-bold text-gray-900">{formatPerMonth(getEffectivePrice() / 12)}</span> or
+                        4 interest-free payments.
+                        <br />
+                        <span className="text-blue-600 underline font-medium">Learn more</span>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center px-3 py-1 rounded-md text-xs font-extrabold text-white bg-emerald-600 shadow-sm">
+                      tabby
+                    </span>
+                  </div>
+                </button>
+              </div>
 
               {/* Quantity and Add to Cart */}
               <div className="space-y-4 mb-6">
@@ -2149,7 +2909,7 @@ const ProductDetails = () => {
                     <button
                       onClick={handleAddToCart}
                       disabled={product.stockStatus === "Out of Stock"}
-                      className=" bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-3 px-9 rounded-lg font-medium transition-colors"
+                      className=" bg-lime-500 hover:bg-lime-600 disabled:bg-gray-400 text-white py-3 px-9 rounded-lg font-medium transition-colors"
                     >
                       <ShoppingCart size={22} className="mr-2" />
                     </button>
@@ -2265,7 +3025,10 @@ const ProductDetails = () => {
 
               {/* Delivery Info */}
               <div className="space-y-4">
-                <div className="flex items-start space-x-3">
+                <div 
+                  className="flex items-start space-x-3 cursor-pointer  border-2 border-yellow-400 hover:bg-lime-100 p-2 rounded-lg transition-colors"
+                  onClick={() => navigate('/delivery-terms')}
+                >
                   <Truck className="text-green-600 mt-1" size={60} />
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm">Express Delivery</h4>
@@ -2275,7 +3038,10 @@ const ProductDetails = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3">
+                <div 
+                  className="flex items-start space-x-3 cursor-pointer border-2 border-yellow-400 hover:bg-lime-100 p-2 rounded-lg transition-colors"
+                  onClick={() => navigate('/refund-return')}
+                >
                   <RotateCcw className="text-green-600 mt-1" size={60} />
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm">Delivery & Returns Policy</h4>
@@ -2286,7 +3052,10 @@ const ProductDetails = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3">
+                <div 
+                  className="flex items-start space-x-3 cursor-pointer border-2 border-yellow-400 hover:bg-lime-100 p-2 rounded-lg transition-colors"
+                  onClick={() => navigate('/terms-conditions')}
+                >
                   <Award className="text-green-600 mt-1" size={33} />
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm">Warranty Information</h4>
@@ -2296,6 +3065,78 @@ const ProductDetails = () => {
                   </div>
                 </div>
               </div>
+
+  
+
+
+
+{/* Protect Your Purchase - Only show if protection plans are available */}
+{hasProtectionPlans && (
+<div className="lg:col-span-3 mt-8 border border-black rounded">
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <h3 className="font-bold text-gray-900 text-lg mb-4 flex items-center gap-2">
+                <Shield className="text-blue-600" size={24} />
+                Protect Your Purchase
+              </h3>
+              <BuyerProtectionSection
+                productId={product._id}
+                productPrice={product.salePrice || product.price}
+                onSelectProtection={setSelectedProtections}
+                selectedProtections={selectedProtections}
+              />
+            </div>
+          </div>
+)}
+
+{/* Hidden loader to check for protection plans availability */}
+{!hasProtectionPlans && (
+  <BuyerProtectionSection
+    productId={product._id}
+    productPrice={product.salePrice || product.price}
+    onSelectProtection={setSelectedProtections}
+    selectedProtections={selectedProtections}
+    onProtectionsLoaded={setHasProtectionPlans}
+  />
+)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
               {/* Payment Methods */}
               <div className="border-t pt-4">
@@ -2325,8 +3166,11 @@ const ProductDetails = () => {
                     />
                   </div>
                 </div>
+
+                
               </div>
             </div>
+            
           </div>
         </div>
 
@@ -2335,14 +3179,14 @@ const ProductDetails = () => {
 
         {/* Tabs Section */}
         {/* <div className="bg-white rounded-lg shadow-sm mt-8">
-          <div className="border-b bg-blue-600">
+          <div className="border-b bg-lime-500">
             <div className="flex  space-x-8 px-6">
               <button
                 onClick={() => setActiveTab("description")}
                 className={`py-4 px-2 border-b-2 font-bold text-md transition-colors ${
                   activeTab === "description"
                     ? "border-white text-white"
-                    : "border-transparent text-white hover:text-gray-200"
+                    : "border-transparent text-black hover:text-gray-700"
                 }`}
               >
                 Product Description
@@ -2352,7 +3196,7 @@ const ProductDetails = () => {
                 className={`py-4 px-2 border-b-2 font-bold text-md transition-colors ${
                   activeTab === "information"
                     ? "border-white text-white"
-                    : "border-transparent text-white hover:text-gray-200"
+                    : "border-transparent text-black hover:text-gray-700"
                 }`}
               >
                 More Information
@@ -2362,7 +3206,7 @@ const ProductDetails = () => {
                 className={`py-4 px-2 border-b-2 font-bold text-md transition-colors ${
                   activeTab === "reviews"
                     ? "border-white text-white"
-                    : "border-transparent text-white hover:text-gray-200"
+                    : "border-transparent text-black hover:text-gray-700"
                 }`}
               >
                 Reviews ({reviewStats.totalReviews || 0})
@@ -2374,9 +3218,7 @@ const ProductDetails = () => {
             {activeTab === "description" && (
               <div>
                 <h3 className="text-lg font-bold mb-4">Product Description</h3>
-                <div className="prose max-w-none">
-                  <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: product.description }} />
-                </div>
+                <TipTapRenderer content={product.description} />
               </div>
             )}
 
@@ -2444,14 +3286,14 @@ const ProductDetails = () => {
 
 
 <div className="bg-white rounded-lg shadow-sm mt-8">
-  <div className="border-b bg-blue-600">
+  <div className="border-b bg-lime-500">
     <div className="flex px-2 py-2">
       <button
         onClick={() => setActiveTab("description")}
         className={`flex-1 py-3 px-2 mx-1 rounded-lg font-bold text-sm sm:text-md transition-all whitespace-nowrap ${
           activeTab === "description"
-            ? "bg-white text-blue-700 shadow-md"
-            : "bg-blue-700 text-white hover:bg-blue-800"
+            ? "bg-white text-lime-700 shadow-md"
+            : "bg-lime-700 text-white hover:bg-lime-800"
         }`}
       >
         <span className="hidden sm:inline">Product </span>Description
@@ -2460,8 +3302,8 @@ const ProductDetails = () => {
         onClick={() => setActiveTab("information")}
         className={`flex-1 py-3 px-2 mx-1 rounded-lg font-bold text-sm sm:text-md transition-all whitespace-nowrap ${
           activeTab === "information"
-            ? "bg-white text-blue-700 shadow-md"
-            : "bg-blue-700 text-white hover:bg-blue-800"
+            ? "bg-white text-lime-700 shadow-md"
+            : "bg-lime-700 text-white hover:bg-lime-800"
         }`}
       >
         <span className="hidden sm:inline">More </span>Information
@@ -2470,8 +3312,8 @@ const ProductDetails = () => {
         onClick={() => setActiveTab("reviews")}
         className={`flex-1 py-3 px-2 mx-1  rounded-lg font-bold text-sm sm:text-md transition-all whitespace-nowrap ${
           activeTab === "reviews"
-            ? "bg-white text-blue-700 shadow-md"
-            : "bg-blue-700 text-white hover:bg-blue-800"
+            ? "bg-white text-lime-700 shadow-md"
+            : "bg-lime-700 text-white hover:bg-lime-800"
         }`}
       >
         Reviews ({reviewStats.totalReviews || 0})
@@ -2482,9 +3324,7 @@ const ProductDetails = () => {
     {activeTab === "description" && (
       <div>
         <h3 className="text-lg font-bold mb-4">Product Description</h3>
-        <div className="prose max-w-none">
-          <div className="text-gray-700" dangerouslySetInnerHTML={{ __html: product.description }} />
-        </div>
+        <TipTapRenderer content={product.description} />
       </div>
     )}
 
@@ -2634,9 +3474,9 @@ const ProductDetails = () => {
                     key={relatedProduct._id}
                     className="bg-white rounded-lg shadow-sm p-4 border hover:shadow-md transition-shadow"
                   >
-                    <Link to={`/product/${relatedProduct.slug || relatedProduct._id}`}>
+                    <Link to={`/product/${encodeURIComponent(relatedProduct.slug || relatedProduct._id)}`}>
                       <img
-                        src={relatedProduct.image || "/placeholder.svg?height=128&width=128"}
+                        src={getFullImageUrl(relatedProduct.image) || "/placeholder.svg?height=128&width=128"}
                         alt={relatedProduct.name}
                         className="w-full h-32 object-contain mb-2"
                       />
@@ -2664,6 +3504,57 @@ const ProductDetails = () => {
       {/* ADD ONLY THIS LINE */}
       <ProductSchema product={product} />
 
+      {/* Video Modal */}
+      {showVideoModal && product?.video && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowVideoModal(false)
+            }
+          }}
+        >
+          <div className="relative w-[85vw] max-w-3xl">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowVideoModal(false)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors z-10"
+            >
+              <X size={28} />
+            </button>
+            
+            {/* Video Container */}
+            <div className="aspect-video w-full bg-black rounded-lg overflow-hidden shadow-2xl">
+              {isYouTubeUrl(product.video) ? (
+                <iframe
+                  src={`${getYouTubeEmbedUrl(product.video)}?autoplay=1`}
+                  title="Product Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full"
+                ></iframe>
+              ) : (
+                <video
+                  src={getFullImageUrl(product.video)}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                  poster={getFullImageUrl(product.image)}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </div>
+            
+            {/* Product Name */}
+            <div className="mt-3 text-center">
+              <h3 className="text-white text-base font-medium">{product.name}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Modal */}
       {showImageModal && (
         <div
@@ -2676,14 +3567,14 @@ const ProductDetails = () => {
           }}
         >
           <div className="relative flex h-[90vh] w-[90vw] max-w-7xl bg-white rounded-lg overflow-hidden">
-            {/* Sidebar with all images (vertical on desktop, horizontal on mobile) */}
+            {/* Sidebar with all images/videos (vertical on desktop, horizontal on mobile) */}
             <div className="hidden md:block w-64 bg-gray-100 p-4 overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">All Images</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">All Media</h3>
               <div className="space-y-2">
-                {productImages.map((image, index) => (
+                {productImages.map((media, index) => (
                   <div
                     key={index}
-                    className={`cursor-pointer border-2 rounded-lg overflow-hidden ${
+                    className={`relative cursor-pointer border-2 rounded-lg overflow-hidden ${
                       index === modalImageIndex ? "border-lime-500" : "border-gray-300"
                     }`}
                     onClick={() => {
@@ -2691,21 +3582,45 @@ const ProductDetails = () => {
                       setIsImageZoomed(false)
                     }}
                   >
-                    <img
-                      src={image || "/placeholder.svg?height=150&width=150"}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-24 object-cover"
-                    />
+                    {media?.type === 'video' ? (
+                      <>
+                        {isYouTubeUrl(media.url) ? (
+                          <img
+                            src={`https://img.youtube.com/vi/${media.url.includes('youtu.be/') 
+                              ? media.url.split('youtu.be/')[1]?.split('?')[0] 
+                              : media.url.split('v=')[1]?.split('&')[0]}/mqdefault.jpg`}
+                            alt="YouTube video thumbnail"
+                            className="w-full h-24 object-cover"
+                          />
+                        ) : (
+                          <video
+                            src={getFullImageUrl(media.url)}
+                            className="w-full h-24 object-cover"
+                          />
+                        )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                          </svg>
+                        </div>
+                      </>
+                    ) : (
+                      <img
+                        src={getFullImageUrl(media?.url) || "/placeholder.svg?height=150&width=150"}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-24 object-cover"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
             </div>
             {/* Horizontal thumbnails for mobile */}
             <div className="md:hidden absolute bottom-0 left-0 w-full bg-gray-100 p-2 flex space-x-2 overflow-x-auto z-10">
-              {productImages.map((image, index) => (
+              {productImages.map((media, index) => (
                 <div
                   key={index}
-                  className={`flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden ${
+                  className={`relative flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden ${
                     index === modalImageIndex ? "border-lime-500" : "border-gray-300"
                   }`}
                   onClick={() => {
@@ -2713,44 +3628,93 @@ const ProductDetails = () => {
                     setIsImageZoomed(false)
                   }}
                 >
-                  <img
-                    src={image || "/placeholder.svg?height=64&width=64"}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {media?.type === 'video' ? (
+                    <>
+                      {isYouTubeUrl(media.url) ? (
+                        <img
+                          src={`https://img.youtube.com/vi/${media.url.includes('youtu.be/') 
+                            ? media.url.split('youtu.be/')[1]?.split('?')[0] 
+                            : media.url.split('v=')[1]?.split('&')[0]}/mqdefault.jpg`}
+                          alt="YouTube video thumbnail"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={getFullImageUrl(media.url)}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                        </svg>
+                      </div>
+                    </>
+                  ) : (
+                    <img
+                      src={getFullImageUrl(media?.url) || "/placeholder.svg?height=64&width=64"}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
               ))}
             </div>
 
-            {/* Main image area */}
+            {/* Main media area */}
             <div className="flex-1 flex items-center justify-center relative">
-              <img
-                src={productImages[modalImageIndex] || "/placeholder.svg?height=600&width=600"}
-                alt={product.name}
-                className={`object-contain bg-white cursor-pointer transition-transform duration-300 ${
-                  isImageZoomed ? "max-h-none max-w-none scale-150" : "max-h-full max-w-full"
-                }`}
-                style={{
-                  transformOrigin: isImageZoomed ? `${mousePosition.x}% ${mousePosition.y}%` : "center",
-                }}
-                onClick={(e) => {
-                  if (!isImageZoomed) {
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    const x = ((e.clientX - rect.left) / rect.width) * 100
-                    const y = ((e.clientY - rect.top) / rect.height) * 100
-                    setMousePosition({ x, y })
-                  }
-                  setIsImageZoomed(!isImageZoomed)
-                }}
-                onMouseMove={(e) => {
-                  if (isImageZoomed) {
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    const x = ((e.clientX - rect.left) / rect.width) * 100
-                    const y = ((e.clientY - rect.top) / rect.height) * 100
-                    setMousePosition({ x, y })
-                  }
-                }}
-              />
+              {productImages[modalImageIndex]?.type === 'video' ? (
+                isYouTubeUrl(productImages[modalImageIndex]?.url) ? (
+                  <iframe
+                    key={modalImageIndex}
+                    src={getYouTubeEmbedUrl(productImages[modalImageIndex]?.url)}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full h-full max-w-4xl max-h-[80vh]"
+                  ></iframe>
+                ) : (
+                  <video
+                    key={modalImageIndex}
+                    src={getFullImageUrl(productImages[modalImageIndex]?.url) || ""}
+                    controls
+                    autoPlay
+                    className="max-h-full max-w-full object-contain bg-white"
+                    poster={getFullImageUrl(product.image)}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )
+              ) : (
+                <img
+                  src={getFullImageUrl(productImages[modalImageIndex]?.url) || "/placeholder.svg?height=600&width=600"}
+                  alt={product.name}
+                  className={`object-contain bg-white cursor-pointer transition-transform duration-300 ${
+                    isImageZoomed ? "max-h-none max-w-none scale-150" : "max-h-full max-w-full"
+                  }`}
+                  style={{
+                    transformOrigin: isImageZoomed ? `${mousePosition.x}% ${mousePosition.y}%` : "center",
+                  }}
+                  onClick={(e) => {
+                    if (!isImageZoomed) {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const x = ((e.clientX - rect.left) / rect.width) * 100
+                      const y = ((e.clientY - rect.top) / rect.height) * 100
+                      setMousePosition({ x, y })
+                    }
+                    setIsImageZoomed(!isImageZoomed)
+                  }}
+                  onMouseMove={(e) => {
+                    if (isImageZoomed) {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const x = ((e.clientX - rect.left) / rect.width) * 100
+                      const y = ((e.clientY - rect.top) / rect.height) * 100
+                      setMousePosition({ x, y })
+                    }
+                  }}
+                />
+              )}
 
               {/* Navigation arrows */}
               <button
@@ -2789,85 +3753,166 @@ const ProductDetails = () => {
       </div> */}
 
       {showCallbackModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-4 w-full max-w-sm sm:max-w-sm md:max-w-sm lg:max-w-md shadow-lg relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative max-h-[90vh] overflow-y-auto">
             <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowCallbackModal(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              onClick={() => {
+                setShowCallbackModal(false)
+                setEmailChanged(false)
+                setVerificationCode("")
+                setVerificationSent(false)
+                setVerificationVerified(false)
+              }}
             >
               <X size={24} />
             </button>
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
-              <div className="flex-1 w-full">
-                <h2 className="text-xl  text-center font-bold mb-4">Request a Callback</h2>
-                {callbackSuccess ? (
-                  <div className="text-green-600 font-medium text-center">Request submitted successfully!</div>
-                ) : (
-                  <form onSubmit={handleCallbackSubmit} className="space-y-5">
-                    {/* Name Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 ml-9">Name</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <User size={26} />
-                        </div>
-                        <input
-                          type="text"
-                          name="name"
-                          value={callbackForm.name}
-                          onChange={handleCallbackChange}
-                          className="flex-1 py-2 px-3 border border-gray-300 rounded-md"
-                          required
-                        />
+            <div className="flex flex-col gap-4">
+              <h2 className="text-xl text-center font-bold mb-2">Request a Callback</h2>
+              {callbackSuccess ? (
+                <div className="text-green-600 font-medium text-center py-8 flex flex-col items-center gap-2">
+                  <CheckCircle size={48} className="text-green-500" />
+                  <p>Request submitted successfully!</p>
+                  <p className="text-sm text-gray-600">We will contact you soon.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleCallbackSubmit} className="space-y-4">
+                  {/* Full Name Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <div className="flex items-center gap-3">
+                      <div className="text-lime-600">
+                        <User size={24} />
                       </div>
+                      <input
+                        type="text"
+                        name="name"
+                        value={callbackForm.name}
+                        onChange={handleCallbackChange}
+                        className="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                        placeholder="Enter your full name"
+                        required
+                      />
                     </div>
+                  </div>
 
-                    {/* Email Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 ml-9">Email</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <Mail size={26} />
-                        </div>
+                  {/* Email Field with Verification */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <div className="flex items-center gap-3">
+                      <div className="text-lime-600">
+                        <Mail size={24} />
+                      </div>
+                      <div className="flex-1">
                         <input
                           type="email"
                           name="email"
                           value={callbackForm.email}
                           onChange={handleCallbackChange}
-                          className="flex-1 py-2 px-3 border border-gray-300 rounded-md"
+                          className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                          placeholder="Enter your email"
                           required
                         />
                       </div>
+                      {verificationVerified && (
+                        <CheckCircle size={24} className="text-green-500" />
+                      )}
                     </div>
-
-                    {/* Phone Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 ml-9">Phone Number</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <Phone size={26} />
-                        </div>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={callbackForm.phone}
-                          onChange={handleCallbackChange}
-                          className="flex-1 py-2 px-3 border border-gray-300 rounded-md"
-                          required
-                        />
+                    
+                    {/* Email Verification Section */}
+                    {emailChanged && !verificationVerified && (
+                      <div className="mt-3 ml-9 space-y-3">
+                        {!verificationSent ? (
+                          <button
+                            type="button"
+                            onClick={handleSendVerificationCode}
+                            disabled={verificationLoading}
+                            className="text-sm bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                          >
+                            {verificationLoading ? "Sending..." : "Send Verification Code"}
+                          </button>
+                        ) : (
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">Enter the verification code sent to your email:</p>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
+                                className="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                                placeholder="Enter 6-digit code"
+                                maxLength={6}
+                              />
+                              <button
+                                type="button"
+                                onClick={handleVerifyCode}
+                                disabled={verificationLoading || verificationCode.length !== 6}
+                                className="bg-lime-500 text-white px-4 py-2 rounded-md hover:bg-lime-600 disabled:opacity-50"
+                              >
+                                {verificationLoading ? "..." : "Verify"}
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleSendVerificationCode}
+                              disabled={verificationLoading}
+                              className="text-sm text-blue-500 hover:underline"
+                            >
+                              Resend Code
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )}
+                  </div>
 
-                    <button
-                      type="submit"
-                      className="w-full bg-lime-500 text-white py-2 rounded-md font-medium"
-                      disabled={callbackLoading}
-                    >
-                      {callbackLoading ? "Submitting..." : "Submit Request"}
-                    </button>
-                  </form>
-                )}
-              </div>
+                  {/* Phone Number with Country Code */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <div className="flex items-center gap-3">
+                      <div className="text-lime-600">
+                        <Phone size={24} />
+                      </div>
+                      <PhoneInput
+                        international
+                        defaultCountry="AE"
+                        value={phoneValue}
+                        onChange={setPhoneValue}
+                        className="flex-1"
+                        placeholder="Enter phone number"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Customer Note */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Customer Note (Optional)</label>
+                    <textarea
+                      name="customerNote"
+                      value={callbackForm.customerNote}
+                      onChange={handleCallbackChange}
+                      rows={4}
+                      className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                      placeholder="Any specific requirements or questions..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-lime-500 text-white py-3 rounded-md font-medium hover:bg-lime-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={callbackLoading || (emailChanged && !verificationVerified)}
+                  >
+                    {callbackLoading ? "Submitting..." : "Submit Request"}
+                  </button>
+                  
+                  {emailChanged && !verificationVerified && (
+                    <p className="text-sm text-red-500 text-center">
+                      Please verify your email before submitting
+                    </p>
+                  )}
+                </form>
+              )}
             </div>
           </div>
         </div>
@@ -3007,7 +4052,6 @@ const ProductDetails = () => {
         </div>
       )}
 
-      {/* Tamara and Tabby Modals - Rendered at root level */}
       {showTamaraModal && <TamaraModal amount={getEffectivePrice()} onClose={() => setShowTamaraModal(false)} />}
       {showTabbyModal && <TabbyModal amount={getEffectivePrice()} onClose={() => setShowTabbyModal(false)} />}
     </div>

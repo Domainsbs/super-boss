@@ -283,6 +283,7 @@
 
 
 import React, { useState, useEffect, useRef } from "react";
+import { getFullImageUrl } from "../utils/imageUtils";
 
 const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
   const [brandIndex, setBrandIndex] = useState(initialIndex);
@@ -293,16 +294,14 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
-  // Filter out invalid brands and create duplicates for infinite scroll
-  const validBrands = brands.filter(brand => brand && brand._id && brand.name && brand.logo);
-  const duplicatedBrands = [...validBrands, ...validBrands];
+  const duplicatedBrands = [...brands, ...brands, ...brands]; // triple for seamless infinite scroll
 
   // Update visible count + isMobile
   useEffect(() => {
     const updateVisible = () => {
       const width = window.innerWidth;
       if (width < 768) {
-        setVisibleCount(validBrands.length);
+        setVisibleCount(brands.length);
         setIsMobile(true);
       } else {
         setIsMobile(false);
@@ -314,12 +313,10 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
     updateVisible();
     window.addEventListener("resize", updateVisible);
     return () => window.removeEventListener("resize", updateVisible);
-  }, [validBrands.length]);
+  }, [brands.length]);
 
   // Auto-scroll with smooth loop (mobile) or index (desktop)
   useEffect(() => {
-    if (validBrands.length === 0) return;
-    
     const interval = setInterval(() => {
       if (isMobile && sliderRef.current) {
         const container = sliderRef.current;
@@ -333,24 +330,56 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
           // Scroll to next brand smoothly
           container.scrollBy({ left: scrollAmount, behavior: "smooth" });
         }
-      } else {
-        // Desktop: brand index logic
-        setBrandIndex((prev) => (prev + 1) % validBrands.length);
+      } else if (sliderRef.current) {
+        // Desktop: also use scroll for seamless loop
+        const container = sliderRef.current;
+        const scrollAmount = 180 + 8;
+        const singleSetWidth = brands.length * scrollAmount;
+
+        // If we've scrolled past the first set, reset to beginning of second set
+        if (container.scrollLeft >= singleSetWidth * 1.5) {
+          container.scrollLeft = singleSetWidth / 2;
+        } else {
+          container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        }
       }
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [validBrands.length, isMobile]);
+  }, [brands.length, isMobile]);
+
+  // Handle infinite scroll wrap on mouse drag end
+  const handleScrollWrap = () => {
+    if (!sliderRef.current || isMobile) return;
+    
+    const container = sliderRef.current;
+    const scrollAmount = 180 + 8;
+    const singleSetWidth = brands.length * scrollAmount;
+    
+    // If scrolled too far right, wrap to middle set
+    if (container.scrollLeft >= singleSetWidth * 2) {
+      container.scrollLeft = singleSetWidth;
+    }
+    // If scrolled too far left, wrap to middle set
+    else if (container.scrollLeft <= 0) {
+      container.scrollLeft = singleSetWidth;
+    }
+  };
+
+  // Initialize desktop scroll position to middle set
+  useEffect(() => {
+    if (!isMobile && sliderRef.current && brands.length > 0) {
+      const scrollAmount = 180 + 8;
+      const singleSetWidth = brands.length * scrollAmount;
+      sliderRef.current.scrollLeft = singleSetWidth; // Start at middle set
+    }
+  }, [isMobile, brands.length]);
 
   // Get visible brands for desktop
   const getVisibleBrands = () => {
-    if (!validBrands || validBrands.length === 0) return [];
     const visible = [];
     for (let i = 0; i < visibleCount; i++) {
-      const brand = validBrands[(brandIndex + i) % validBrands.length];
-      if (brand && brand._id && brand.name && brand.logo) {
-        visible.push(brand);
-      }
+      visible.push(brands[(brandIndex + i) % brands.length]);
     }
     return visible;
   };
@@ -361,8 +390,14 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
     startX.current = e.pageX - sliderRef.current.offsetLeft;
     scrollLeft.current = sliderRef.current.scrollLeft;
   };
-  const handleMouseLeave = () => (isDragging.current = false);
-  const handleMouseUp = () => (isDragging.current = false);
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+    handleScrollWrap();
+  };
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    handleScrollWrap();
+  };
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
     e.preventDefault();
@@ -388,25 +423,25 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
 
   const handleTouchEnd = () => {
     isDragging.current = false;
+    if (isMobile) handleScrollWrap();
   };
 
-  // Return early if no valid brands
-  if (!validBrands || validBrands.length === 0) {
-    return (
-      <section className="bg-white py-8">
-        <div className="max-w-8xl mx-auto">
-          <div className="relative mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 text-center">
-              Featured Brands
-            </h2>
-          </div>
-          <div className="text-center py-8 text-gray-500">
-            <p>No brands available at the moment.</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  // Arrow navigation
+  const handlePrevClick = () => {
+    if (sliderRef.current) {
+      const scrollAmount = 180 + 8; // width + margin
+      sliderRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      setTimeout(handleScrollWrap, 300);
+    }
+  };
+
+  const handleNextClick = () => {
+    if (sliderRef.current) {
+      const scrollAmount = 180 + 8;
+      sliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      setTimeout(handleScrollWrap, 300);
+    }
+  };
 
   return (
     <section className="bg-white py-8">
@@ -417,8 +452,30 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
           </h2>
         </div>
         <div className="relative mx-3 md:mx-5">
+          {/* Left Arrow */}
+          <button
+            onClick={handlePrevClick}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 md:p-3 transition-all duration-200 hover:scale-110"
+            aria-label="Previous brands"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Right Arrow */}
+          <button
+            onClick={handleNextClick}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 md:p-3 transition-all duration-200 hover:scale-110"
+            aria-label="Next brands"
+          >
+            <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
           <div
-            className="flex overflow-x-hidden no-scrollbar space-x-2"
+            className="flex overflow-x-scroll space-x-2 hide-scrollbar"
             ref={sliderRef}
             onMouseDown={handleMouseDown}
             onMouseLeave={handleMouseLeave}
@@ -428,9 +485,7 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {(isMobile ? duplicatedBrands : getVisibleBrands())
-              .filter(brand => brand && brand._id && brand.name && brand.logo)
-              .map((brand, index) => (
+            {duplicatedBrands.map((brand, index) => (
               <div
                 key={`${brand._id}-${index}`}
                 className="flex-shrink-0"
@@ -443,7 +498,7 @@ const BrandSlider = ({ brands = [], onBrandClick, initialIndex = 0 }) => {
                   >
                     <div className="w-22 h-22 md:w-26 md:h-26 lg:w-40 lg:h-40 overflow-hidden flex items-center justify-center">
                       <img
-                        src={brand.logo || "/placeholder.svg"}
+                        src={getFullImageUrl(brand.logo) || "/placeholder.svg"}
                         alt={brand.name}
                         className="w-full h-full object-contain"
                       />

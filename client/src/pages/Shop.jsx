@@ -1,2023 +1,15 @@
-// "use client"
-
-// import { useState, useEffect, useRef } from "react"
-// import { Search, ChevronDown, Minus, X, FilterIcon } from "lucide-react"
-// import axios from "axios"
-// import { useNavigate, useLocation, useParams } from "react-router-dom"
-// import { useCart } from "../context/CartContext"
-// import HomeStyleProductCard from "../components/HomeStyleProductCard"
-// import ProductSchema from "../components/ProductSchema"
-// import productCache from "../services/productCache"
-// import { generateShopURL, parseShopURL, createSlug } from "../utils/urlUtils"
-
-// import config from "../config/config"
-// import "rc-slider/assets/index.css"
-// import Slider from "rc-slider"
-
-// const API_BASE_URL = `${config.API_URL}`
-
-// const bounceStyle = {
-//   animation: "bounce 1s infinite",
-// }
-// const bounceKeyframes = `
-// @keyframes bounce {
-//   0%, 100% { transform: translateY(0); }
-//   50% { transform: translateY(-30px); }
-// }`
-// if (typeof document !== "undefined" && !document.getElementById("bounce-keyframes")) {
-//   const style = document.createElement("style")
-//   style.id = "bounce-keyframes"
-//   style.innerHTML = bounceKeyframes
-//   document.head.appendChild(style)
-// }
-
-// // Right-anchored custom dropdown to avoid right overflow
-// const SortDropdown = ({ value, onChange }) => {
-//   const [open, setOpen] = useState(false)
-//   const ref = useRef(null)
-//   const options = [
-//     { value: "newest", label: "Newest First" },
-//     { value: "price-low", label: "Price: Low to High" },
-//     { value: "price-high", label: "Price: High to Low" },
-//     { value: "name", label: "Name: A-Z" },
-//   ]
-
-//   const current = options.find((o) => o.value === value)?.label || "Sort"
-
-//   useEffect(() => {
-//     const onDocClick = (e) => {
-//       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
-//     }
-//     const onKey = (e) => {
-//       if (e.key === "Escape") setOpen(false)
-//     }
-//     document.addEventListener("mousedown", onDocClick)
-//     document.addEventListener("keydown", onKey)
-//     return () => {
-//       document.removeEventListener("mousedown", onDocClick)
-//       document.removeEventListener("keydown", onKey)
-//     }
-//   }, [])
-
-//   const handleSelect = (val) => {
-//     // Maintain existing handler signature: pass an event-like object
-//     onChange?.({ target: { value: val } })
-//     setOpen(false)
-//   }
-
-//   return (
-//     <div className="relative inline-block text-left" ref={ref}>
-//       <button
-//         type="button"
-//         onClick={() => setOpen((s) => !s)}
-//         className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2"
-//         aria-haspopup="listbox"
-//         aria-expanded={open}
-//       >
-//         <span className="truncate max-w-[46vw] sm:max-w-none">{current}</span>
-//         <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} />
-//       </button>
-//       {open && (
-//         <ul
-//           className="absolute right-0 mt-1 w-56 max-w-[80vw] bg-white border border-gray-200 rounded-md shadow-lg z-50 overflow-hidden"
-//           role="listbox"
-//         >
-//           {options.map((opt) => (
-//             <li key={opt.value} role="option" aria-selected={opt.value === value}>
-//               <button
-//                 type="button"
-//                 onClick={() => handleSelect(opt.value)}
-//                 className={`w-full text-left px-4 py-2 text-gray-900 hover:bg-gray-100 ${
-//                   opt.value === value ? "font-semibold" : ""
-//                 }`}
-//               >
-//                 {opt.label}
-//               </button>
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   )
-// }
-
-// const PriceFilter = ({ min, max, onApply, initialRange }) => {
-//   const [range, setRange] = useState(initialRange || [min, max])
-//   const [inputMin, setInputMin] = useState(range[0])
-//   const [inputMax, setInputMax] = useState(range[1])
-
-//   const handleSliderChange = (values) => {
-//     setRange(values)
-//     setInputMin(values[0])
-//     setInputMax(values[1])
-//   }
-
-//   const handleInputMin = (e) => {
-//     const value = e.target.value
-//     // If input is empty, set to empty string to allow clearing
-//     if (value === "") {
-//       setInputMin("")
-//     } else if (!isNaN(value)) {
-//       // Only update if it's a valid number
-//       const numericValue = Number(value)
-//       setInputMin(numericValue)
-//       setRange([numericValue, range[1]])
-//     }
-//   }
-
-//   const handleInputMax = (e) => {
-//     const value = e.target.value
-//     // If input is empty, set to empty string to allow clearing
-//     if (value === "") {
-//       setInputMax("")
-//     } else if (!isNaN(value)) {
-//       // Only update if it's a valid number
-//       const numericValue = Number(value)
-//       setInputMax(numericValue)
-//       setRange([range[0], numericValue])
-//     }
-//   }
-
-//   const handleMinFocus = (e) => {
-//     // Always clear the input on focus for better UX
-//     setInputMin("")
-//   }
-
-//   const handleMaxFocus = (e) => {
-//     // Always clear the input on focus for better UX
-//     setInputMax("")
-//   }
-
-//   const handleApply = (e) => {
-//     if (e && e.preventDefault) e.preventDefault()
-//     // Ensure we have valid numbers before applying
-//     const minValue = inputMin === "" ? 0 : Number(inputMin)
-//     const maxValue = inputMax === "" ? max : Number(inputMax)
-//     onApply([minValue, maxValue])
-//   }
-
-//   return (
-//     <div className="">
-//       <Slider
-//         range
-//         min={min}
-//         max={max}
-//         value={range}
-//         onChange={handleSliderChange}
-//         trackStyle={[{ backgroundColor: "#84cc16" }]} // lime-500
-//         handleStyle={[
-//           { backgroundColor: "#84cc16", borderColor: "#84cc16" },
-//           { backgroundColor: "#84cc16", borderColor: "#84cc16" },
-//         ]}
-//         railStyle={{ backgroundColor: "#e5e7eb" }}
-//       />
-//       <div className="flex justify-between mt-4 mb-2 text-xs font-semibold">
-//         <span>MIN</span>
-//         <span>MAX</span>
-//       </div>
-//       <div className="flex gap-2 mb-4">
-//         <input
-//           type="number"
-//           className="w-1/2 border rounded px-2 py-1 text-center focus:border-lime-500 focus:ring-lime-500"
-//           value={inputMin}
-//           min={min}
-//           max={inputMax}
-//           onChange={handleInputMin}
-//           onFocus={handleMinFocus}
-//           onBlur={() => {
-//             // When input loses focus, if it's empty, set it to 0
-//             if (inputMin === "") {
-//               setInputMin(0)
-//             }
-//           }}
-//         />
-//         <input
-//           type="number"
-//           className="w-1/2 border rounded px-2 py-1 text-center focus:border-lime-500 focus:ring-lime-500"
-//           value={inputMax}
-//           min={inputMin}
-//           max={max}
-//           onChange={handleInputMax}
-//           onFocus={handleMaxFocus}
-//           onBlur={() => {
-//             // When input loses focus, if it's empty, set it to max
-//             if (inputMax === "") {
-//               setInputMax(max)
-//             }
-//           }}
-//         />
-//       </div>
-//       <button
-//         type="button"
-//         className="w-full bg-white border border-lime-500 text-lime-600 rounded py-2 font-semibold hover:bg-lime-50 hover:text-lime-700 hover:border-lime-600 transition"
-//         onClick={handleApply}
-//       >
-//         Apply
-//       </button>
-//     </div>
-//   )
-// }
-
-// const Shop = () => {
-//   const navigate = useNavigate()
-//   const location = useLocation()
-//   const params = useParams()
-//   const { addToCart } = useCart()
-//   const [products, setProducts] = useState([])
-//   const [categories, setCategories] = useState([])
-//   const [brands, setBrands] = useState([])
-//   const [banners, setBanners] = useState([])
-//   const [loading, setLoading] = useState(true)
-//   const [error, setError] = useState(null)
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [actualSearchQuery, setActualSearchQuery] = useState("") // New state to track the actual search term used
-//   const [selectedCategory, setSelectedCategory] = useState("all")
-//   const [selectedBrands, setSelectedBrands] = useState([])
-//   const [priceRange, setPriceRange] = useState([0, 10000])
-//   const [maxPrice, setMaxPrice] = useState(10000) // Will be set to global highest product price
-//   const [globalMaxPrice, setGlobalMaxPrice] = useState(null)
-//   const [sortBy, setSortBy] = useState("newest")
-//   const [brandSearch, setBrandSearch] = useState("")
-//   const [subCategories, setSubCategories] = useState([])
-//   const [selectedSubCategories, setSelectedSubCategories] = useState([])
-//   const [stockFilters, setStockFilters] = useState({ inStock: false, outOfStock: false, onSale: false })
-//   const [minPrice, setMinPrice] = useState(0)
-
-//   // Filter panel states
-//   const [showPriceFilter, setShowPriceFilter] = useState(true)
-//   const [showCategoryFilter, setShowCategoryFilter] = useState(true)
-//   const [showBrandFilter, setShowBrandFilter] = useState(true)
-//   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-
-//   const [productsToShow, setProductsToShow] = useState(20)
-//   const [delayedLoading, setDelayedLoading] = useState(false)
-//   const fetchTimeout = useRef()
-//   const loadingTimeout = useRef()
-
-//   // Progressive search function
-//   const performProgressiveSearch = async (searchTerm) => {
-//     if (!searchTerm || searchTerm.trim() === "") {
-//       setActualSearchQuery("")
-//       return []
-//     }
-
-//     const words = searchTerm.trim().split(/\s+/)
-
-//     // Try searching with progressively fewer words
-//     for (let i = words.length; i > 0; i--) {
-//       const currentSearchTerm = words.slice(0, i).join(" ")
-
-//       try {
-//         // Get cached products
-//         const allProducts = await productCache.getProducts()
-//         if (!allProducts || allProducts.length === 0) {
-//           continue
-//         }
-
-//         // Apply filters with current search term
-//         const stockStatusFilters = []
-//         if (stockFilters.inStock) stockStatusFilters.push("inStock")
-//         if (stockFilters.outOfStock) stockStatusFilters.push("outOfStock")
-//         if (stockFilters.onSale) stockStatusFilters.push("onSale")
-
-//         const filters = {
-//           parent_category: selectedCategory !== "all" ? selectedCategory : null,
-//           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
-//           brand: selectedBrands.length > 0 ? selectedBrands : null,
-//           search: currentSearchTerm,
-//           priceRange: priceRange,
-//           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
-//           sortBy: sortBy,
-//         }
-
-//         const filteredProducts = productCache.filterProducts(allProducts, filters)
-
-//         // If we found products, use this search term
-//         if (filteredProducts.length > 0) {
-//           setActualSearchQuery(currentSearchTerm)
-//           return filteredProducts
-//         }
-//       } catch (err) {
-//         console.error("Error in progressive search:", err)
-//       }
-//     }
-
-//     // Fallback: If still nothing, try character-by-character trimming from the end
-//     // This helps when the user pastes a SKU with extra suffix characters (no spaces)
-//     const trimmed = searchTerm.trim()
-//     for (let len = trimmed.length - 1; len >= 3; len--) {
-//       const currentSearchTerm = trimmed.slice(0, len)
-//       try {
-//         const allProducts = await productCache.getProducts()
-//         if (!allProducts || allProducts.length === 0) continue
-
-//         const stockStatusFilters = []
-//         if (stockFilters.inStock) stockStatusFilters.push("inStock")
-//         if (stockFilters.outOfStock) stockStatusFilters.push("outOfStock")
-//         if (stockFilters.onSale) stockStatusFilters.push("onSale")
-
-//         const filters = {
-//           parent_category: selectedCategory !== "all" ? selectedCategory : null,
-//           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
-//           brand: selectedBrands.length > 0 ? selectedBrands : null,
-//           search: currentSearchTerm,
-//           priceRange: priceRange,
-//           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
-//           sortBy: sortBy,
-//         }
-
-//         const filteredProducts = productCache.filterProducts(allProducts, filters)
-//         if (filteredProducts.length > 0) {
-//           setActualSearchQuery(currentSearchTerm)
-//           return filteredProducts
-//         }
-//       } catch (err) {
-//         console.error("Error in char-trim search:", err)
-//       }
-//     }
-
-//     // If no results found even with single word, set actual search to original
-//     setActualSearchQuery(searchTerm)
-//     return []
-//   }
-
-//   // Load and filter products using cache with progressive search
-//   const loadAndFilterProducts = async () => {
-//     try {
-//       setLoading(true)
-//       setError(null)
-
-//       // Use the productCache service instead of direct API call
-//       const allProducts = await productCache.getProducts()
-
-//       if (!allProducts || allProducts.length === 0) {
-//         setError("No products available")
-//         setLoading(false)
-//         return
-//       }
-
-//       let filteredProducts = []
-
-//       // If there's a search query, use progressive search
-//       if (searchQuery && searchQuery.trim() !== "") {
-//         filteredProducts = await performProgressiveSearch(searchQuery)
-//       } else {
-//         // No search query, apply other filters normally
-//         setActualSearchQuery("")
-
-//         const stockStatusFilters = []
-//         if (stockFilters.inStock) stockStatusFilters.push("inStock")
-//         if (stockFilters.outOfStock) stockStatusFilters.push("outOfStock")
-//         if (stockFilters.onSale) stockStatusFilters.push("onSale")
-
-//         const filters = {
-//           parent_category: selectedCategory !== "all" ? selectedCategory : null,
-//           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
-//           brand: selectedBrands.length > 0 ? selectedBrands : null,
-//           search: null,
-//           priceRange: priceRange,
-//           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
-//           sortBy: sortBy,
-//         }
-
-//         filteredProducts = productCache.filterProducts(allProducts, filters)
-//       }
-
-//       if (filteredProducts.length > 0) {
-//         const prices = filteredProducts.map((p) => p.price || 0)
-//         const minProductPrice = Math.min(...prices)
-//         const filteredMax = Math.max(...prices)
-//         // Do not mutate maxPrice here; keep global upper bound fixed
-//         // Only reset price range if it matches the default (user hasn't changed it)
-//         if (priceRange[0] === 0 && priceRange[1] === 10000) {
-//           setPriceRange([minProductPrice, globalMaxPrice != null ? globalMaxPrice : filteredMax])
-//         }
-//         // Save minProductPrice in state for use in PriceFilter
-//         setMinPrice(minProductPrice)
-//       }
-
-//       setProducts(filteredProducts)
-//       setLoading(false)
-//     } catch (err) {
-//       setError("Error loading products")
-//       setLoading(false)
-//     }
-//   }
-
-//   // Filter products from cache without API calls (for instant filtering) with progressive search
-//   const filterProductsFromCache = async () => {
-//     try {
-//       // Get cached products
-//       const allProducts = await productCache.getProducts()
-//       if (!allProducts || allProducts.length === 0) {
-//         await loadAndFilterProducts()
-//         return
-//       }
-
-//       let filteredProducts = []
-
-//       // If there's a search query, use progressive search
-//       if (searchQuery && searchQuery.trim() !== "") {
-//         filteredProducts = await performProgressiveSearch(searchQuery)
-//       } else {
-//         // No search query, apply other filters normally
-//         setActualSearchQuery("")
-
-//         const stockStatusFilters = []
-//         if (stockFilters.inStock) stockStatusFilters.push("inStock")
-//         if (stockFilters.outOfStock) stockStatusFilters.push("outOfStock")
-//         if (stockFilters.onSale) stockStatusFilters.push("onSale")
-
-//         const filters = {
-//           parent_category: selectedCategory !== "all" ? selectedCategory : null,
-//           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
-//           brand: selectedBrands.length > 0 ? selectedBrands : null,
-//           search: null,
-//           priceRange: priceRange,
-//           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
-//           sortBy: sortBy,
-//         }
-
-//         filteredProducts = productCache.filterProducts(allProducts, filters)
-//       }
-
-//       if (filteredProducts.length > 0) {
-//         const prices = filteredProducts.map((p) => p.price || 0)
-//         const minProductPrice = Math.min(...prices)
-//         const filteredMax = Math.max(...prices)
-//         // Do not mutate maxPrice here; keep global upper bound fixed
-//         // Only reset price range if it matches the default (user hasn't changed it)
-//         if (priceRange[0] === 0 && priceRange[1] === 10000) {
-//           setPriceRange([minProductPrice, globalMaxPrice != null ? globalMaxPrice : filteredMax])
-//         }
-//         // Save minProductPrice in state for use in PriceFilter
-//         setMinPrice(minProductPrice)
-//       }
-
-//       setProducts(filteredProducts)
-//     } catch (err) {
-//       // Fallback to API if cache fails
-//       await loadAndFilterProducts()
-//     }
-//   }
-
-//   // Fetch categories and brands on mount
-//   useEffect(() => {
-//     fetchCategories()
-//     fetchBrands()
-//     fetchBanners()
-//     loadAndFilterProducts()
-//   }, [])
-
-//   // Compute and fix the global maximum product price on mount (upper bound only)
-//   useEffect(() => {
-//     const computeGlobalMax = async () => {
-//       try {
-//         const allProducts = await productCache.getProducts()
-//         if (allProducts && allProducts.length > 0) {
-//           const prices = allProducts.map((p) => p.price || 0)
-//           const globalMax = Math.max(...prices)
-//           setGlobalMaxPrice(globalMax)
-//           setMaxPrice(globalMax)
-//           // If initial priceRange is still default, expand upper bound to global max
-//           if (priceRange[0] === 0 && priceRange[1] === 10000) {
-//             setPriceRange([0, globalMax])
-//           }
-//         }
-//       } catch (e) {
-//         // ignore; keep fallback maxPrice
-//       }
-//     }
-//     computeGlobalMax()
-//   }, [])
-
-//   // Filter products from cache when filters change (no API calls)
-//   useEffect(() => {
-//     if (fetchTimeout.current) clearTimeout(fetchTimeout.current)
-
-//     fetchTimeout.current = setTimeout(() => {
-//       filterProductsFromCache()
-//     }, 100) // 100ms debounce for instant filtering
-//     return () => {
-//       clearTimeout(fetchTimeout.current)
-//     }
-//   }, [selectedCategory, selectedBrands, searchQuery, priceRange, selectedSubCategories, stockFilters, sortBy])
-
-//   // 1. On URL or categories change: set selectedCategory from the slug.
-//   useEffect(() => {
-//     const urlParams = parseShopURL(location.pathname, location.search)
-//     if (categories.length > 0) {
-//       const foundCategory = categories.find(
-//         (cat) =>
-//           cat._id === urlParams.parentCategory ||
-//           cat.slug === urlParams.parentCategory ||
-//           createSlug(cat.name) === urlParams.parentCategory,
-//       )
-//       setSelectedCategory(foundCategory ? foundCategory._id : "all")
-//     }
-//   }, [location.pathname, location.search, categories])
-
-//   // 2. On selectedCategory change: fetch subcategories for that category.
-//   useEffect(() => {
-//     if (selectedCategory && selectedCategory !== "all") {
-//       fetchSubCategories()
-//     } else {
-//       setSubCategories([])
-//       setSelectedSubCategories([])
-//     }
-//   }, [selectedCategory])
-
-//   // 3. On subCategories or URL change: set selectedSubCategories from the slug.
-//   useEffect(() => {
-//     const urlParams = parseShopURL(location.pathname, location.search)
-//     if (subCategories.length > 0 && urlParams.subcategory) {
-//       const foundSubcategory = subCategories.find(
-//         (sub) =>
-//           sub._id === urlParams.subcategory ||
-//           sub.slug === urlParams.subcategory ||
-//           createSlug(sub.name) === urlParams.subcategory,
-//       )
-//       setSelectedSubCategories(foundSubcategory ? [foundSubcategory._id] : [])
-//     } else {
-//       setSelectedSubCategories([])
-//     }
-//   }, [location.pathname, location.search, subCategories])
-
-//   // 4. On URL or brands change: set selectedBrands from the URL parameter
-//   useEffect(() => {
-//     const urlParams = parseShopURL(location.pathname, location.search)
-//     if (brands.length > 0 && urlParams.brand) {
-//       const foundBrand = brands.find(
-//         (brand) => brand.name === urlParams.brand || createSlug(brand.name) === createSlug(urlParams.brand),
-//       )
-//       if (foundBrand) {
-//         setSelectedBrands([foundBrand._id])
-//       } else {
-//         setSelectedBrands([])
-//       }
-//     }
-//   }, [location.pathname, location.search, brands])
-
-//   // Add useEffect hook to parse search parameter from URL and update searchQuery state
-//   useEffect(() => {
-//     const urlParams = parseShopURL(location.pathname, location.search)
-//     if (urlParams.search) {
-//       setSearchQuery(urlParams.search)
-//     }
-//   }, [location.pathname, location.search])
-
-//   // Debug: Log all loaded categories and subcategories
-//   useEffect(() => {
-//     if (categories.length > 0) {
-//       console.log(
-//         "All loaded categories:",
-//         categories.map((c) => ({ name: c.name, slug: c.slug, _id: c._id })),
-//       )
-//     }
-//   }, [categories])
-
-//   useEffect(() => {
-//     if (subCategories.length > 0) {
-//       console.log(
-//         "All loaded subcategories:",
-//         subCategories.map((s) => ({ name: s.name, slug: s.slug, _id: s._id })),
-//       )
-//     }
-//   }, [subCategories])
-
-//   // Reset productsToShow when filters change or products are refetched
-//   useEffect(() => {
-//     setProductsToShow(20)
-//   }, [selectedCategory, selectedBrands, searchQuery, priceRange, selectedSubCategories, stockFilters, products.length])
-
-//   const fetchCategories = async () => {
-//     try {
-//       const { data } = await axios.get(`${API_BASE_URL}/api/categories`)
-
-//       // Filter to only show parent categories
-//       const validCategories = data.filter((cat) => {
-//         const isValid =
-//           cat &&
-//           typeof cat === "object" &&
-//           cat.name &&
-//           typeof cat.name === "string" &&
-//           cat.name.trim() !== "" &&
-//           cat.isActive !== false &&
-//           !cat.isDeleted &&
-//           !cat.name.match(/^[0-9a-fA-F]{24}$/) && // Not an ID
-//           !cat.parentCategory // Only include categories without a parent
-
-//         return isValid
-//       })
-
-//       setCategories(validCategories)
-//     } catch (err) {
-//       // Handle error silently
-//     }
-//   }
-
-//   const fetchBrands = async () => {
-//     try {
-//       const { data } = await axios.get(`${API_BASE_URL}/api/brands`)
-
-//       // Filter and validate brands
-//       const validBrands = data.filter((brand) => {
-//         const isValid =
-//           brand &&
-//           typeof brand === "object" &&
-//           brand.name &&
-//           typeof brand.name === "string" &&
-//           brand.name.trim() !== "" &&
-//           brand.isActive !== false &&
-//           !brand.name.match(/^[0-9a-fA-F]{24}$/) // Not an ID
-
-//         return isValid
-//       })
-
-//       setBrands(validBrands)
-//     } catch (err) {
-//       // Handle error silently
-//     }
-//   }
-
-//   const fetchBanners = async () => {
-//     try {
-//       const { data } = await axios.get(`${API_BASE_URL}/api/banners`)
-//       setBanners(data)
-//     } catch (err) {
-//       // Handle error silently
-//     }
-//   }
-
-//   const fetchSubCategories = async () => {
-//     try {
-//       const catObj = categories.find((cat) => cat._id === selectedCategory)
-//       if (!catObj) return
-
-//       const { data } = await axios.get(`${API_BASE_URL}/api/subcategories?category=${catObj._id}`)
-
-//       // Filter and validate subcategories
-//       const validSubCategories = data.filter((subCat) => {
-//         const isValid =
-//           subCat &&
-//           typeof subCat === "object" &&
-//           subCat.name &&
-//           typeof subCat.name === "string" &&
-//           subCat.name.trim() !== "" &&
-//           subCat.isActive !== false &&
-//           !subCat.isDeleted &&
-//           !subCat.name.match(/^[0-9a-fA-F]{24}$/) // Not an ID
-
-//         return isValid
-//       })
-
-//       setSubCategories(validSubCategories)
-//     } catch (err) {
-//       // Handle error silently
-//     }
-//   }
-
-//   const filteredBrands = brands.filter((brand) => brand.name.toLowerCase().includes(brandSearch.toLowerCase()))
-
-//   // When a parent category is selected, clear subcategory selection
-//   const handleCategoryChange = (categoryId) => {
-//     setSelectedCategory(categoryId)
-//     setSelectedSubCategories([])
-
-//     // Find the category object to get its name for URL generation
-//     const categoryObj = categories.find((cat) => cat._id === categoryId)
-//     const categoryName = categoryObj ? categoryObj.name : categoryId
-
-//     // Generate SEO-friendly URL
-//     const url = generateShopURL({
-//       parentCategory: categoryId !== "all" ? categoryName : null,
-//       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
-//       search: searchQuery || null,
-//     })
-
-//     navigate(url)
-//   }
-
-//   // When a subcategory is selected, set both parent and subcategory in the filter
-//   const handleSubCategoryChange = (subCatId) => {
-//     setSelectedSubCategories([subCatId])
-//     // Find the parent category for this subcategory
-//     const subcatObj = subCategories.find((sub) => sub._id === subCatId)
-//     // category could be either an object or a string
-//     let parentId
-//     if (subcatObj) {
-//       parentId = typeof subcatObj.category === "object" ? subcatObj.category._id : subcatObj.category
-//     } else {
-//       parentId = selectedCategory
-//     }
-//     setSelectedCategory(parentId)
-
-//     // Find the category and subcategory objects to get their names for URL generation
-//     const categoryObj = categories.find((cat) => cat._id === parentId)
-//     const subcategoryObj = subCategories.find((sub) => sub._id === subCatId)
-
-//     const categoryName = categoryObj ? categoryObj.name : parentId
-//     const subcategoryName = subcategoryObj ? subcategoryObj.name : subCatId
-
-//     // Generate SEO-friendly URL
-//     const url = generateShopURL({
-//       parentCategory: parentId !== "all" ? categoryName : null,
-//       subcategory: subcategoryName,
-//       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
-//       search: searchQuery || null,
-//     })
-
-//     // Debug log for subcategory change
-//     console.log("handleSubCategoryChange called with:", { subCatId, parentId, subcatObj, url, subCategories })
-//     navigate(url)
-//   }
-
-//   const handleBrandChange = (brandId) => {
-//     setSelectedBrands((prev) => (prev.includes(brandId) ? prev.filter((b) => b !== brandId) : [...prev, brandId]))
-
-//     // Update URL with brand filter
-//     const newSelectedBrands = selectedBrands.includes(brandId)
-//       ? selectedBrands.filter((b) => b !== brandId)
-//       : [...selectedBrands, brandId]
-
-//     const categoryObj = categories.find((cat) => cat._id === selectedCategory)
-//     const subcategoryObj =
-//       selectedSubCategories.length > 0 ? subCategories.find((sub) => sub._id === selectedSubCategories[0]) : null
-
-//     const url = generateShopURL({
-//       parentCategory: selectedCategory !== "all" ? categoryObj?.name || selectedCategory : null,
-//       subcategory: subcategoryObj?.name || selectedSubCategories[0] || null,
-//       brand: newSelectedBrands.length > 0 ? brands.find((b) => b._id === newSelectedBrands[0])?.name : null,
-//       search: searchQuery || null,
-//     })
-
-//     navigate(url)
-//   }
-
-//   const handleStockFilterChange = (key) => {
-//     setStockFilters((prev) => {
-//       // For radio buttons, only one can be selected at a time
-//       const newState = { inStock: false, outOfStock: false, onSale: false }
-//       newState[key] = true
-//       return newState
-//     })
-//   }
-
-//   // Handle search query changes and update URL
-//   const handleSearchChange = (e) => {
-//     const newSearchQuery = e.target.value
-//     setSearchQuery(newSearchQuery)
-
-//     // Update URL with search query
-//     const categoryObj = categories.find((cat) => cat._id === selectedCategory)
-//     const subcategoryObj =
-//       selectedSubCategories.length > 0 ? subCategories.find((sub) => sub._id === selectedSubCategories[0]) : null
-
-//     const url = generateShopURL({
-//       parentCategory: selectedCategory !== "all" ? categoryObj?.name || selectedCategory : null,
-//       subcategory: subcategoryObj?.name || selectedSubCategories[0] || null,
-//       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
-//       search: newSearchQuery || null,
-//     })
-
-//     navigate(url)
-//   }
-
-//   const clearAllFilters = () => {
-//     setSelectedCategory("all")
-//     setSelectedBrands([])
-//     setSelectedSubCategories([])
-//     setPriceRange([0, maxPrice])
-//     setSearchQuery("")
-//     setActualSearchQuery("")
-//     setStockFilters({ inStock: false, outOfStock: false, onSale: false })
-//     navigate("/shop")
-//   }
-
-//   // Show loading only on initial load, not on filter changes
-//   if (loading && products.length === 0) {
-//     return (
-//       <div className="flex justify-center items-center h-screen">
-//         <img src="/g.png" alt="Loading..." style={{ width: 180, height: 180, animation: "bounce 1s infinite" }} />
-//       </div>
-//     )
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center">
-//         <div className="text-red-500 text-center">
-//           <p className="text-xl font-semibold mb-2">Error</p>
-//           <p>{error}</p>
-//         </div>
-//       </div>
-//     )
-//   }
-
-//   // Add debug log before rendering
-//   console.log("Products being rendered:", products)
-
-//   // Get selected subcategory object
-//   const selectedSubCategoryObj = subCategories.find((sub) => sub._id === selectedSubCategories[0])
-
-//   // 1. Add a handler for sort dropdown
-//   const handleSortChange = (e) => {
-//     setSortBy(e.target.value)
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       <ProductSchema products={products} type="list" />
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-//         {/* Top Action Bar (mobile only): Filter + Sort */}
-//         <div className="flex items-center justify-between mb-4 md:hidden">
-//           <button
-//             className="flex md:hidden items-center gap-2 px-4 py-2 bg-lime-500 text-white rounded font-semibold shadow hover:bg-lime-600 transition"
-//             onClick={() => setIsMobileFilterOpen(true)}
-//           >
-//             <FilterIcon size={20} />
-//             Filter
-//           </button>
-//           <div className="ml-auto relative z-20 md:hidden">
-//             <SortDropdown value={sortBy} onChange={handleSortChange} />
-//           </div>
-//         </div>
-//         {/* Mobile Filter Drawer */}
-//         {isMobileFilterOpen && (
-//           <div className="fixed inset-0 z-[9999] flex">
-//             {/* Overlay */}
-//             <div className="fixed inset-0 bg-black bg-opacity-40 z-10" onClick={() => setIsMobileFilterOpen(false)}></div>
-//             {/* Drawer */}
-//             <div className="relative bg-white w-80 max-w-full h-full shadow-xl ml-auto animate-slideInRight flex flex-col z-20">
-//               <button
-//                 className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
-//                 onClick={() => setIsMobileFilterOpen(false)}
-//                 aria-label="Close filter"
-//               >
-//                 <X size={24} />
-//               </button>
-//               {/* Filter Content (copied from sidebar) */}
-//               <div className="flex-1 overflow-y-auto space-y-6 mt-6 p-6">
-//                 {/* Price Filter */}
-//                 <div className="border-b pb-4">
-//                   <button
-//                     onClick={() => setShowPriceFilter(!showPriceFilter)}
-//                     className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                   >
-//                     Price Range
-//                     {showPriceFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                   </button>
-//                   {showPriceFilter && (
-//                     <div className="mt-4 space-y-4">
-//                       <PriceFilter
-//                         min={minPrice}
-//                         max={maxPrice}
-//                         initialRange={priceRange}
-//                         onApply={(range) => setPriceRange(range)}
-//                       />
-//                     </div>
-//                   )}
-//                 </div>
-//                 {/* Categories Filter */}
-//                 <div className="border-b pb-4">
-//                   <button
-//                     onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-//                     className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                   >
-//                     Categories
-//                     {showCategoryFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                   </button>
-//                   {showCategoryFilter && (
-//                     <div className="mt-4 space-y-2">
-//                       <div className="flex items-center cursor-pointer" onClick={() => handleCategoryChange("all")}>
-//                         <div className="relative flex items-center">
-//                           <input
-//                             type="radio"
-//                             name="category-group"
-//                             checked={selectedCategory === "all"}
-//                             readOnly
-//                             className="absolute opacity-0 w-0 h-0"
-//                           />
-//                           <div
-//                             className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                               selectedCategory === "all" ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                             }`}
-//                           >
-//                             {selectedCategory === "all" && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                           </div>
-//                         </div>
-//                         <span className="text-sm text-gray-700">All Categories</span>
-//                       </div>
-
-//                       {categories.map((category) => (
-//                         <div
-//                           key={category._id}
-//                           className="flex items-center cursor-pointer"
-//                           onClick={() => handleCategoryChange(category._id)}
-//                         >
-//                           <div className="relative flex items-center">
-//                             <input
-//                               type="radio"
-//                               name="category-group"
-//                               checked={selectedCategory === category._id}
-//                               readOnly
-//                               className="absolute opacity-0 w-0 h-0"
-//                             />
-//                             <div
-//                               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                                 selectedCategory === category._id ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                               }`}
-//                             >
-//                               {selectedCategory === category._id && (
-//                                 <div className="w-2 h-2 rounded-full bg-white"></div>
-//                               )}
-//                             </div>
-//                           </div>
-//                           <span className="text-sm text-gray-700">{category.name}</span>
-//                         </div>
-//                       ))}
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 {/* Subcategories Filter */}
-//                 {subCategories.length > 0 && (
-//                   <div className="border-b pb-4">
-//                     <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-//                       {categories.find((cat) => cat._id === selectedCategory)?.name} Subcategories
-//                     </button>
-//                     <div className="mt-4 space-y-2">
-//                       {subCategories.map((subcat) => (
-//                         <div
-//                           key={subcat._id}
-//                           className="flex items-center cursor-pointer"
-//                           onClick={() => handleSubCategoryChange(subcat._id)}
-//                         >
-//                           <div className="relative flex items-center">
-//                             <input
-//                               type="radio"
-//                               name="subcategory-group"
-//                               checked={selectedSubCategories[0] === subcat._id}
-//                               readOnly
-//                               className="absolute opacity-0 w-0 h-0"
-//                             />
-//                             <div
-//                               className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                                 selectedSubCategories[0] === subcat._id
-//                                   ? "border-lime-600 bg-lime-600"
-//                                   : "border-gray-300"
-//                               }`}
-//                             >
-//                               {selectedSubCategories[0] === subcat._id && (
-//                                 <div className="w-2 h-2 rounded-full bg-white"></div>
-//                               )}
-//                             </div>
-//                           </div>
-//                           <span className="text-sm text-gray-700">{subcat.name}</span>
-//                         </div>
-//                       ))}
-//                     </div>
-//                   </div>
-//                 )}
-//                 {brands.length > 0 && (
-//                   <div className="border-b pb-4">
-//                     <button
-//                       onClick={() => setShowBrandFilter(!showBrandFilter)}
-//                       className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                     >
-//                       Brands
-//                       {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                     </button>
-//                     {showBrandFilter && (
-//                       <div className="mt-4 space-y-3">
-//                         <div className="relative">
-//                           <Search
-//                             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-//                             size={16}
-//                           />
-//                           <input
-//                             type="text"
-//                             placeholder="Search brands"
-//                             value={brandSearch}
-//                             onChange={(e) => setBrandSearch(e.target.value)}
-//                             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-//                           />
-//                         </div>
-//                         <div className="max-h-48 overflow-y-auto space-y-2">
-//                           {filteredBrands.map((brand) => (
-//                             <div
-//                               key={brand._id}
-//                               className="flex items-center cursor-pointer"
-//                               onClick={() => handleBrandChange(brand._id)}
-//                             >
-//                               <div className="relative flex items-center">
-//                                 <input
-//                                   type="checkbox"
-//                                   checked={selectedBrands.includes(brand._id)}
-//                                   readOnly
-//                                   className="absolute opacity-0 w-0 h-0"
-//                                 />
-//                                 <div
-//                                   className={`w-4 h-4 border-2 flex items-center justify-center mr-2 ${
-//                                     selectedBrands.includes(brand._id)
-//                                       ? "border-lime-600 bg-lime-600"
-//                                       : "border-gray-300 rounded"
-//                                   }`}
-//                                 >
-//                                   {selectedBrands.includes(brand._id) && (
-//                                     <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-//                                       <path
-//                                         fillRule="evenodd"
-//                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-//                                         clipRule="evenodd"
-//                                       />
-//                                     </svg>
-//                                   )}
-//                                 </div>
-//                               </div>
-//                               <span className="text-sm text-gray-700">{brand.name}</span>
-//                             </div>
-//                           ))}
-//                         </div>
-//                       </div>
-//                     )}
-//                   </div>
-//                 )}
-
-//                 {/* Stock/On Sale Filter */}
-//                 <div className="border-b pb-4">
-//                   <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-//                     Stock Status
-//                   </button>
-//                   <div className="mt-4 space-y-2">
-//                     <div
-//                       className="flex items-center cursor-pointer"
-//                       onClick={() => handleStockFilterChange("inStock")}
-//                     >
-//                       <div className="relative flex items-center">
-//                         <input
-//                           type="radio"
-//                           name="stock-group"
-//                           checked={stockFilters.inStock}
-//                           readOnly
-//                           className="absolute opacity-0 w-0 h-0"
-//                         />
-//                         <div
-//                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                             stockFilters.inStock ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                           }`}
-//                         >
-//                           {stockFilters.inStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                         </div>
-//                       </div>
-//                       <span className="text-sm text-gray-700">In Stock</span>
-//                     </div>
-
-//                     <div
-//                       className="flex items-center cursor-pointer"
-//                       onClick={() => handleStockFilterChange("outOfStock")}
-//                     >
-//                       <div className="relative flex items-center">
-//                         <input
-//                           type="radio"
-//                           name="stock-group"
-//                           checked={stockFilters.outOfStock}
-//                           readOnly
-//                           className="absolute opacity-0 w-0 h-0"
-//                         />
-//                         <div
-//                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                             stockFilters.outOfStock ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                           }`}
-//                         >
-//                           {stockFilters.outOfStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                         </div>
-//                       </div>
-//                       <span className="text-sm text-gray-700">Out of Stock</span>
-//                     </div>
-
-//                     <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("onSale")}>
-//                       <div className="relative flex items-center">
-//                         <input
-//                           type="radio"
-//                           name="stock-group"
-//                           checked={stockFilters.onSale}
-//                           readOnly
-//                           className="absolute opacity-0 w-0 h-0"
-//                         />
-//                         <div
-//                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                             stockFilters.onSale ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                           }`}
-//                         >
-//                           {stockFilters.onSale && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                         </div>
-//                       </div>
-//                       <span className="text-sm text-gray-700">On Sale</span>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 {/* Brands Filter */}
-//               </div>
-//               {/* Footer actions */}
-//               <div className="p-4 border-t bg-white flex items-center justify-between gap-3">
-//                 <button
-//                   type="button"
-//                   onClick={() => {
-//                     clearAllFilters()
-//                     setIsMobileFilterOpen(false)
-//                   }}
-//                   className="flex-1 px-4 py-2 border border-red-600 text-red-600 rounded-md font-semibold hover:bg-red-50"
-//                 >
-//                   Clear
-//                 </button>
-//                 <button
-//                   type="button"
-//                   onClick={() => setIsMobileFilterOpen(false)}
-//                   className="flex-1 px-4 py-2 bg-lime-600 text-white rounded-md font-semibold hover:bg-lime-700"
-//                 >
-//                   Apply
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         )}
-//         <div className="flex flex-col lg:flex-row gap-8">
-//           {/* Sidebar Filters (hidden on mobile) */}
-//           <div className="lg:w-1/4 hidden md:block">
-//             <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-//               {/* Search */}
-//               <div>
-//                 {/* <div className="relative">
-//                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-//                   <input
-//                     type="text"
-//                     placeholder="Search products..."
-//                                     value={searchQuery}
-//                 onChange={handleSearchChange}
-//                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-//                   />
-//                 </div> */}
-//               </div>
-
-//               {/* Price Filter */}
-//               <div className="border-b pb-4">
-//                 <button
-//                   onClick={() => setShowPriceFilter(!showPriceFilter)}
-//                   className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                 >
-//                   Price Range
-//                   {showPriceFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                 </button>
-//                 {showPriceFilter && (
-//                   <div className="mt-4 space-y-4">
-//                     <PriceFilter
-//                       min={minPrice} // Use true minimum product price for the slider and input
-//                       max={maxPrice}
-//                       initialRange={priceRange}
-//                       onApply={(range) => setPriceRange(range)}
-//                     />
-//                   </div>
-//                 )}
-//               </div>
-
-//               {/* Categories Filter */}
-//               <div className="border-b pb-4">
-//                 <button
-//                   onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-//                   className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                 >
-//                   Categories
-//                   {showCategoryFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                 </button>
-//                 {showCategoryFilter && (
-//                   <div className="mt-4 space-y-2">
-//                     <div className="flex items-center cursor-pointer" onClick={() => handleCategoryChange("all")}>
-//                       <div className="relative flex items-center">
-//                         <input
-//                           type="radio"
-//                           name="category-group"
-//                           checked={selectedCategory === "all"}
-//                           readOnly
-//                           className="absolute opacity-0 w-0 h-0"
-//                         />
-//                         <div
-//                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                             selectedCategory === "all" ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                           }`}
-//                         >
-//                           {selectedCategory === "all" && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                         </div>
-//                       </div>
-//                       <span className="text-sm text-gray-700">All Categories</span>
-//                     </div>
-
-//                     {categories.map((category) => (
-//                       <div
-//                         key={category._id}
-//                         className="flex items-center cursor-pointer"
-//                         onClick={() => handleCategoryChange(category._id)}
-//                       >
-//                         <div className="relative flex items-center">
-//                           <input
-//                             type="radio"
-//                             name="category-group"
-//                             checked={selectedCategory === category._id}
-//                             readOnly
-//                             className="absolute opacity-0 w-0 h-0"
-//                           />
-//                           <div
-//                             className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                               selectedCategory === category._id ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                             }`}
-//                           >
-//                             {selectedCategory === category._id && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                           </div>
-//                         </div>
-//                         <span className="text-sm text-gray-700">{category.name}</span>
-//                       </div>
-//                     ))}
-//                   </div>
-//                 )}
-//               </div>
-
-//               {/* Subcategories Filter */}
-//               {subCategories.length > 0 && (
-//                 <div className="border-b pb-4">
-//                   <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-//                     {categories.find((cat) => cat._id === selectedCategory)?.name} Subcategories
-//                   </button>
-//                   <div className="mt-4 space-y-2">
-//                     {subCategories.map((subcat) => (
-//                       <div
-//                         key={subcat._id}
-//                         className="flex items-center cursor-pointer"
-//                         onClick={() => handleSubCategoryChange(subcat._id)}
-//                       >
-//                         <div className="relative flex items-center">
-//                           <input
-//                             type="radio"
-//                             name="subcategory-group"
-//                             checked={selectedSubCategories[0] === subcat._id}
-//                             readOnly
-//                             className="absolute opacity-0 w-0 h-0"
-//                           />
-//                           <div
-//                             className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                               selectedSubCategories[0] === subcat._id
-//                                 ? "border-lime-600 bg-lime-600"
-//                                 : "border-gray-300"
-//                             }`}
-//                           >
-//                             {selectedSubCategories[0] === subcat._id && (
-//                               <div className="w-2 h-2 rounded-full bg-white"></div>
-//                             )}
-//                           </div>
-//                         </div>
-//                         <span className="text-sm text-gray-700">{subcat.name}</span>
-//                       </div>
-//                     ))}
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Brands Filter */}
-//               {brands.length > 0 && (
-//                 <div className="border-b pb-4">
-//                   <button
-//                     onClick={() => setShowBrandFilter(!showBrandFilter)}
-//                     className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-//                   >
-//                     Brands
-//                     {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-//                   </button>
-//                   {showBrandFilter && (
-//                     <div className="mt-4 space-y-3">
-//                       <div className="relative">
-//                         <Search
-//                           className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-//                           size={16}
-//                         />
-//                         <input
-//                           type="text"
-//                           placeholder="Search brands"
-//                           value={brandSearch}
-//                           onChange={(e) => setBrandSearch(e.target.value)}
-//                           className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-//                         />
-//                       </div>
-//                       <div className="max-h-48 overflow-y-auto space-y-2">
-//                         {filteredBrands.map((brand) => (
-//                           <label key={brand._id} className="flex items-center">
-//                             <input
-//                               type="checkbox"
-//                               checked={selectedBrands.includes(brand._id)}
-//                               onChange={() => handleBrandChange(brand._id)}
-//                               onClick={(e) => e.stopPropagation()} // Prevent event bubbling
-//                               className="mr-2 h-4 w-4 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
-//                             />
-//                             <span className="text-sm text-gray-700">{brand.name}</span>
-//                           </label>
-//                         ))}
-//                       </div>
-//                     </div>
-//                   )}
-//                 </div>
-//               )}
-
-//               {/* Stock/On Sale Filter */}
-//               <div className="border-b pb-4">
-//                 <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-//                   Stock
-//                 </button>
-//                 <div className="mt-4 space-y-2">
-//                   <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("inStock")}>
-//                     <div className="relative flex items-center">
-//                       <input
-//                         type="radio"
-//                         name="stock-group"
-//                         checked={stockFilters.inStock}
-//                         readOnly
-//                         className="absolute opacity-0 w-0 h-0"
-//                       />
-//                       <div
-//                         className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                           stockFilters.inStock ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                         }`}
-//                       >
-//                         {stockFilters.inStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                       </div>
-//                     </div>
-//                     <span className="text-sm text-gray-700">In Stock</span>
-//                   </div>
-
-//                   <div
-//                     className="flex items-center cursor-pointer"
-//                     onClick={() => handleStockFilterChange("outOfStock")}
-//                   >
-//                     <div className="relative flex items-center">
-//                       <input
-//                         type="radio"
-//                         name="stock-group"
-//                         checked={stockFilters.outOfStock}
-//                         readOnly
-//                         className="absolute opacity-0 w-0 h-0"
-//                       />
-//                       <div
-//                         className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                           stockFilters.outOfStock ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                         }`}
-//                       >
-//                         {stockFilters.outOfStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                       </div>
-//                     </div>
-//                     <span className="text-sm text-gray-700">Out of Stock</span>
-//                   </div>
-
-//                   <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("onSale")}>
-//                     <div className="relative flex items-center">
-//                       <input
-//                         type="radio"
-//                         name="stock-group"
-//                         checked={stockFilters.onSale}
-//                         readOnly
-//                         className="absolute opacity-0 w-0 h-0"
-//                       />
-//                       <div
-//                         className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-//                           stockFilters.onSale ? "border-lime-600 bg-lime-600" : "border-gray-300"
-//                         }`}
-//                       >
-//                         {stockFilters.onSale && <div className="w-2 h-2 rounded-full bg-white"></div>}
-//                       </div>
-//                     </div>
-//                     <span className="text-sm text-gray-700">On Sale</span>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Clear Filters Button */}
-//               <div className="pt-4">
-//                 <button
-//                   onClick={clearAllFilters}
-//                   className="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-//                 >
-//                   Clear All Filters
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Main Content */}
-//           <div className="lg:w-3/4">
-//             {/* Category Banner - Show when specific category is selected and banner exists */}
-//             {banners.find((banner) => banner.category === selectedCategory && banner.isActive) && (
-//               <div className="mb-8">
-//                 <div
-//                   className="relative rounded-lg overflow-hidden"
-//                   style={{
-//                     background:
-//                       banners.find((banner) => banner.category === selectedCategory && banner.isActive)
-//                         ?.backgroundColor || "linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)",
-//                     minHeight: "300px",
-//                   }}
-//                 >
-//                   {/* Background Pattern */}
-//                   <div className="absolute inset-0 opacity-10">
-//                     <div className="absolute top-10 right-20 w-32 h-32 border-2 border-white rounded-full"></div>
-//                     <div className="absolute top-20 right-40 w-24 h-24 border border-white rounded-full"></div>
-//                     <div className="absolute bottom-20 right-10 w-40 h-40 border border-white rounded-full"></div>
-//                   </div>
-
-//                   <div className="relative z-10 flex items-center justify-between p-8 h-full">
-//                     <div className="flex-1 text-white">
-//                       <h2 className="text-4xl font-bold mb-4">
-//                         {banners.find((banner) => banner.category === selectedCategory && banner.isActive)?.title ||
-//                           `Shop ${categories.find((cat) => cat._id === selectedCategory)?.name}`}
-//                       </h2>
-//                       <p className="text-xl mb-6 opacity-90">
-//                         {banners.find((banner) => banner.category === selectedCategory && banner.isActive)
-//                           ?.description ||
-//                           `Discover our amazing collection of ${categories.find((cat) => cat._id === selectedCategory)?.name.toLowerCase()} products`}
-//                       </p>
-//                       <div className="flex items-center space-x-4">
-//                         <span className="bg-white text-blue-600 px-4 py-2 rounded-full font-semibold">
-//                           {products.length} Products Available
-//                         </span>
-//                       </div>
-//                     </div>
-//                     {banners.find((banner) => banner.category === selectedCategory && banner.isActive)?.image && (
-//                       <div className="flex-shrink-0 ml-8">
-//                         <img
-//                           src={banners.find((banner) => banner.category === selectedCategory && banner.isActive).image}
-//                           alt={categories.find((cat) => cat._id === selectedCategory)?.name}
-//                           className="w-64 h-48 cover rounded-lg shadow-lg"
-//                         />
-//                       </div>
-//                     )}
-//                   </div>
-//                 </div>
-//               </div>
-//             )}
-
-//             {/* Header */}
-//             <div className="flex flex-row justify-between items-center mb-6 relative z-10">
-//               <div className="flex-1 min-w-0">
-//                 <h1 className="text-2xl font-bold text-gray-900">
-//                   {searchQuery.trim() ? (
-//                     <>
-//                       Results for "{searchQuery.trim()}"
-//                       {actualSearchQuery && actualSearchQuery !== searchQuery.trim() && (
-//                         <span className="text-sm text-gray-500 block mt-1">
-//                           Showing results for "{actualSearchQuery}" instead
-//                         </span>
-//                       )}
-//                     </>
-//                   ) : selectedSubCategoryObj ? (
-//                     selectedSubCategoryObj.name
-//                   ) : (
-//                     categories.find((cat) => cat._id === selectedCategory)?.name || "All Products"
-//                   )}
-//                 </h1>
-//                 <p className="text-gray-600 mt-1">{products.length} products found</p>
-//               </div>
-
-//               {/* Desktop Sort Dropdown (original placement) */}
-//               <div className="hidden md:block mt-0 flex-shrink-0 relative z-20">
-//                 <select
-//                   value={sortBy}
-//                   onChange={handleSortChange}
-//                   className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
-//                 >
-//                   <option value="newest">Newest First</option>
-//                   <option value="price-low">Price: Low to High</option>
-//                   <option value="price-high">Price: High to Low</option>
-//                   <option value="name">Name: A-Z</option>
-//                 </select>
-//               </div>
-//             </div>
-
-//             {/* Products Grid */}
-//             {products.length > 0 ? (
-//               <>
-//                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-//                   {products.slice(0, productsToShow).map((product) => (
-//                     <HomeStyleProductCard key={product._id} product={product} />
-//                   ))}
-//                 </div>
-//                 {productsToShow < products.length && (
-//                   <div className="flex justify-center mt-8">
-//                     <button
-//                       onClick={() => setProductsToShow((prev) => prev + 20)}
-//                       className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-colors font-semibold"
-//                     >
-//                       Load More
-//                     </button>
-//                   </div>
-//                 )}
-//               </>
-//             ) : (
-//               <div className="text-center py-12">
-//                 <div className="text-gray-500 text-lg">No products found</div>
-//                 <p className="text-gray-400 mt-2">Try adjusting your filters or search terms</p>
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// export default Shop
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, ChevronDown, Minus, X, FilterIcon } from "lucide-react"
+import { ChevronDown, Minus, Plus, X } from "lucide-react"
 import axios from "axios"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useCart } from "../context/CartContext"
 import HomeStyleProductCard from "../components/HomeStyleProductCard"
 import ProductSchema from "../components/ProductSchema"
 import SEO from "../components/SEO"
-import LoadingSpinner from "../components/LoadingSpinner"
 import productCache from "../services/productCache"
-import {
-  generateShopURL,
-  parseShopURL,
-  createSlug,
-  findCategoryByIdentifier,
-  findSubcategoryByIdentifier,
-} from "../utils/urlUtils"
+import { generateShopURL, parseShopURL, createSlug } from "../utils/urlUtils"
 import { createMetaDescription, generateSEOTitle } from "../utils/seoHelpers"
 
 import config from "../config/config"
@@ -2029,11 +21,7 @@ const API_BASE_URL = `${config.API_URL}`
 const bounceStyle = {
   animation: "bounce 1s infinite",
 }
-const bounceKeyframes = `
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
-}`
+const bounceKeyframes = `@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-30px); } }`
 if (typeof document !== "undefined" && !document.getElementById("bounce-keyframes")) {
   const style = document.createElement("style")
   style.id = "bounce-keyframes"
@@ -2070,7 +58,6 @@ const SortDropdown = ({ value, onChange }) => {
   }, [])
 
   const handleSelect = (val) => {
-    // Maintain existing handler signature: pass an event-like object
     onChange?.({ target: { value: val } })
     setOpen(false)
   }
@@ -2097,9 +84,8 @@ const SortDropdown = ({ value, onChange }) => {
               <button
                 type="button"
                 onClick={() => handleSelect(opt.value)}
-                className={`w-full text-left px-4 py-2 text-gray-900 hover:bg-gray-100 ${
-                  opt.value === value ? "font-semibold" : ""
-                }`}
+                className={`w-full text-left px-4 py-2 text-gray-900 hover:bg-gray-100 ${opt.value === value ? "font-semibold" : ""
+                  }`}
               >
                 {opt.label}
               </button>
@@ -2124,11 +110,9 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
 
   const handleInputMin = (e) => {
     const value = e.target.value
-    // If input is empty, set to empty string to allow clearing
     if (value === "") {
       setInputMin("")
     } else if (!isNaN(value)) {
-      // Only update if it's a valid number
       const numericValue = Number(value)
       setInputMin(numericValue)
       setRange([numericValue, range[1]])
@@ -2137,11 +121,9 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
 
   const handleInputMax = (e) => {
     const value = e.target.value
-    // If input is empty, set to empty string to allow clearing
     if (value === "") {
       setInputMax("")
     } else if (!isNaN(value)) {
-      // Only update if it's a valid number
       const numericValue = Number(value)
       setInputMax(numericValue)
       setRange([range[0], numericValue])
@@ -2149,18 +131,15 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
   }
 
   const handleMinFocus = (e) => {
-    // Always clear the input on focus for better UX
     setInputMin("")
   }
 
   const handleMaxFocus = (e) => {
-    // Always clear the input on focus for better UX
     setInputMax("")
   }
 
   const handleApply = (e) => {
     if (e && e.preventDefault) e.preventDefault()
-    // Ensure we have valid numbers before applying
     const minValue = inputMin === "" ? 0 : Number(inputMin)
     const maxValue = inputMax === "" ? max : Number(inputMax)
     onApply([minValue, maxValue])
@@ -2174,10 +153,10 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
         max={max}
         value={range}
         onChange={handleSliderChange}
-        trackStyle={[{ backgroundColor: "#3b82f6" }]} // blue-500
+        trackStyle={[{ backgroundColor: "#84cc16" }]}
         handleStyle={[
-          { backgroundColor: "#3b82f6", borderColor: "#3b82f6" },
-          { backgroundColor: "#3b82f6", borderColor: "#3b82f6" },
+          { backgroundColor: "#84cc16", borderColor: "#84cc16" },
+          { backgroundColor: "#84cc16", borderColor: "#84cc16" },
         ]}
         railStyle={{ backgroundColor: "#e5e7eb" }}
       />
@@ -2188,14 +167,13 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
       <div className="flex gap-2 mb-4">
         <input
           type="number"
-          className="w-1/2 border rounded px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
+          className="w-1/2 border rounded px-2 py-1 text-center focus:border-lime-500 focus:ring-lime-500"
           value={inputMin}
           min={min}
           max={inputMax}
           onChange={handleInputMin}
           onFocus={handleMinFocus}
           onBlur={() => {
-            // When input loses focus, if it's empty, set it to 0
             if (inputMin === "") {
               setInputMin(0)
             }
@@ -2203,14 +181,13 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
         />
         <input
           type="number"
-          className="w-1/2 border rounded px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
+          className="w-1/2 border rounded px-2 py-1 text-center focus:border-lime-500 focus:ring-lime-500"
           value={inputMax}
           min={inputMin}
           max={max}
           onChange={handleInputMax}
           onFocus={handleMaxFocus}
           onBlur={() => {
-            // When input loses focus, if it's empty, set it to max
             if (inputMax === "") {
               setInputMax(max)
             }
@@ -2219,7 +196,7 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
       </div>
       <button
         type="button"
-        className="w-full bg-white border border-blue-500 text-blue-600 rounded py-2 font-semibold hover:bg-blue-50 hover:text-blue-700 hover:border-blue-600 transition"
+        className="w-full bg-white border border-lime-500 text-lime-600 rounded py-2 font-semibold hover:bg-lime-50 hover:text-lime-700 hover:border-lime-600 transition"
         onClick={handleApply}
       >
         Apply
@@ -2240,25 +217,38 @@ const Shop = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [actualSearchQuery, setActualSearchQuery] = useState("") // New state to track the actual search term used
+  const [actualSearchQuery, setActualSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedBrands, setSelectedBrands] = useState([])
   const [priceRange, setPriceRange] = useState([0, 10000])
-  const [maxPrice, setMaxPrice] = useState(10000) // Will be set to global highest product price
+  const [maxPrice, setMaxPrice] = useState(10000)
   const [globalMaxPrice, setGlobalMaxPrice] = useState(null)
   const [sortBy, setSortBy] = useState("newest")
   const [brandSearch, setBrandSearch] = useState("")
   const [subCategories, setSubCategories] = useState([])
   const [selectedSubCategories, setSelectedSubCategories] = useState([])
+  const [selectedSubCategory2, setSelectedSubCategory2] = useState(null)
+  const [selectedSubCategory3, setSelectedSubCategory3] = useState(null)
+  const [selectedSubCategory4, setSelectedSubCategory4] = useState(null)
+  const [currentSubCategoryName, setCurrentSubCategoryName] = useState(null)
+  const [currentSubCategory2Name, setCurrentSubCategory2Name] = useState(null)
+  const [currentSubCategory3Name, setCurrentSubCategory3Name] = useState(null)
+  const [currentSubCategory4Name, setCurrentSubCategory4Name] = useState(null)
+  // Add state for full subcategory objects with SEO data
+  const [subCategory2Data, setSubCategory2Data] = useState(null)
+  const [subCategory3Data, setSubCategory3Data] = useState(null)
+  const [subCategory4Data, setSubCategory4Data] = useState(null)
   const [stockFilters, setStockFilters] = useState({ inStock: false, outOfStock: false, onSale: false })
   const [minPrice, setMinPrice] = useState(0)
-  const [discountFilter, setDiscountFilter] = useState(null) // Discount filter state
 
-  // Filter panel states
   const [showPriceFilter, setShowPriceFilter] = useState(true)
-  const [showCategoryFilter, setShowCategoryFilter] = useState(true)
-  const [showBrandFilter, setShowBrandFilter] = useState(true)
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false)
+  const [showBrandFilter, setShowBrandFilter] = useState(false)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+
+  // State for expandable category tree
+  const [expandedCategories, setExpandedCategories] = useState({})
+  const [allSubcategories, setAllSubcategories] = useState([])
 
   const [productsToShow, setProductsToShow] = useState(20)
   const [delayedLoading, setDelayedLoading] = useState(false)
@@ -2274,18 +264,15 @@ const Shop = () => {
 
     const words = searchTerm.trim().split(/\s+/)
 
-    // Try searching with progressively fewer words
     for (let i = words.length; i > 0; i--) {
       const currentSearchTerm = words.slice(0, i).join(" ")
 
       try {
-        // Get cached products
         const allProducts = await productCache.getProducts()
         if (!allProducts || allProducts.length === 0) {
           continue
         }
 
-        // Apply filters with current search term
         const stockStatusFilters = []
         if (stockFilters.inStock) stockStatusFilters.push("inStock")
         if (stockFilters.outOfStock) stockStatusFilters.push("outOfStock")
@@ -2294,17 +281,18 @@ const Shop = () => {
         const filters = {
           parent_category: selectedCategory !== "all" ? selectedCategory : null,
           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
+          subcategory2: selectedSubCategory2,
+          subcategory3: selectedSubCategory3,
+          subcategory4: selectedSubCategory4,
           brand: selectedBrands.length > 0 ? selectedBrands : null,
           search: currentSearchTerm,
           priceRange: priceRange,
           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
           sortBy: sortBy,
-          minDiscount: discountFilter,
         }
 
         const filteredProducts = productCache.filterProducts(allProducts, filters)
 
-        // If we found products, use this search term
         if (filteredProducts.length > 0) {
           setActualSearchQuery(currentSearchTerm)
           return filteredProducts
@@ -2314,8 +302,6 @@ const Shop = () => {
       }
     }
 
-    // Fallback: If still nothing, try character-by-character trimming from the end
-    // This helps when the user pastes a SKU with extra suffix characters (no spaces)
     const trimmed = searchTerm.trim()
     for (let len = trimmed.length - 1; len >= 3; len--) {
       const currentSearchTerm = trimmed.slice(0, len)
@@ -2331,12 +317,14 @@ const Shop = () => {
         const filters = {
           parent_category: selectedCategory !== "all" ? selectedCategory : null,
           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
+          subcategory2: selectedSubCategory2,
+          subcategory3: selectedSubCategory3,
+          subcategory4: selectedSubCategory4,
           brand: selectedBrands.length > 0 ? selectedBrands : null,
           search: currentSearchTerm,
           priceRange: priceRange,
           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
           sortBy: sortBy,
-          minDiscount: discountFilter,
         }
 
         const filteredProducts = productCache.filterProducts(allProducts, filters)
@@ -2349,18 +337,15 @@ const Shop = () => {
       }
     }
 
-    // If no results found even with single word, set actual search to original
     setActualSearchQuery(searchTerm)
     return []
   }
 
-  // Load and filter products using cache with progressive search
   const loadAndFilterProducts = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      // Use the productCache service instead of direct API call
       const allProducts = await productCache.getProducts()
 
       if (!allProducts || allProducts.length === 0) {
@@ -2371,11 +356,9 @@ const Shop = () => {
 
       let filteredProducts = []
 
-      // If there's a search query, use progressive search
       if (searchQuery && searchQuery.trim() !== "") {
         filteredProducts = await performProgressiveSearch(searchQuery)
       } else {
-        // No search query, apply other filters normally
         setActualSearchQuery("")
 
         const stockStatusFilters = []
@@ -2386,12 +369,14 @@ const Shop = () => {
         const filters = {
           parent_category: selectedCategory !== "all" ? selectedCategory : null,
           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
+          subcategory2: selectedSubCategory2,
+          subcategory3: selectedSubCategory3,
+          subcategory4: selectedSubCategory4,
           brand: selectedBrands.length > 0 ? selectedBrands : null,
           search: null,
           priceRange: priceRange,
           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
           sortBy: sortBy,
-          minDiscount: discountFilter,
         }
 
         filteredProducts = productCache.filterProducts(allProducts, filters)
@@ -2401,12 +386,9 @@ const Shop = () => {
         const prices = filteredProducts.map((p) => p.price || 0)
         const minProductPrice = Math.min(...prices)
         const filteredMax = Math.max(...prices)
-        // Do not mutate maxPrice here; keep global upper bound fixed
-        // Only reset price range if it matches the default (user hasn't changed it)
         if (priceRange[0] === 0 && priceRange[1] === 10000) {
           setPriceRange([minProductPrice, globalMaxPrice != null ? globalMaxPrice : filteredMax])
         }
-        // Save minProductPrice in state for use in PriceFilter
         setMinPrice(minProductPrice)
       }
 
@@ -2418,10 +400,8 @@ const Shop = () => {
     }
   }
 
-  // Filter products from cache without API calls (for instant filtering) with progressive search
   const filterProductsFromCache = async () => {
     try {
-      // Get cached products
       const allProducts = await productCache.getProducts()
       if (!allProducts || allProducts.length === 0) {
         await loadAndFilterProducts()
@@ -2430,11 +410,9 @@ const Shop = () => {
 
       let filteredProducts = []
 
-      // If there's a search query, use progressive search
       if (searchQuery && searchQuery.trim() !== "") {
         filteredProducts = await performProgressiveSearch(searchQuery)
       } else {
-        // No search query, apply other filters normally
         setActualSearchQuery("")
 
         const stockStatusFilters = []
@@ -2445,46 +423,54 @@ const Shop = () => {
         const filters = {
           parent_category: selectedCategory !== "all" ? selectedCategory : null,
           category: selectedSubCategories.length > 0 ? selectedSubCategories[0] : null,
+          subcategory2: selectedSubCategory2,
+          subcategory3: selectedSubCategory3,
+          subcategory4: selectedSubCategory4,
           brand: selectedBrands.length > 0 ? selectedBrands : null,
           search: null,
           priceRange: priceRange,
           stockStatus: stockStatusFilters.length > 0 ? stockStatusFilters : null,
           sortBy: sortBy,
-          minDiscount: discountFilter,
         }
 
+        console.log("🔍 Active Filters:", {
+          parentCategory: filters.parent_category ? "✅" : "❌",
+          level1: filters.category ? "✅" : "❌", 
+          level2: filters.subcategory2 ? "✅" : "❌",
+          level3: filters.subcategory3 ? "✅" : "❌",
+          level4: filters.subcategory4 ? "✅" : "❌",
+          brands: filters.brand ? `✅ (${filters.brand.length})` : "❌",
+          priceRange: `${filters.priceRange[0]} - ${filters.priceRange[1]}`,
+          stockStatus: filters.stockStatus ? `✅ (${filters.stockStatus.join(", ")})` : "❌",
+        })
         filteredProducts = productCache.filterProducts(allProducts, filters)
+        console.log(`📊 Results: ${filteredProducts.length} products (from ${allProducts.length} total)`)
       }
 
       if (filteredProducts.length > 0) {
         const prices = filteredProducts.map((p) => p.price || 0)
         const minProductPrice = Math.min(...prices)
         const filteredMax = Math.max(...prices)
-        // Do not mutate maxPrice here; keep global upper bound fixed
-        // Only reset price range if it matches the default (user hasn't changed it)
         if (priceRange[0] === 0 && priceRange[1] === 10000) {
           setPriceRange([minProductPrice, globalMaxPrice != null ? globalMaxPrice : filteredMax])
         }
-        // Save minProductPrice in state for use in PriceFilter
         setMinPrice(minProductPrice)
       }
 
       setProducts(filteredProducts)
     } catch (err) {
-      // Fallback to API if cache fails
       await loadAndFilterProducts()
     }
   }
 
-  // Fetch categories and brands on mount
   useEffect(() => {
     fetchCategories()
     fetchBrands()
     fetchBanners()
+    fetchAllSubcategories()
     loadAndFilterProducts()
   }, [])
 
-  // Compute and fix the global maximum product price on mount (upper bound only)
   useEffect(() => {
     const computeGlobalMax = async () => {
       try {
@@ -2494,7 +480,6 @@ const Shop = () => {
           const globalMax = Math.max(...prices)
           setGlobalMaxPrice(globalMax)
           setMaxPrice(globalMax)
-          // If initial priceRange is still default, expand upper bound to global max
           if (priceRange[0] === 0 && priceRange[1] === 10000) {
             setPriceRange([0, globalMax])
           }
@@ -2506,28 +491,55 @@ const Shop = () => {
     computeGlobalMax()
   }, [])
 
-  // Filter products from cache when filters change (no API calls)
   useEffect(() => {
     if (fetchTimeout.current) clearTimeout(fetchTimeout.current)
 
     fetchTimeout.current = setTimeout(() => {
       filterProductsFromCache()
-    }, 100) // 100ms debounce for instant filtering
+    }, 100)
     return () => {
       clearTimeout(fetchTimeout.current)
     }
-  }, [selectedCategory, selectedBrands, searchQuery, priceRange, selectedSubCategories, stockFilters, sortBy, discountFilter])
+  }, [
+    selectedCategory,
+    selectedBrands,
+    searchQuery,
+    priceRange,
+    selectedSubCategories,
+    selectedSubCategory2,
+    selectedSubCategory3,
+    selectedSubCategory4,
+    stockFilters,
+    sortBy,
+  ])
 
-  // 1. On URL or categories change: set selectedCategory from the slug.
   useEffect(() => {
+    // Parse URL when location changes or categories load
+    if (categories.length === 0) return
+    
     const urlParams = parseShopURL(location.pathname, location.search)
-    if (categories.length > 0) {
-      const foundCategory = findCategoryByIdentifier(categories, urlParams.parentCategory)
-      setSelectedCategory(foundCategory ? foundCategory._id : "all")
+    const foundCategory = categories.find(
+      (cat) =>
+        cat._id === urlParams.parentCategory ||
+        cat.slug === urlParams.parentCategory ||
+        createSlug(cat.name) === urlParams.parentCategory,
+    )
+    const newCategory = foundCategory ? foundCategory._id : "all"
+    
+    // Only update if different to prevent loops
+    if (newCategory !== selectedCategory) {
+      setSelectedCategory(newCategory)
+      setSelectedSubCategories([])
+      setSelectedSubCategory2(null)
+      setSelectedSubCategory3(null)
+      setSelectedSubCategory4(null)
+      setCurrentSubCategoryName(null)
+      setCurrentSubCategory2Name(null)
+      setCurrentSubCategory3Name(null)
+      setCurrentSubCategory4Name(null)
     }
-  }, [location.pathname, location.search, categories])
+  }, [categories, location.pathname, location.search])
 
-  // 2. On selectedCategory change: fetch subcategories for that category.
   useEffect(() => {
     if (selectedCategory && selectedCategory !== "all") {
       fetchSubCategories()
@@ -2537,56 +549,96 @@ const Shop = () => {
     }
   }, [selectedCategory])
 
-  // 3. On subCategories or URL change: set selectedSubCategories from the slug.
   useEffect(() => {
+    // Parse URL and set subcategories after allSubcategories are loaded
+    if (allSubcategories.length === 0) return
+    
     const urlParams = parseShopURL(location.pathname, location.search)
-    if (subCategories.length > 0 && urlParams.subcategory) {
-      const foundSubcategory = subCategories.find(
-        (sub) =>
-          sub._id === urlParams.subcategory ||
-          sub.slug === urlParams.subcategory ||
-          createSlug(sub.name) === urlParams.subcategory,
-      )
-      setSelectedSubCategories(foundSubcategory ? [foundSubcategory._id] : [])
+
+    if (urlParams.subcategory) {
+      const foundSub = allSubcategories.find((sub) => sub.slug === urlParams.subcategory) ||
+        allSubcategories.find((sub) => sub._id === urlParams.subcategory) ||
+        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory)
+      if (foundSub) {
+        setCurrentSubCategoryName(foundSub.name)
+        setSelectedSubCategories([foundSub._id])
+      } else {
+        setSelectedSubCategories([])
+        setCurrentSubCategoryName(urlParams.subcategory)
+      }
     } else {
       setSelectedSubCategories([])
+      setCurrentSubCategoryName(null)
     }
-  }, [location.pathname, location.search, subCategories])
 
-  // 4. On URL or brands change: set selectedBrands from the URL parameter
+    if (urlParams.subcategory2) {
+      const found2 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory2) ||
+        allSubcategories.find((sub) => sub._id === urlParams.subcategory2) ||
+        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory2)
+      setSelectedSubCategory2(found2 ? found2._id : urlParams.subcategory2)
+      setSubCategory2Data(found2 || null)
+      setCurrentSubCategory2Name(found2 ? found2.name : urlParams.subcategory2)
+    } else {
+      setSelectedSubCategory2(null)
+      setSubCategory2Data(null)
+      setCurrentSubCategory2Name(null)
+    }
+
+    if (urlParams.subcategory3) {
+      const found3 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory3) ||
+        allSubcategories.find((sub) => sub._id === urlParams.subcategory3) ||
+        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory3)
+      setSelectedSubCategory3(found3 ? found3._id : urlParams.subcategory3)
+      setSubCategory3Data(found3 || null)
+      setCurrentSubCategory3Name(found3 ? found3.name : urlParams.subcategory3)
+    } else {
+      setSelectedSubCategory3(null)
+      setSubCategory3Data(null)
+      setCurrentSubCategory3Name(null)
+    }
+
+    if (urlParams.subcategory4) {
+      const found4 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory4) ||
+        allSubcategories.find((sub) => sub._id === urlParams.subcategory4) ||
+        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory4)
+      setSelectedSubCategory4(found4 ? found4._id : urlParams.subcategory4)
+      setSubCategory4Data(found4 || null)
+      setCurrentSubCategory4Name(found4 ? found4.name : urlParams.subcategory4)
+    } else {
+      setSelectedSubCategory4(null)
+      setSubCategory4Data(null)
+      setCurrentSubCategory4Name(null)
+    }
+  }, [allSubcategories, location.pathname, location.search])
+
   useEffect(() => {
+    // Parse URL when location changes or brands load
+    if (brands.length === 0) return
+    
     const urlParams = parseShopURL(location.pathname, location.search)
-    if (brands.length > 0 && urlParams.brand) {
+    if (urlParams.brand) {
       const foundBrand = brands.find(
         (brand) => brand.name === urlParams.brand || createSlug(brand.name) === createSlug(urlParams.brand),
       )
-      if (foundBrand) {
-        setSelectedBrands([foundBrand._id])
-      } else {
-        setSelectedBrands([])
+      const newBrands = foundBrand ? [foundBrand._id] : []
+      // Only update if different
+      if (JSON.stringify(newBrands) !== JSON.stringify(selectedBrands)) {
+        setSelectedBrands(newBrands)
       }
+    } else if (selectedBrands.length > 0) {
+      setSelectedBrands([])
     }
-  }, [location.pathname, location.search, brands])
+  }, [brands, location.pathname, location.search])
 
-  // Add useEffect hook to parse search parameter from URL and update searchQuery state
   useEffect(() => {
+    // Parse search query from URL
     const urlParams = parseShopURL(location.pathname, location.search)
-    if (urlParams.search) {
-      setSearchQuery(urlParams.search)
+    const newSearch = urlParams.search || ""
+    if (newSearch !== searchQuery) {
+      setSearchQuery(newSearch)
     }
   }, [location.pathname, location.search])
 
-  // Parse discount filter from URL
-  useEffect(() => {
-    const urlParams = parseShopURL(location.pathname, location.search)
-    if (urlParams.discount) {
-      setDiscountFilter(Number(urlParams.discount))
-      // Automatically enable onSale filter when discount is specified
-      setStockFilters(prev => ({ ...prev, onSale: true }))
-    }
-  }, [location.pathname, location.search])
-
-  // Debug: Log all loaded categories and subcategories
   useEffect(() => {
     if (categories.length > 0) {
       console.log(
@@ -2605,7 +657,6 @@ const Shop = () => {
     }
   }, [subCategories])
 
-  // Reset productsToShow when filters change or products are refetched
   useEffect(() => {
     setProductsToShow(20)
   }, [selectedCategory, selectedBrands, searchQuery, priceRange, selectedSubCategories, stockFilters, products.length])
@@ -2614,7 +665,6 @@ const Shop = () => {
     try {
       const { data } = await axios.get(`${API_BASE_URL}/api/categories`)
 
-      // Filter to only show parent categories
       const validCategories = data.filter((cat) => {
         const isValid =
           cat &&
@@ -2624,8 +674,8 @@ const Shop = () => {
           cat.name.trim() !== "" &&
           cat.isActive !== false &&
           !cat.isDeleted &&
-          !cat.name.match(/^[0-9a-fA-F]{24}$/) && // Not an ID
-          !cat.parentCategory // Only include categories without a parent
+          !cat.name.match(/^[0-9a-fA-F]{24}$/) &&
+          !cat.parentCategory
 
         return isValid
       })
@@ -2640,7 +690,6 @@ const Shop = () => {
     try {
       const { data } = await axios.get(`${API_BASE_URL}/api/brands`)
 
-      // Filter and validate brands
       const validBrands = data.filter((brand) => {
         const isValid =
           brand &&
@@ -2649,7 +698,7 @@ const Shop = () => {
           typeof brand.name === "string" &&
           brand.name.trim() !== "" &&
           brand.isActive !== false &&
-          !brand.name.match(/^[0-9a-fA-F]{24}$/) // Not an ID
+          !brand.name.match(/^[0-9a-fA-F]{24}$/)
 
         return isValid
       })
@@ -2669,14 +718,9 @@ const Shop = () => {
     }
   }
 
-  const fetchSubCategories = async () => {
+  const fetchAllSubcategories = async () => {
     try {
-      const catObj = categories.find((cat) => cat._id === selectedCategory)
-      if (!catObj) return
-
-      const { data } = await axios.get(`${API_BASE_URL}/api/subcategories?category=${catObj._id}`)
-
-      // Filter and validate subcategories
+      const { data } = await axios.get(`${API_BASE_URL}/api/subcategories`)
       const validSubCategories = data.filter((subCat) => {
         const isValid =
           subCat &&
@@ -2686,7 +730,34 @@ const Shop = () => {
           subCat.name.trim() !== "" &&
           subCat.isActive !== false &&
           !subCat.isDeleted &&
-          !subCat.name.match(/^[0-9a-fA-F]{24}$/) // Not an ID
+          !subCat.name.match(/^[0-9a-fA-F]{24}$/)
+        return isValid
+      })
+      console.log('📁 All Subcategories loaded:', validSubCategories.length)
+      console.log('Sample subcategory:', validSubCategories[0])
+      setAllSubcategories(validSubCategories)
+    } catch (err) {
+      console.error('Error fetching subcategories:', err)
+    }
+  }
+
+  const fetchSubCategories = async () => {
+    try {
+      const catObj = categories.find((cat) => cat._id === selectedCategory)
+      if (!catObj) return
+
+      const { data } = await axios.get(`${API_BASE_URL}/api/subcategories?category=${catObj._id}`)
+
+      const validSubCategories = data.filter((subCat) => {
+        const isValid =
+          subCat &&
+          typeof subCat === "object" &&
+          subCat.name &&
+          typeof subCat.name === "string" &&
+          subCat.name.trim() !== "" &&
+          subCat.isActive !== false &&
+          !subCat.isDeleted &&
+          !subCat.name.match(/^[0-9a-fA-F]{24}$/)
 
         return isValid
       })
@@ -2699,16 +770,53 @@ const Shop = () => {
 
   const filteredBrands = brands.filter((brand) => brand.name.toLowerCase().includes(brandSearch.toLowerCase()))
 
-  // When a parent category is selected, clear subcategory selection
+  // Helper function to get children of a category/subcategory
+  const getChildren = (parentId, parentType = 'category') => {
+    const children = allSubcategories.filter(sub => {
+      const category = typeof sub.category === 'object' ? sub.category?._id : sub.category
+      const parentSubCategory = typeof sub.parentSubCategory === 'object' ? sub.parentSubCategory?._id : sub.parentSubCategory
+      
+      if (parentType === 'category') {
+        // For parent categories, get Level 1 subcategories (where category matches and parentSubCategory is null)
+        const matches = category === parentId && !parentSubCategory
+        return matches
+      } else if (parentType === 'subcategory') {
+        // For any subcategory level, get children where parentSubCategory matches
+        const matches = parentSubCategory === parentId
+        return matches
+      }
+      return false
+    })
+    
+    if (children.length > 0) {
+      console.log(`🌳 Found ${children.length} children for ${parentId} (type: ${parentType})`, children.map(c => c.name))
+    }
+    
+    return children
+  }
+
+  // Toggle category expansion
+  const toggleExpanded = (id) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }))
+  }
+
   const handleCategoryChange = (categoryId) => {
     setSelectedCategory(categoryId)
     setSelectedSubCategories([])
+    setSelectedSubCategory2(null)
+    setSelectedSubCategory3(null)
+    setSelectedSubCategory4(null)
+    setCurrentSubCategoryName(null)
+    setCurrentSubCategory2Name(null)
+    setCurrentSubCategory3Name(null)
+    setCurrentSubCategory4Name(null)
 
-    // Find the category object to get its name for URL generation
     const categoryObj = categories.find((cat) => cat._id === categoryId)
     const categoryName = categoryObj ? categoryObj.name : categoryId
 
-    // Generate SEO-friendly URL
     const url = generateShopURL({
       parentCategory: categoryId !== "all" ? categoryName : null,
       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
@@ -2718,12 +826,128 @@ const Shop = () => {
     navigate(url)
   }
 
-  // When a subcategory is selected, set both parent and subcategory in the filter
+  // Unified handler for selecting any level of subcategory
+  const handleSubcategorySelect = (subcatId, level) => {
+    const subcatObj = allSubcategories.find((sub) => sub._id === subcatId)
+    if (!subcatObj) return
+
+    // Helper function to trace back the full hierarchy
+    const traceHierarchy = (subcat) => {
+      const hierarchy = {
+        parentCategory: null,
+        level1: null,
+        level2: null,
+        level3: null,
+        level4: null,
+      }
+
+      let current = subcat
+      let currentLevel = level
+
+      // Set the current level
+      if (currentLevel === 1) {
+        hierarchy.level1 = current._id
+      } else if (currentLevel === 2) {
+        hierarchy.level2 = current._id
+      } else if (currentLevel === 3) {
+        hierarchy.level3 = current._id
+      } else if (currentLevel === 4) {
+        hierarchy.level4 = current._id
+      }
+
+      // Trace back through parentSubCategory
+      while (current && current.parentSubCategory) {
+        const parentId = typeof current.parentSubCategory === 'object' 
+          ? current.parentSubCategory._id 
+          : current.parentSubCategory
+        
+        const parent = allSubcategories.find(s => s._id === parentId)
+        if (!parent) break
+
+        currentLevel--
+        if (currentLevel === 1) {
+          hierarchy.level1 = parent._id
+        } else if (currentLevel === 2) {
+          hierarchy.level2 = parent._id
+        } else if (currentLevel === 3) {
+          hierarchy.level3 = parent._id
+        }
+
+        current = parent
+      }
+
+      // Get parent category from the top-level subcategory
+      if (current && current.category) {
+        hierarchy.parentCategory = typeof current.category === 'object' 
+          ? current.category._id 
+          : current.category
+      }
+
+      return hierarchy
+    }
+
+    // Get the complete hierarchy
+    const hierarchy = traceHierarchy(subcatObj)
+
+    // Update all states with the correct hierarchy
+    setSelectedCategory(hierarchy.parentCategory || 'all')
+    
+    if (hierarchy.level1) {
+      const level1Obj = allSubcategories.find(s => s._id === hierarchy.level1)
+      setSelectedSubCategories([hierarchy.level1])
+      setCurrentSubCategoryName(level1Obj?.name || null)
+    } else {
+      setSelectedSubCategories([])
+      setCurrentSubCategoryName(null)
+    }
+
+    if (hierarchy.level2) {
+      const level2Obj = allSubcategories.find(s => s._id === hierarchy.level2)
+      setSelectedSubCategory2(hierarchy.level2)
+      setSubCategory2Data(level2Obj || null)
+      setCurrentSubCategory2Name(level2Obj?.name || null)
+    } else {
+      setSelectedSubCategory2(null)
+      setSubCategory2Data(null)
+      setCurrentSubCategory2Name(null)
+    }
+
+    if (hierarchy.level3) {
+      const level3Obj = allSubcategories.find(s => s._id === hierarchy.level3)
+      setSelectedSubCategory3(hierarchy.level3)
+      setSubCategory3Data(level3Obj || null)
+      setCurrentSubCategory3Name(level3Obj?.name || null)
+    } else {
+      setSelectedSubCategory3(null)
+      setSubCategory3Data(null)
+      setCurrentSubCategory3Name(null)
+    }
+
+    if (hierarchy.level4) {
+      const level4Obj = allSubcategories.find(s => s._id === hierarchy.level4)
+      setSelectedSubCategory4(hierarchy.level4)
+      setSubCategory4Data(level4Obj || null)
+      setCurrentSubCategory4Name(level4Obj?.name || null)
+    } else {
+      setSelectedSubCategory4(null)
+      setSubCategory4Data(null)
+      setCurrentSubCategory4Name(null)
+    }
+
+    // Update URL with correct hierarchy
+    const categoryObj = categories.find((cat) => cat._id === hierarchy.parentCategory)
+    const url = generateShopURL({
+      parentCategory: hierarchy.parentCategory && hierarchy.parentCategory !== 'all' ? categoryObj?.name || hierarchy.parentCategory : null,
+      subcategory: hierarchy.level1 ? allSubcategories.find(s => s._id === hierarchy.level1)?.name : null,
+      brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
+      search: searchQuery || null,
+    })
+    navigate(url)
+  }
+
   const handleSubCategoryChange = (subCatId) => {
     setSelectedSubCategories([subCatId])
-    // Find the parent category for this subcategory
     const subcatObj = subCategories.find((sub) => sub._id === subCatId)
-    // category could be either an object or a string
     let parentId
     if (subcatObj) {
       parentId = typeof subcatObj.category === "object" ? subcatObj.category._id : subcatObj.category
@@ -2732,14 +956,12 @@ const Shop = () => {
     }
     setSelectedCategory(parentId)
 
-    // Find the category and subcategory objects to get their names for URL generation
     const categoryObj = categories.find((cat) => cat._id === parentId)
     const subcategoryObj = subCategories.find((sub) => sub._id === subCatId)
 
     const categoryName = categoryObj ? categoryObj.name : parentId
     const subcategoryName = subcategoryObj ? subcategoryObj.name : subCatId
 
-    // Generate SEO-friendly URL
     const url = generateShopURL({
       parentCategory: parentId !== "all" ? categoryName : null,
       subcategory: subcategoryName,
@@ -2747,7 +969,6 @@ const Shop = () => {
       search: searchQuery || null,
     })
 
-    // Debug log for subcategory change
     console.log("handleSubCategoryChange called with:", { subCatId, parentId, subcatObj, url, subCategories })
     navigate(url)
   }
@@ -2755,7 +976,6 @@ const Shop = () => {
   const handleBrandChange = (brandId) => {
     setSelectedBrands((prev) => (prev.includes(brandId) ? prev.filter((b) => b !== brandId) : [...prev, brandId]))
 
-    // Update URL with brand filter
     const newSelectedBrands = selectedBrands.includes(brandId)
       ? selectedBrands.filter((b) => b !== brandId)
       : [...selectedBrands, brandId]
@@ -2776,19 +996,16 @@ const Shop = () => {
 
   const handleStockFilterChange = (key) => {
     setStockFilters((prev) => {
-      // For radio buttons, only one can be selected at a time
       const newState = { inStock: false, outOfStock: false, onSale: false }
       newState[key] = true
       return newState
     })
   }
 
-  // Handle search query changes and update URL
   const handleSearchChange = (e) => {
     const newSearchQuery = e.target.value
     setSearchQuery(newSearchQuery)
 
-    // Update URL with search query
     const categoryObj = categories.find((cat) => cat._id === selectedCategory)
     const subcategoryObj =
       selectedSubCategories.length > 0 ? subCategories.find((sub) => sub._id === selectedSubCategories[0]) : null
@@ -2814,11 +1031,10 @@ const Shop = () => {
     navigate("/shop")
   }
 
-  // Show loading only on initial load, not on filter changes
   if (loading && products.length === 0) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <LoadingSpinner size="large" />
+        <img src="/g.png" alt="Loading..." style={{ width: 180, height: 180, animation: "bounce 1s infinite" }} />
       </div>
     )
   }
@@ -2834,395 +1050,265 @@ const Shop = () => {
     )
   }
 
-  // Get selected subcategory object
   const selectedSubCategoryObj = subCategories.find((sub) => sub._id === selectedSubCategories[0])
 
-  // 1. Add a handler for sort dropdown
   const handleSortChange = (e) => {
     setSortBy(e.target.value)
   }
 
-  // Build canonical for category/brand pages (omit query params)
   const buildCanonicalPath = () => {
-    // Prefer clean, semantic paths already used by the app
-    // If the pathname starts with /product-category or /product-brand, use it as-is
     const path = location.pathname || "/shop"
-
-    // Avoid querystring in canonical
     return path
   }
 
-  // Derive a reasonable page title from current selection
   const categoryObj = categories.find((cat) => cat._id === selectedCategory)
   const subcategoryObj =
     selectedSubCategories.length > 0 ? subCategories.find((s) => s._id === selectedSubCategories[0]) : null
 
-  // Get SEO content for meta tags (prioritize subcategory over category)
-  const seoContent = subcategoryObj?.seoContent || categoryObj?.seoContent || '';
-  
-  // Use custom meta title/description if available, otherwise generate from SEO content
-  const customMetaTitle = subcategoryObj?.metaTitle || categoryObj?.metaTitle || '';
-  const customMetaDescription = subcategoryObj?.metaDescription || categoryObj?.metaDescription || '';
-  
-  // Generate SEO title - prioritize custom meta title, then content-based, then default
-  const seoTitle = customMetaTitle || 
-    (seoContent ? generateSEOTitle(subcategoryObj?.name || categoryObj?.name || '', seoContent) : 
-      (subcategoryObj && `${subcategoryObj.name} — Shop`) ||
-      (categoryObj && `${categoryObj.name} — Shop`) ||
-      (searchQuery?.trim() ? `Search: ${searchQuery.trim()} — Shop` : "Shop — Grabatoz"));
+  // Determine which subcategory level to use for SEO (deepest level takes priority)
+  const activeSubcategoryForSEO = subCategory4Data || subCategory3Data || subCategory2Data || subcategoryObj
 
-  // Generate SEO description - prioritize custom meta description, then content-based, then default
-  const seoDescription = customMetaDescription || 
-    (seoContent ? createMetaDescription(seoContent, 160) :
-      (subcategoryObj && `Browse ${subcategoryObj.name} products at great prices.`) ||
-      (categoryObj && `Explore top ${categoryObj.name} products.`) ||
-      "Explore our catalog and find your next purchase at Grabatoz.");
+  const seoContent = activeSubcategoryForSEO?.seoContent || categoryObj?.seoContent || ""
+
+  const customMetaTitle = activeSubcategoryForSEO?.metaTitle || categoryObj?.metaTitle || ""
+  const customMetaDescription = activeSubcategoryForSEO?.metaDescription || categoryObj?.metaDescription || ""
+
+  const seoTitle =
+    customMetaTitle ||
+    (seoContent
+      ? generateSEOTitle(activeSubcategoryForSEO?.name || categoryObj?.name || "", seoContent)
+      : activeSubcategoryForSEO
+        ? `${activeSubcategoryForSEO.name} — Shop`
+        : categoryObj
+          ? `${categoryObj.name} — Shop`
+          : searchQuery?.trim()
+            ? `Search: ${searchQuery.trim()} — Shop`
+            : "Shop — Grabatoz")
+
+  const seoDescription =
+    customMetaDescription ||
+    (seoContent
+      ? createMetaDescription(seoContent, 160)
+      : activeSubcategoryForSEO
+        ? `Browse ${activeSubcategoryForSEO.name} products at great prices.`
+        : categoryObj
+          ? `Explore top ${categoryObj.name} products.`
+          : "Explore our catalog and find your next purchase at Grabatoz.")
+
+  const buildBreadcrumbPath = () => {
+    const parts = [categoryObj?.name]
+    if (currentSubCategoryName) parts.push(currentSubCategoryName)
+    if (currentSubCategory2Name) parts.push(currentSubCategory2Name)
+    if (currentSubCategory3Name) parts.push(currentSubCategory3Name)
+    if (currentSubCategory4Name) parts.push(currentSubCategory4Name)
+    return parts.filter(Boolean).join(" > ")
+  }
+
+  const breadcrumbPath = buildBreadcrumbPath()
+  const showBreadcrumb = selectedSubCategory2 || selectedSubCategory3 || selectedSubCategory4
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <SEO title={seoTitle} description={seoDescription} canonicalPath={buildCanonicalPath()} />
       <ProductSchema products={products} type="list" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Top Action Bar (mobile only): Filter + Sort */}
-        <div className="flex items-center justify-between mb-4 md:hidden">
-          <button
-            className="flex md:hidden items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded font-semibold shadow hover:bg-blue-700 transition"
-            onClick={() => setIsMobileFilterOpen(true)}
-          >
-            <FilterIcon size={20} />
-            Filter
-          </button>
-          <div className="ml-auto relative z-20 md:hidden">
-            <SortDropdown value={sortBy} onChange={handleSortChange} />
-          </div>
-        </div>
-        {/* Mobile Filter Drawer */}
-        {isMobileFilterOpen && (
-          <div className="fixed inset-0 z-[9999] flex">
-            {/* Overlay */}
-            <div
-              className="fixed inset-0 bg-black bg-opacity-40 z-10"
-              onClick={() => setIsMobileFilterOpen(false)}
-            ></div>
-            {/* Drawer */}
-            <div className="relative bg-white w-80 max-w-full h-full shadow-xl ml-auto animate-slideInRight flex flex-col z-20">
+      
+      {/* Mobile Filter Modal */}
+      {isMobileFilterOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
+          <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white shadow-xl overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b z-10 px-4 py-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold">Filters</h2>
               <button
-                className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700"
                 onClick={() => setIsMobileFilterOpen(false)}
-                aria-label="Close filter"
+                className="p-2 hover:bg-gray-100 rounded-full"
               >
                 <X size={24} />
               </button>
-              {/* Filter Content (copied from sidebar) */}
-              <div className="flex-1 overflow-y-auto space-y-6 mt-6 p-6">
-                {/* Price Filter */}
-                <div className="border-b pb-4">
-                  <button
-                    onClick={() => setShowPriceFilter(!showPriceFilter)}
-                    className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-                  >
-                    Price Range
-                    {showPriceFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-                  </button>
-                  {showPriceFilter && (
-                    <div className="mt-4 space-y-4">
-                      <PriceFilter
-                        min={minPrice}
-                        max={maxPrice}
-                        initialRange={priceRange}
-                        onApply={(range) => setPriceRange(range)}
-                      />
-                    </div>
-                  )}
-                </div>
-                {/* Categories Filter */}
-                <div className="border-b pb-4">
-                  <button
-                    onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-                    className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-                  >
-                    Categories
-                    {showCategoryFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-                  </button>
-                  {showCategoryFilter && (
-                    <div className="mt-4 space-y-2">
-                      <div className="flex items-center cursor-pointer" onClick={() => handleCategoryChange("all")}>
-                        <div className="relative flex items-center">
-                          <input
-                            type="radio"
-                            name="category-group"
-                            checked={selectedCategory === "all"}
-                            readOnly
-                            className="absolute opacity-0 w-0 h-0"
-                          />
-                          <div
-                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                              selectedCategory === "all" ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                            }`}
-                          >
-                            {selectedCategory === "all" && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-700">All Categories</span>
-                      </div>
-
-                      {categories.map((category) => (
-                        <div
-                          key={category._id}
-                          className="flex items-center cursor-pointer"
-                          onClick={() => handleCategoryChange(category._id)}
-                        >
-                          <div className="relative flex items-center">
-                            <input
-                              type="radio"
-                              name="category-group"
-                              checked={selectedCategory === category._id}
-                              readOnly
-                              className="absolute opacity-0 w-0 h-0"
-                            />
-                            <div
-                              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                                selectedCategory === category._id ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                              }`}
-                            >
-                              {selectedCategory === category._id && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-sm text-gray-700">{category.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Subcategories Filter */}
-                {subCategories.length > 0 && (
-                  <div className="border-b pb-4">
-                    <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-                      {categories.find((cat) => cat._id === selectedCategory)?.name} Subcategories
-                    </button>
-                    <div className="mt-4 space-y-2">
-                      {subCategories.map((subcat) => (
-                        <div
-                          key={subcat._id}
-                          className="flex items-center cursor-pointer"
-                          onClick={() => handleSubCategoryChange(subcat._id)}
-                        >
-                          <div className="relative flex items-center">
-                            <input
-                              type="radio"
-                              name="subcategory-group"
-                              checked={selectedSubCategories[0] === subcat._id}
-                              readOnly
-                              className="absolute opacity-0 w-0 h-0"
-                            />
-                            <div
-                              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                                selectedSubCategories[0] === subcat._id
-                                  ? "border-blue-600 bg-blue-600"
-                                  : "border-gray-300"
-                              }`}
-                            >
-                              {selectedSubCategories[0] === subcat._id && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-sm text-gray-700">{subcat.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {brands.length > 0 && (
-                  <div className="border-b pb-4">
+            </div>
+            
+            <div className="p-4 space-y-6">
+              {/* Active Filters Section - Mobile */}
+              {(selectedCategory !== "all" || 
+                selectedSubCategories.length > 0 || 
+                selectedSubCategory2 || 
+                selectedSubCategory3 || 
+                selectedSubCategory4 || 
+                selectedBrands.length > 0 || 
+                stockFilters.inStock || 
+                stockFilters.outOfStock || 
+                stockFilters.onSale ||
+                priceRange[0] !== minPrice || 
+                priceRange[1] !== maxPrice) && (
+                <div className="border border-lime-200 rounded-lg p-4 bg-lime-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Active Filters</h3>
                     <button
-                      onClick={() => setShowBrandFilter(!showBrandFilter)}
-                      className="flex items-center justify-between w-full text-left font-medium text-gray-900"
+                      onClick={clearAllFilters}
+                      className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline"
                     >
-                      Brands
-                      {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
+                      Clear All
                     </button>
-                    {showBrandFilter && (
-                      <div className="mt-4 space-y-3">
-                        <div className="relative">
-                          <Search
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                            size={16}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Search brands"
-                            value={brandSearch}
-                            onChange={(e) => setBrandSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                          />
+                  </div>
+                  <div className="space-y-2">
+                    {selectedCategory !== "all" && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Category:</span>{" "}
+                          {categories.find((cat) => cat._id === selectedCategory)?.name || selectedCategory}
+                        </span>
+                        <button
+                          onClick={() => handleCategoryChange("all")}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {selectedSubCategories.length > 0 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Subcategory:</span> {currentSubCategoryName}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategories([])
+                            setCurrentSubCategoryName(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {selectedSubCategory2 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 2:</span> {currentSubCategory2Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory2(null)
+                            setCurrentSubCategory2Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {selectedSubCategory3 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 3:</span> {currentSubCategory3Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory3(null)
+                            setCurrentSubCategory3Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {selectedSubCategory4 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 4:</span> {currentSubCategory4Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory4(null)
+                            setCurrentSubCategory4Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {selectedBrands.map((brandId) => {
+                      const brand = brands.find((b) => b._id === brandId)
+                      return brand ? (
+                        <div key={brandId} className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                          <span className="text-gray-700">
+                            <span className="font-semibold">Brand:</span> {brand.name}
+                          </span>
+                          <button
+                            onClick={() => handleBrandChange(brandId)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                          >
+                            ×
+                          </button>
                         </div>
-                        <div className="max-h-48 overflow-y-auto space-y-2">
-                          {filteredBrands.map((brand) => (
-                            <div
-                              key={brand._id}
-                              className="flex items-center cursor-pointer"
-                              onClick={() => handleBrandChange(brand._id)}
-                            >
-                              <div className="relative flex items-center">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedBrands.includes(brand._id)}
-                                  readOnly
-                                  className="absolute opacity-0 w-0 h-0"
-                                />
-                                <div
-                                  className={`w-4 h-4 border-2 flex items-center justify-center mr-2 ${
-                                    selectedBrands.includes(brand._id)
-                                      ? "border-blue-600 bg-blue-600"
-                                      : "border-gray-300 rounded"
-                                  }`}
-                                >
-                                  {selectedBrands.includes(brand._id) && (
-                                    <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  )}
-                                </div>
-                              </div>
-                              <span className="text-sm text-gray-700">{brand.name}</span>
-                            </div>
-                          ))}
-                        </div>
+                      ) : null
+                    })}
+                    {(priceRange[0] !== minPrice || priceRange[1] !== maxPrice) && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Price:</span> ₹{priceRange[0]} - ₹{priceRange[1]}
+                        </span>
+                        <button
+                          onClick={() => setPriceRange([minPrice, maxPrice])}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {stockFilters.inStock && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> In Stock
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {stockFilters.outOfStock && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> Out of Stock
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {stockFilters.onSale && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> On Sale
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
                       </div>
                     )}
                   </div>
-                )}
-
-                {/* Stock/On Sale Filter */}
-                <div className="border-b pb-4">
-                  <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-                    Stock Status
-                  </button>
-                  <div className="mt-4 space-y-2">
-                    <div
-                      className="flex items-center cursor-pointer"
-                      onClick={() => handleStockFilterChange("inStock")}
-                    >
-                      <div className="relative flex items-center">
-                        <input
-                          type="radio"
-                          name="stock-group"
-                          checked={stockFilters.inStock}
-                          readOnly
-                          className="absolute opacity-0 w-0 h-0"
-                        />
-                        <div
-                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                            stockFilters.inStock ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                          }`}
-                        >
-                          {stockFilters.inStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-700">In Stock</span>
-                    </div>
-
-                    <div
-                      className="flex items-center cursor-pointer"
-                      onClick={() => handleStockFilterChange("outOfStock")}
-                    >
-                      <div className="relative flex items-center">
-                        <input
-                          type="radio"
-                          name="stock-group"
-                          checked={stockFilters.outOfStock}
-                          readOnly
-                          className="absolute opacity-0 w-0 h-0"
-                        />
-                        <div
-                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                            stockFilters.outOfStock ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                          }`}
-                        >
-                          {stockFilters.outOfStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-700">Out of Stock</span>
-                    </div>
-
-                    <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("onSale")}>
-                      <div className="relative flex items-center">
-                        <input
-                          type="radio"
-                          name="stock-group"
-                          checked={stockFilters.onSale}
-                          readOnly
-                          className="absolute opacity-0 w-0 h-0"
-                        />
-                        <div
-                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                            stockFilters.onSale ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                          }`}
-                        >
-                          {stockFilters.onSale && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-700">On Sale</span>
-                    </div>
-                  </div>
                 </div>
+              )}
 
-                {/* Brands Filter */}
-              </div>
-              {/* Footer actions */}
-              <div className="p-4 border-t bg-white flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearAllFilters()
-                    setIsMobileFilterOpen(false)
-                  }}
-                  className="flex-1 px-4 py-2 border border-red-600 text-red-600 rounded-md font-semibold hover:bg-red-50"
-                >
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFilterOpen(false)}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700"
-                >
-                  Apply
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters (hidden on mobile) */}
-          <div className="lg:w-1/4 hidden md:block">
-            <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-              {/* Search */}
-              <div>
-                {/* <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                                    value={searchQuery}
-                onChange={handleSearchChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div> */}
-              </div>
-
-              {/* Price Filter */}
+              {/* Price Filter - Mobile */}
               <div className="border-b pb-4">
                 <button
                   onClick={() => setShowPriceFilter(!showPriceFilter)}
-                  className="flex items-center justify-between w-full text-left font-medium text-gray-900"
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    priceRange[0] !== minPrice || priceRange[1] !== maxPrice
+                      ? "text-lime-500"
+                      : "text-gray-900"
+                  }`}
                 >
                   Price Range
                   {showPriceFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
@@ -3230,7 +1316,7 @@ const Shop = () => {
                 {showPriceFilter && (
                   <div className="mt-4 space-y-4">
                     <PriceFilter
-                      min={minPrice} // Use true minimum product price for the slider and input
+                      min={minPrice}
                       max={maxPrice}
                       initialRange={priceRange}
                       onApply={(range) => setPriceRange(range)}
@@ -3239,18 +1325,636 @@ const Shop = () => {
                 )}
               </div>
 
-              {/* Categories Filter */}
+              {/* Categories Filter - Mobile */}
               <div className="border-b pb-4">
                 <button
                   onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-                  className="flex items-center justify-between w-full text-left font-medium text-gray-900"
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    selectedCategory !== "all" || selectedSubCategories.length > 0 || selectedSubCategory2 || selectedSubCategory3 || selectedSubCategory4
+                      ? "text-lime-500"
+                      : "text-gray-900"
+                  }`}
                 >
                   Categories
                   {showCategoryFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
                 </button>
                 {showCategoryFilter && (
+                  <div className="mt-4 space-y-1">
+                    <div className="flex items-center cursor-pointer py-1" onClick={() => handleCategoryChange("all")}>
+                      <div className="relative flex items-center">
+                        <input
+                          type="radio"
+                          name="category-group-mobile"
+                          checked={selectedCategory === "all"}
+                          readOnly
+                          className="absolute opacity-0 w-0 h-0"
+                        />
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                            selectedCategory === "all" ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                          }`}
+                        >
+                          {selectedCategory === "all" && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-700">All Categories</span>
+                    </div>
+
+                    {categories.map((category) => {
+                      const level1Children = getChildren(category._id, 'category')
+                      const hasChildren = level1Children.length > 0
+                      const isExpanded = expandedCategories[category._id]
+                      const isSelected = selectedCategory === category._id
+
+                      return (
+                        <div key={category._id} className="space-y-1">
+                          <div className="flex items-center justify-between py-1 group">
+                            <div 
+                              className="flex items-center cursor-pointer flex-1"
+                              onClick={() => handleCategoryChange(category._id)}
+                            >
+                              <div className="relative flex items-center">
+                                <input
+                                  type="radio"
+                                  name="category-group-mobile"
+                                  checked={isSelected}
+                                  readOnly
+                                  className="absolute opacity-0 w-0 h-0"
+                                />
+                                <div
+                                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                    isSelected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                  }`}
+                                >
+                                  {isSelected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                </div>
+                              </div>
+                              <span className={`text-sm ${isSelected ? "text-lime-600 font-semibold" : "text-gray-700"}`}>
+                                {category.name}
+                              </span>
+                            </div>
+                            {hasChildren && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleExpanded(category._id)
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded ml-2"
+                              >
+                                {isExpanded ? <Minus size={14} /> : <Plus size={14} />}
+                              </button>
+                            )}
+                          </div>
+
+                          {isExpanded && level1Children.map((level1) => {
+                            const level2Children = getChildren(level1._id, 'subcategory')
+                            const hasLevel2 = level2Children.length > 0
+                            const isLevel1Expanded = expandedCategories[level1._id]
+                            const isLevel1Selected = selectedSubCategories.includes(level1._id)
+
+                            return (
+                              <div key={level1._id} className="ml-6 space-y-1">
+                                <div className="flex items-center justify-between py-1 group">
+                                  <div
+                                    className="flex items-center cursor-pointer flex-1"
+                                    onClick={() => handleSubcategorySelect(level1._id, 1)}
+                                  >
+                                    <div className="relative flex items-center">
+                                      <input
+                                        type="radio"
+                                        checked={isLevel1Selected}
+                                        readOnly
+                                        className="absolute opacity-0 w-0 h-0"
+                                      />
+                                      <div
+                                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                          isLevel1Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                        }`}
+                                      >
+                                        {isLevel1Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                      </div>
+                                    </div>
+                                    <span className={`text-sm ${isLevel1Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                      {level1.name}
+                                    </span>
+                                  </div>
+                                  {hasLevel2 && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        toggleExpanded(level1._id)
+                                      }}
+                                      className="p-1 hover:bg-gray-100 rounded ml-2"
+                                    >
+                                      {isLevel1Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                    </button>
+                                  )}
+                                </div>
+
+                                {isLevel1Expanded && level2Children.map((level2) => {
+                                  const level3Children = getChildren(level2._id, 'subcategory')
+                                  const hasLevel3 = level3Children.length > 0
+                                  const isLevel2Expanded = expandedCategories[level2._id]
+                                  const isLevel2Selected = selectedSubCategory2 === level2._id
+
+                                  return (
+                                    <div key={level2._id} className="ml-6 space-y-1">
+                                      <div className="flex items-center justify-between py-1 group">
+                                        <div
+                                          className="flex items-center cursor-pointer flex-1"
+                                          onClick={() => handleSubcategorySelect(level2._id, 2)}
+                                        >
+                                          <div className="relative flex items-center">
+                                            <input
+                                              type="radio"
+                                              checked={isLevel2Selected}
+                                              readOnly
+                                              className="absolute opacity-0 w-0 h-0"
+                                            />
+                                            <div
+                                              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                isLevel2Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                              }`}
+                                            >
+                                              {isLevel2Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                            </div>
+                                          </div>
+                                          <span className={`text-sm ${isLevel2Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                            {level2.name}
+                                          </span>
+                                        </div>
+                                        {hasLevel3 && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              toggleExpanded(level2._id)
+                                            }}
+                                            className="p-1 hover:bg-gray-100 rounded ml-2"
+                                          >
+                                            {isLevel2Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {isLevel2Expanded && level3Children.map((level3) => {
+                                        const level4Children = getChildren(level3._id, 'subcategory')
+                                        const hasLevel4 = level4Children.length > 0
+                                        const isLevel3Expanded = expandedCategories[level3._id]
+                                        const isLevel3Selected = selectedSubCategory3 === level3._id
+
+                                        return (
+                                          <div key={level3._id} className="ml-6 space-y-1">
+                                            <div className="flex items-center justify-between py-1 group">
+                                              <div
+                                                className="flex items-center cursor-pointer flex-1"
+                                                onClick={() => handleSubcategorySelect(level3._id, 3)}
+                                              >
+                                                <div className="relative flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    checked={isLevel3Selected}
+                                                    readOnly
+                                                    className="absolute opacity-0 w-0 h-0"
+                                                  />
+                                                  <div
+                                                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                      isLevel3Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                                    }`}
+                                                  >
+                                                    {isLevel3Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                                  </div>
+                                                </div>
+                                                <span className={`text-sm ${isLevel3Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                                  {level3.name}
+                                                </span>
+                                              </div>
+                                              {hasLevel4 && (
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    toggleExpanded(level3._id)
+                                                  }}
+                                                  className="p-1 hover:bg-gray-100 rounded ml-2"
+                                                >
+                                                  {isLevel3Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                                </button>
+                                              )}
+                                            </div>
+
+                                            {isLevel3Expanded && level4Children.map((level4) => {
+                                              const isLevel4Selected = selectedSubCategory4 === level4._id
+
+                                              return (
+                                                <div key={level4._id} className="ml-6 space-y-1">
+                                                  <div className="flex items-center py-1">
+                                                    <div
+                                                      className="flex items-center cursor-pointer flex-1"
+                                                      onClick={() => handleSubcategorySelect(level4._id, 4)}
+                                                    >
+                                                      <div className="relative flex items-center">
+                                                        <input
+                                                          type="radio"
+                                                          checked={isLevel4Selected}
+                                                          readOnly
+                                                          className="absolute opacity-0 w-0 h-0"
+                                                        />
+                                                        <div
+                                                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                            isLevel4Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                                          }`}
+                                                        >
+                                                          {isLevel4Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                                        </div>
+                                                      </div>
+                                                      <span className={`text-sm ${isLevel4Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                                        {level4.name}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Brand Filter - Mobile */}
+              <div className="border-b pb-4">
+                <button
+                  onClick={() => setShowBrandFilter(!showBrandFilter)}
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    selectedBrands.length > 0 ? "text-lime-500" : "text-gray-900"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    Brands
+                    {selectedBrands.length > 0 && (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-lime-500 rounded-full">
+                        {selectedBrands.length}
+                      </span>
+                    )}
+                  </span>
+                  {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {showBrandFilter && (
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center cursor-pointer" onClick={() => handleCategoryChange("all")}>
+                    <input
+                      type="text"
+                      placeholder="Search brands..."
+                      value={brandSearch}
+                      onChange={(e) => setBrandSearch(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
+                    />
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {filteredBrands.map((brand) => (
+                        <div key={brand._id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`brand-mobile-${brand._id}`}
+                            checked={selectedBrands.includes(brand._id)}
+                            onChange={() => handleBrandChange(brand._id)}
+                            className="w-4 h-4 text-lime-600 border-gray-300 rounded focus:ring-lime-500"
+                          />
+                          <label htmlFor={`brand-mobile-${brand._id}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                            {brand.name}
+                          </label>
+                        </div>
+                      ))}
+                      {filteredBrands.length === 0 && (
+                        <p className="text-sm text-gray-500 italic">No brands found</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Stock Status Filter - Mobile */}
+              <div className="border-b pb-4">
+                <div className={`font-medium mb-4 ${
+                  stockFilters.inStock || stockFilters.outOfStock || stockFilters.onSale
+                    ? "text-lime-500"
+                    : "text-gray-900"
+                }`}>Stock Status</div>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-all-mobile"
+                      name="stock-filter-mobile"
+                      checked={!stockFilters.inStock && !stockFilters.outOfStock && !stockFilters.onSale}
+                      onChange={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-all-mobile" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      All Products
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-in-mobile"
+                      name="stock-filter-mobile"
+                      checked={stockFilters.inStock}
+                      onChange={() => handleStockFilterChange('inStock')}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-in-mobile" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      In Stock
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-out-mobile"
+                      name="stock-filter-mobile"
+                      checked={stockFilters.outOfStock}
+                      onChange={() => handleStockFilterChange('outOfStock')}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-out-mobile" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      Out of Stock
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Apply & Clear Buttons - Mobile */}
+              <div className="space-y-3 pt-4">
+                <button
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="w-full px-4 py-3 bg-lime-600 text-white rounded-lg hover:bg-lime-700 transition-colors font-semibold"
+                >
+                  Show {products.length} Products
+                </button>
+                <button
+                  onClick={() => {
+                    clearAllFilters()
+                    setIsMobileFilterOpen(false)
+                  }}
+                  className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="lg:w-1/4 hidden md:block">
+            {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6 sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide"> */}
+             <div className="bg-white rounded-lg p-6 space-y-6 sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto scrollbar-hide">
+              {showBreadcrumb && (
+                <div className="bg-lime-50 border border-lime-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-lime-900">Current Path:</p>
+                  <p className="text-sm text-lime-800 mt-1 break-words">{breadcrumbPath}</p>
+                </div>
+              )}
+
+              {/* Active Filters Section */}
+              {(selectedCategory !== "all" || 
+                selectedSubCategories.length > 0 || 
+                selectedSubCategory2 || 
+                selectedSubCategory3 || 
+                selectedSubCategory4 || 
+                selectedBrands.length > 0 || 
+                stockFilters.inStock || 
+                stockFilters.outOfStock || 
+                stockFilters.onSale ||
+                priceRange[0] !== minPrice || 
+                priceRange[1] !== maxPrice) && (
+                <div className="border border-lime-200 rounded-lg p-4 bg-lime-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Active Filters</h3>
+                    <button
+                      onClick={clearAllFilters}
+                      className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {/* Parent Category Filter */}
+                    {selectedCategory !== "all" && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Category:</span>{" "}
+                          {categories.find((cat) => cat._id === selectedCategory)?.name || selectedCategory}
+                        </span>
+                        <button
+                          onClick={() => handleCategoryChange("all")}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Level 1 Subcategory */}
+                    {selectedSubCategories.length > 0 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Subcategory:</span> {currentSubCategoryName}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategories([])
+                            setCurrentSubCategoryName(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Level 2 Subcategory */}
+                    {selectedSubCategory2 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 2:</span> {currentSubCategory2Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory2(null)
+                            setCurrentSubCategory2Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Level 3 Subcategory */}
+                    {selectedSubCategory3 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 3:</span> {currentSubCategory3Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory3(null)
+                            setCurrentSubCategory3Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Level 4 Subcategory */}
+                    {selectedSubCategory4 && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Level 4:</span> {currentSubCategory4Name}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubCategory4(null)
+                            setCurrentSubCategory4Name(null)
+                          }}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Selected Brands */}
+                    {selectedBrands.map((brandId) => {
+                      const brand = brands.find((b) => b._id === brandId)
+                      return brand ? (
+                        <div key={brandId} className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                          <span className="text-gray-700">
+                            <span className="font-semibold">Brand:</span> {brand.name}
+                          </span>
+                          <button
+                            onClick={() => handleBrandChange(brandId)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ) : null
+                    })}
+
+                    {/* Price Range Filter */}
+                    {(priceRange[0] !== minPrice || priceRange[1] !== maxPrice) && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Price:</span> ₹{priceRange[0]} - ₹{priceRange[1]}
+                        </span>
+                        <button
+                          onClick={() => setPriceRange([minPrice, maxPrice])}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Stock Status Filters */}
+                    {stockFilters.inStock && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> In Stock
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {stockFilters.outOfStock && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> Out of Stock
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {stockFilters.onSale && (
+                      <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
+                        <span className="text-gray-700">
+                          <span className="font-semibold">Stock:</span> On Sale
+                        </span>
+                        <button
+                          onClick={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                          className="text-red-500 hover:text-red-700 ml-2"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="border-b pb-4">
+                <button
+                  onClick={() => setShowPriceFilter(!showPriceFilter)}
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    priceRange[0] !== minPrice || priceRange[1] !== maxPrice
+                      ? "text-lime-500"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Price Range
+                  {showPriceFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {showPriceFilter && (
+                  <div className="mt-4 space-y-4">
+                    <PriceFilter
+                      min={minPrice}
+                      max={maxPrice}
+                      initialRange={priceRange}
+                      onApply={(range) => setPriceRange(range)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="border-b pb-4">
+                <button
+                  onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    selectedCategory !== "all" || selectedSubCategories.length > 0 || selectedSubCategory2 || selectedSubCategory3 || selectedSubCategory4
+                      ? "text-lime-500"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Categories
+                  {showCategoryFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {showCategoryFilter && (
+                  <div className="mt-4 space-y-1">
+                    {/* All Categories Option */}
+                    <div className="flex items-center cursor-pointer py-1" onClick={() => handleCategoryChange("all")}>
                       <div className="relative flex items-center">
                         <input
                           type="radio"
@@ -3261,7 +1965,7 @@ const Shop = () => {
                         />
                         <div
                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                            selectedCategory === "all" ? "border-blue-600 bg-blue-600" : "border-gray-300"
+                            selectedCategory === "all" ? "border-lime-600 bg-lime-600" : "border-gray-300"
                           }`}
                         >
                           {selectedCategory === "all" && <div className="w-2 h-2 rounded-full bg-white"></div>}
@@ -3270,191 +1974,343 @@ const Shop = () => {
                       <span className="text-sm text-gray-700">All Categories</span>
                     </div>
 
-                    {categories.map((category) => (
-                      <div
-                        key={category._id}
-                        className="flex items-center cursor-pointer"
-                        onClick={() => handleCategoryChange(category._id)}
-                      >
-                        <div className="relative flex items-center">
-                          <input
-                            type="radio"
-                            name="category-group"
-                            checked={selectedCategory === category._id}
-                            readOnly
-                            className="absolute opacity-0 w-0 h-0"
-                          />
-                          <div
-                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                              selectedCategory === category._id ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                            }`}
-                          >
-                            {selectedCategory === category._id && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                    {/* Hierarchical Category Tree */}
+                    {categories.map((category) => {
+                      const level1Children = getChildren(category._id, 'category')
+                      const hasChildren = level1Children.length > 0
+                      const isExpanded = expandedCategories[category._id]
+                      const isSelected = selectedCategory === category._id
+
+                      return (
+                        <div key={category._id} className="space-y-1">
+                          {/* Parent Category */}
+                          <div className="flex items-center justify-between py-1 group">
+                            <div 
+                              className="flex items-center cursor-pointer flex-1"
+                              onClick={() => handleCategoryChange(category._id)}
+                            >
+                              <div className="relative flex items-center">
+                                <input
+                                  type="radio"
+                                  name="category-group"
+                                  checked={isSelected}
+                                  readOnly
+                                  className="absolute opacity-0 w-0 h-0"
+                                />
+                                <div
+                                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                    isSelected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                  }`}
+                                >
+                                  {isSelected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                </div>
+                              </div>
+                              <span className={`text-sm ${isSelected ? "text-lime-600 font-semibold" : "text-gray-700"}`}>
+                                {category.name}
+                              </span>
+                            </div>
+                            {hasChildren && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleExpanded(category._id)
+                                }}
+                                className="p-1 hover:bg-gray-100 rounded ml-2"
+                              >
+                                {isExpanded ? <Minus size={14} /> : <Plus size={14} />}
+                              </button>
+                            )}
                           </div>
+
+                          {/* Level 1 Subcategories */}
+                          {isExpanded && level1Children.map((level1) => {
+                            const level2Children = getChildren(level1._id, 'subcategory')
+                            const hasLevel2 = level2Children.length > 0
+                            const isLevel1Expanded = expandedCategories[level1._id]
+                            const isLevel1Selected = selectedSubCategories.includes(level1._id)
+
+                            return (
+                              <div key={level1._id} className="ml-6 space-y-1">
+                                {/* Level 1 Item */}
+                                <div className="flex items-center justify-between py-1 group">
+                                  <div
+                                    className="flex items-center cursor-pointer flex-1"
+                                    onClick={() => handleSubcategorySelect(level1._id, 1)}
+                                  >
+                                    <div className="relative flex items-center">
+                                      <input
+                                        type="radio"
+                                        checked={isLevel1Selected}
+                                        readOnly
+                                        className="absolute opacity-0 w-0 h-0"
+                                      />
+                                      <div
+                                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                          isLevel1Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                        }`}
+                                      >
+                                        {isLevel1Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                      </div>
+                                    </div>
+                                    <span className={`text-sm ${isLevel1Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                      {level1.name}
+                                    </span>
+                                  </div>
+                                  {hasLevel2 && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        toggleExpanded(level1._id)
+                                      }}
+                                      className="p-1 hover:bg-gray-100 rounded ml-2"
+                                    >
+                                      {isLevel1Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Level 2 Subcategories */}
+                                {isLevel1Expanded && level2Children.map((level2) => {
+                                  const level3Children = getChildren(level2._id, 'subcategory')
+                                  const hasLevel3 = level3Children.length > 0
+                                  const isLevel2Expanded = expandedCategories[level2._id]
+                                  const isLevel2Selected = selectedSubCategory2 === level2._id
+
+                                  return (
+                                    <div key={level2._id} className="ml-6 space-y-1">
+                                      {/* Level 2 Item */}
+                                      <div className="flex items-center justify-between py-1 group">
+                                        <div
+                                          className="flex items-center cursor-pointer flex-1"
+                                          onClick={() => handleSubcategorySelect(level2._id, 2)}
+                                        >
+                                          <div className="relative flex items-center">
+                                            <input
+                                              type="radio"
+                                              checked={isLevel2Selected}
+                                              readOnly
+                                              className="absolute opacity-0 w-0 h-0"
+                                            />
+                                            <div
+                                              className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                isLevel2Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                              }`}
+                                            >
+                                              {isLevel2Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                            </div>
+                                          </div>
+                                          <span className={`text-sm ${isLevel2Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                            {level2.name}
+                                          </span>
+                                        </div>
+                                        {hasLevel3 && (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              toggleExpanded(level2._id)
+                                            }}
+                                            className="p-1 hover:bg-gray-100 rounded ml-2"
+                                          >
+                                            {isLevel2Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                          </button>
+                                        )}
+                                      </div>
+
+                                      {/* Level 3 Subcategories */}
+                                      {isLevel2Expanded && level3Children.map((level3) => {
+                                        const level4Children = getChildren(level3._id, 'subcategory')
+                                        const hasLevel4 = level4Children.length > 0
+                                        const isLevel3Expanded = expandedCategories[level3._id]
+                                        const isLevel3Selected = selectedSubCategory3 === level3._id
+
+                                        return (
+                                          <div key={level3._id} className="ml-6 space-y-1">
+                                            {/* Level 3 Item */}
+                                            <div className="flex items-center justify-between py-1 group">
+                                              <div
+                                                className="flex items-center cursor-pointer flex-1"
+                                                onClick={() => handleSubcategorySelect(level3._id, 3)}
+                                              >
+                                                <div className="relative flex items-center">
+                                                  <input
+                                                    type="radio"
+                                                    checked={isLevel3Selected}
+                                                    readOnly
+                                                    className="absolute opacity-0 w-0 h-0"
+                                                  />
+                                                  <div
+                                                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                      isLevel3Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                                    }`}
+                                                  >
+                                                    {isLevel3Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                                  </div>
+                                                </div>
+                                                <span className={`text-sm ${isLevel3Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                                  {level3.name}
+                                                </span>
+                                              </div>
+                                              {hasLevel4 && (
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    toggleExpanded(level3._id)
+                                                  }}
+                                                  className="p-1 hover:bg-gray-100 rounded ml-2"
+                                                >
+                                                  {isLevel3Expanded ? <Minus size={14} /> : <Plus size={14} />}
+                                                </button>
+                                              )}
+                                            </div>
+
+                                            {/* Level 4 Subcategories */}
+                                            {isLevel3Expanded && level4Children.map((level4) => {
+                                              const isLevel4Selected = selectedSubCategory4 === level4._id
+
+                                              return (
+                                                <div key={level4._id} className="ml-6 flex items-center justify-between py-1 group">
+                                                  <div
+                                                    className="flex items-center cursor-pointer flex-1"
+                                                    onClick={() => handleSubcategorySelect(level4._id, 4)}
+                                                  >
+                                                    <div className="relative flex items-center">
+                                                      <input
+                                                        type="radio"
+                                                        checked={isLevel4Selected}
+                                                        readOnly
+                                                        className="absolute opacity-0 w-0 h-0"
+                                                      />
+                                                      <div
+                                                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
+                                                          isLevel4Selected ? "border-lime-600 bg-lime-600" : "border-gray-300"
+                                                        }`}
+                                                      >
+                                                        {isLevel4Selected && <div className="w-2 h-2 rounded-full bg-white"></div>}
+                                                      </div>
+                                                    </div>
+                                                    <span className={`text-sm ${isLevel4Selected ? "text-lime-600 font-semibold" : "text-gray-600"}`}>
+                                                      {level4.name}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )
+                          })}
                         </div>
-                        <span className="text-sm text-gray-700">{category.name}</span>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
               </div>
 
-              {/* Subcategories Filter */}
-              {subCategories.length > 0 && (
-                <div className="border-b pb-4">
-                  <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-                    {categories.find((cat) => cat._id === selectedCategory)?.name} Subcategories
-                  </button>
-                  <div className="mt-4 space-y-2">
-                    {subCategories.map((subcat) => (
-                      <div
-                        key={subcat._id}
-                        className="flex items-center cursor-pointer"
-                        onClick={() => handleSubCategoryChange(subcat._id)}
-                      >
-                        <div className="relative flex items-center">
-                          <input
-                            type="radio"
-                            name="subcategory-group"
-                            checked={selectedSubCategories[0] === subcat._id}
-                            readOnly
-                            className="absolute opacity-0 w-0 h-0"
-                          />
-                          <div
-                            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                              selectedSubCategories[0] === subcat._id
-                                ? "border-blue-600 bg-blue-600"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            {selectedSubCategories[0] === subcat._id && (
-                              <div className="w-2 h-2 rounded-full bg-white"></div>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-700">{subcat.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Brands Filter */}
-              {brands.length > 0 && (
-                <div className="border-b pb-4">
-                  <button
-                    onClick={() => setShowBrandFilter(!showBrandFilter)}
-                    className="flex items-center justify-between w-full text-left font-medium text-gray-900"
-                  >
-                    Brands
-                    {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
-                  </button>
-                  {showBrandFilter && (
-                    <div className="mt-4 space-y-3">
-                      <div className="relative">
-                        <Search
-                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                          size={16}
-                        />
-                        <input
-                          type="text"
-                          placeholder="Search brands"
-                          value={brandSearch}
-                          onChange={(e) => setBrandSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
-                      </div>
-                      <div className="max-h-48 overflow-y-auto space-y-2">
-                        {filteredBrands.map((brand) => (
-                          <label key={brand._id} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={selectedBrands.includes(brand._id)}
-                              onChange={() => handleBrandChange(brand._id)}
-                              onClick={(e) => e.stopPropagation()} // Prevent event bubbling
-                              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <span className="text-sm text-gray-700">{brand.name}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Stock/On Sale Filter */}
+              {/* Brand Filter */}
               <div className="border-b pb-4">
-                <button className="flex items-center justify-between w-full text-left font-medium text-gray-900">
-                  Stock
+                <button
+                  onClick={() => setShowBrandFilter(!showBrandFilter)}
+                  className={`flex items-center justify-between w-full text-left font-medium ${
+                    selectedBrands.length > 0 ? "text-lime-500" : "text-gray-900"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    Brands
+                    {selectedBrands.length > 0 && (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-lime-500 rounded-full">
+                        {selectedBrands.length}
+                      </span>
+                    )}
+                  </span>
+                  {showBrandFilter ? <Minus size={16} /> : <ChevronDown size={16} />}
                 </button>
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("inStock")}>
-                    <div className="relative flex items-center">
-                      <input
-                        type="radio"
-                        name="stock-group"
-                        checked={stockFilters.inStock}
-                        readOnly
-                        className="absolute opacity-0 w-0 h-0"
-                      />
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                          stockFilters.inStock ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                        }`}
-                      >
-                        {stockFilters.inStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                      </div>
+                {showBrandFilter && (
+                  <div className="mt-4 space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Search brands..."
+                      value={brandSearch}
+                      onChange={(e) => setBrandSearch(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500"
+                    />
+                    <div className="space-y-2">
+                      {filteredBrands.map((brand) => (
+                        <div key={brand._id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`brand-${brand._id}`}
+                            checked={selectedBrands.includes(brand._id)}
+                            onChange={() => handleBrandChange(brand._id)}
+                            className="w-4 h-4 text-lime-600 border-gray-300 rounded focus:ring-lime-500"
+                          />
+                          <label htmlFor={`brand-${brand._id}`} className="ml-2 text-sm text-gray-700 cursor-pointer">
+                            {brand.name}
+                          </label>
+                        </div>
+                      ))}
+                      {filteredBrands.length === 0 && (
+                        <p className="text-sm text-gray-500 italic">No brands found</p>
+                      )}
                     </div>
-                    <span className="text-sm text-gray-700">In Stock</span>
                   </div>
+                )}
+              </div>
 
-                  <div
-                    className="flex items-center cursor-pointer"
-                    onClick={() => handleStockFilterChange("outOfStock")}
-                  >
-                    <div className="relative flex items-center">
-                      <input
-                        type="radio"
-                        name="stock-group"
-                        checked={stockFilters.outOfStock}
-                        readOnly
-                        className="absolute opacity-0 w-0 h-0"
-                      />
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                          stockFilters.outOfStock ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                        }`}
-                      >
-                        {stockFilters.outOfStock && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-700">Out of Stock</span>
+              {/* Stock Status Filter */}
+              <div className="border-b pb-4">
+                <div className={`font-medium mb-4 ${
+                  stockFilters.inStock || stockFilters.outOfStock || stockFilters.onSale
+                    ? "text-lime-500"
+                    : "text-gray-900"
+                }`}>Stock Status</div>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-all"
+                      name="stock-filter"
+                      checked={!stockFilters.inStock && !stockFilters.outOfStock && !stockFilters.onSale}
+                      onChange={() => setStockFilters({ inStock: false, outOfStock: false, onSale: false })}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-all" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      All Products
+                    </label>
                   </div>
-
-                  <div className="flex items-center cursor-pointer" onClick={() => handleStockFilterChange("onSale")}>
-                    <div className="relative flex items-center">
-                      <input
-                        type="radio"
-                        name="stock-group"
-                        checked={stockFilters.onSale}
-                        readOnly
-                        className="absolute opacity-0 w-0 h-0"
-                      />
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mr-2 ${
-                          stockFilters.onSale ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                        }`}
-                      >
-                        {stockFilters.onSale && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-700">On Sale</span>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-in"
+                      name="stock-filter"
+                      checked={stockFilters.inStock}
+                      onChange={() => handleStockFilterChange('inStock')}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-in" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      In Stock
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="stock-out"
+                      name="stock-filter"
+                      checked={stockFilters.outOfStock}
+                      onChange={() => handleStockFilterChange('outOfStock')}
+                      className="w-4 h-4 text-lime-600 border-gray-300 focus:ring-lime-500"
+                    />
+                    <label htmlFor="stock-out" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                      Out of Stock
+                    </label>
                   </div>
                 </div>
               </div>
 
-              {/* Clear Filters Button */}
               <div className="pt-4">
                 <button
                   onClick={clearAllFilters}
@@ -3468,57 +2324,36 @@ const Shop = () => {
 
           {/* Main Content */}
           <div className="lg:w-3/4">
-            {/* Category Banner - Show when specific category is selected and banner exists */}
-            {banners.find((banner) => banner.category === selectedCategory && banner.isActive) && (
-              <div className="mb-8">
-                <div
-                  className="relative rounded-lg overflow-hidden"
-                  style={{
-                    background:
-                      banners.find((banner) => banner.category === selectedCategory && banner.isActive)
-                        ?.backgroundColor || "linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)",
-                    minHeight: "300px",
-                  }}
-                >
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-10 right-20 w-32 h-32 border-2 border-white rounded-full"></div>
-                    <div className="absolute top-20 right-40 w-24 h-24 border border-white rounded-full"></div>
-                    <div className="absolute bottom-20 right-10 w-40 h-40 border border-white rounded-full"></div>
-                  </div>
-
-                  <div className="relative z-10 flex items-center justify-between p-8 h-full">
-                    <div className="flex-1 text-white">
-                      <h2 className="text-4xl font-bold mb-4">
-                        {banners.find((banner) => banner.category === selectedCategory && banner.isActive)?.title ||
-                          `Shop ${categories.find((cat) => cat._id === selectedCategory)?.name}`}
-                      </h2>
-                      <p className="text-xl mb-6 opacity-90">
-                        {banners.find((banner) => banner.category === selectedCategory && banner.isActive)
-                          ?.description ||
-                          `Discover our amazing collection of ${categories.find((cat) => cat._id === selectedCategory)?.name.toLowerCase()} products`}
-                      </p>
-                      <div className="flex items-center space-x-4">
-                        <span className="bg-white text-blue-600 px-4 py-2 rounded-full font-semibold">
-                          {products.length} Products Available
-                        </span>
-                      </div>
-                    </div>
-                    {banners.find((banner) => banner.category === selectedCategory && banner.isActive)?.image && (
-                      <div className="flex-shrink-0 ml-8">
-                        <img
-                          src={banners.find((banner) => banner.category === selectedCategory && banner.isActive).image}
-                          alt={categories.find((cat) => cat._id === selectedCategory)?.name}
-                          className="w-64 h-48 cover rounded-lg shadow-lg"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* Mobile Filter Button */}
+            <div className="md:hidden mb-4 flex gap-2">
+              <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-lime-600 text-white rounded-lg hover:bg-lime-700 transition-colors font-semibold shadow-md"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filters
+                {(selectedCategory !== "all" || 
+                  selectedSubCategories.length > 0 || 
+                  selectedBrands.length > 0 || 
+                  stockFilters.inStock || 
+                  stockFilters.outOfStock || 
+                  stockFilters.onSale ||
+                  priceRange[0] !== minPrice || 
+                  priceRange[1] !== maxPrice) && (
+                  <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold bg-white text-lime-600 rounded-full">
+                    {[selectedCategory !== "all", selectedSubCategories.length > 0, selectedBrands.length, 
+                      stockFilters.inStock || stockFilters.outOfStock || stockFilters.onSale,
+                      priceRange[0] !== minPrice || priceRange[1] !== maxPrice].filter(Boolean).length}
+                  </span>
+                )}
+              </button>
+              <div className="flex-shrink-0">
+                <SortDropdown value={sortBy} onChange={handleSortChange} />
               </div>
-            )}
-
-            {/* Header */}
+            </div>
+            
             <div className="flex flex-row justify-between items-center mb-6 relative z-10">
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -3531,22 +2366,36 @@ const Shop = () => {
                         </span>
                       )}
                     </>
-                  ) : selectedSubCategoryObj ? (
-                    selectedSubCategoryObj.name
                   ) : (
-                    categories.find((cat) => cat._id === selectedCategory)?.name || "All Products"
+                    (() => {
+                      // Show brand name if a single brand is selected
+                      if (selectedBrands.length === 1) {
+                        const brandName = brands.find((b) => b._id === selectedBrands[0])?.name
+                        if (brandName) return brandName
+                      }
+                      
+                      // Show subcategory names (deepest first)
+                      if (currentSubCategory4Name) return currentSubCategory4Name
+                      if (currentSubCategory3Name) return currentSubCategory3Name
+                      if (currentSubCategory2Name) return currentSubCategory2Name
+                      if (currentSubCategoryName) return currentSubCategoryName
+                      
+                      // Show category name
+                      const categoryName = categories.find((cat) => cat._id === selectedCategory)?.name
+                      if (categoryName) return categoryName
+                      
+                      return "All Products"
+                    })()
                   )}
                 </h1>
                 <p className="text-gray-600 mt-1">{products.length} products found</p>
               </div>
 
-              {/* Desktop Sort Dropdown (original placement) */}
               <div className="hidden md:block mt-0 flex-shrink-0 relative z-20">
                 <SortDropdown value={sortBy} onChange={handleSortChange} />
               </div>
             </div>
 
-            {/* Products Grid */}
             {products.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -3558,7 +2407,7 @@ const Shop = () => {
                   <div className="flex justify-center mt-8">
                     <button
                       onClick={() => setProductsToShow((prev) => prev + 20)}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-semibold"
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition-colors font-semibold"
                     >
                       Load More
                     </button>
@@ -3574,50 +2423,31 @@ const Shop = () => {
           </div>
         </div>
 
-        {/* SEO Content Section - Full Width */}
-        {!searchQuery.trim() && selectedCategory && selectedCategory !== "all" && (
-          (() => {
-            const currentCategory = categories.find((cat) => cat._id === selectedCategory)
-            const currentSubCategory = selectedSubCategoryObj
-            
-            // Show subcategory content if subcategory is selected, otherwise show category content
-            const seoContent = currentSubCategory?.seoContent || currentCategory?.seoContent
-            
-            // Only render if there's actual content
-            if (seoContent && seoContent.trim()) {
-              return (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-12">
-                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-10 lg:p-12">
-                    <div 
-                      className="seo-content prose prose-base md:prose-lg lg:prose-xl max-w-none
-                        prose-headings:font-bold prose-headings:text-gray-900 
-                        prose-h1:text-2xl md:prose-h1:text-4xl lg:prose-h1:text-5xl prose-h1:mb-6 prose-h1:leading-tight
-                        prose-h2:text-xl md:prose-h2:text-3xl lg:prose-h2:text-4xl prose-h2:mt-10 prose-h2:mb-5 prose-h2:leading-snug
-                        prose-h3:text-lg md:prose-h3:text-2xl lg:prose-h3:text-3xl prose-h3:mt-8 prose-h3:mb-4 prose-h3:leading-snug
-                        prose-h4:text-base md:prose-h4:text-xl lg:prose-h4:text-2xl prose-h4:mt-6 prose-h4:mb-3
-                        prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-5 prose-p:text-base md:prose-p:text-lg lg:prose-p:text-xl
-                        prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline hover:prose-a:text-blue-700
-                        prose-strong:text-gray-900 prose-strong:font-bold
-                        prose-em:text-gray-800 prose-em:italic
-                        prose-ul:my-6 prose-ul:space-y-2
-                        prose-ol:my-6 prose-ol:space-y-2
-                        prose-li:text-gray-700 prose-li:leading-relaxed prose-li:text-base md:prose-li:text-lg lg:prose-li:text-xl
-                        prose-img:rounded-lg prose-img:shadow-lg prose-img:my-8 prose-img:w-full
-                        prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:my-6
-                        prose-code:text-sm prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded
-                        prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
-                        prose-table:w-full prose-table:border-collapse prose-table:my-8
-                        prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:p-3 prose-th:text-left prose-th:font-semibold
-                        prose-td:border prose-td:border-gray-300 prose-td:p-3
-                        first:prose-h1:mt-0 first:prose-h2:mt-0 first:prose-h3:mt-0"
-                      dangerouslySetInnerHTML={{ __html: seoContent }}
-                    />
-                  </div>
-                </div>
-              )
-            }
-            return null
-          })()
+        {/* SEO Content Display - Full Width After Products */}
+        {seoContent && !searchQuery.trim() && products.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mt-8">
+            <div
+              className="prose prose-lg max-w-none text-gray-700 
+                [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-4 [&_h1]:text-gray-900
+                [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mb-3 [&_h2]:mt-6 [&_h2]:text-gray-800
+                [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-gray-800
+                [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mb-2 [&_h4]:mt-3 [&_h4]:text-gray-700
+                [&_p]:mb-4 [&_p]:leading-relaxed [&_p]:text-gray-700
+                [&_ul]:list-disc [&_ul]:ml-6 [&_ul]:mb-4 [&_ul]:space-y-2
+                [&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:mb-4 [&_ol]:space-y-2
+                [&_li]:text-gray-700 [&_li]:leading-relaxed
+                [&_strong]:font-bold [&_strong]:text-gray-900
+                [&_em]:italic
+                [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800
+                [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4
+                [&_code]:bg-gray-100 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+                [&_pre]:bg-gray-100 [&_pre]:p-4 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:mb-4
+                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-4
+                [&_th]:border [&_th]:border-gray-300 [&_th]:px-4 [&_th]:py-2 [&_th]:bg-gray-100 [&_th]:font-semibold
+                [&_td]:border [&_td]:border-gray-300 [&_td]:px-4 [&_td]:py-2"
+              dangerouslySetInnerHTML={{ __html: seoContent }}
+            />
+          </div>
         )}
       </div>
     </div>

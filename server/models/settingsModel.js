@@ -57,6 +57,38 @@ const settingsSchema = mongoose.Schema(
       instagram: String,
       youtube: String,
     },
+    homeSections: {
+      categoryCards: {
+        type: Boolean,
+        default: true,
+      },
+      brandsCards: {
+        type: Boolean,
+        default: true,
+      },
+      productsCards: {
+        type: Boolean,
+        default: true,
+      },
+      flashSaleCards: {
+        type: Boolean,
+        default: true,
+      },
+      limitedSaleCards: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    categorySliderShape: {
+      type: String,
+      enum: ["circle", "square", "octagon"],
+      default: "circle",
+    },
+    categorySliderLayoutType: {
+      type: String,
+      enum: ["default", "compact", "modern", "minimal", "card", "banner", "circularCard"],
+      default: "default",
+    },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

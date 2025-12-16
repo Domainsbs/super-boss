@@ -1131,7 +1131,10 @@ router.get(
 
     const orders = await Order.find(query)
       .populate({ path: "user", select: "name email" })
-      .populate({ path: "orderItems.product", select: "name image sku" })
+      .populate({
+        path: "orderItems.product",
+        select: "name image sku price offerPrice oldPrice discount",
+      })
       .sort({ deliveredAt: -1, createdAt: -1 }) // Sort by delivered date first, then created date
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -1163,7 +1166,10 @@ router.get(
   asyncHandler(async (req, res) => {
     const orders = await Order.find({ status: { $ne: "Deleted" } })
       .populate({ path: "user", select: "name email" })
-      .populate({ path: "orderItems.product", select: "name image sku" })
+      .populate({
+        path: "orderItems.product",
+        select: "name image sku price offerPrice oldPrice discount",
+      })
       .sort({ createdAt: -1 })
       .limit(5)
     res.json(orders)
@@ -1182,17 +1188,30 @@ router.put(
 
     if (order) {
       const previousStatus = order.status
-      order.status = req.body.status
+
+      // Normalize incoming status to match schema enum values (case-insensitive)
+      const incoming = typeof req.body.status === "string" ? req.body.status.trim() : ""
+      const allowedStatuses = Order.schema.path("status").enumValues || []
+      const normalized = allowedStatuses.find((s) => s.toLowerCase() === incoming.toLowerCase())
+
+      if (!normalized) {
+        res.status(400)
+        throw new Error(
+          `Invalid status '${req.body.status}'. Allowed values: ${allowedStatuses.join(", ")}`,
+        )
+      }
+
+      order.status = normalized
 
       // Update delivered date if status is Delivered
-      if (req.body.status === "Delivered" && previousStatus !== "Delivered") {
+      if (normalized === "Delivered" && previousStatus !== "Delivered") {
         order.deliveredAt = new Date()
       }
 
       const updatedOrder = await order.save()
 
       // Send notification email only if status has changed
-      if (previousStatus !== req.body.status) {
+      if (previousStatus !== normalized) {
         try {
           await sendOrderNotification(updatedOrder)
           console.log(`Order status update email sent for order ${updatedOrder._id}`)
@@ -1287,11 +1306,18 @@ router.post(
   protect,
   admin,
   asyncHandler(async (req, res) => {
+    const { sellerMessage } = req.body
     const order = await Order.findById(req.params.id)
 
     if (!order) {
       res.status(404)
       throw new Error("Order not found")
+    }
+
+    // If seller message is provided, update the order first
+    if (sellerMessage !== undefined) {
+      order.sellerMessage = sellerMessage
+      await order.save()
     }
 
     const result = await sendOrderNotification(order)
@@ -1696,6 +1722,12 @@ router.post(
         Number(discountAmount || 0),
     )
 
+    // Normalize provided status to schema enum values
+    const allowedStatuses = Order.schema.path("status").enumValues || []
+    const normalizedStatus = allowedStatuses.find(
+      (s) => s.toLowerCase() === String(status || "New").trim().toLowerCase(),
+    ) || "New"
+
     const order = new Order({
       orderItems,
       user: userId || null,
@@ -1709,7 +1741,7 @@ router.post(
       discountAmount: Number(Number(discountAmount || 0).toFixed(2)), // special discount stored
       totalPrice: Number((typeof totalPrice === "number" ? totalPrice : computedTotal).toFixed(2)),
       customerNotes,
-      status: status || "New",
+      status: normalizedStatus,
     })
 
     const createdOrder = await order.save()
@@ -1730,5 +1762,42 @@ router.get("/test-reviews", protect, admin, (req, res) => {
     timestamp: new Date(),
   })
 })
+
+// @desc    Get critical orders (unpaid card/tabby/tamara payments)
+// @route   GET /api/admin/orders/critical
+// @access  Private/Admin
+router.get(
+  "/orders/critical",
+  protect,
+  admin,
+  asyncHandler(async (req, res) => {
+    // Find orders where:
+    // 1. Payment method is card, tabby, or tamara (not COD)
+    // 2. Order is NOT paid
+    // These are orders where customer attempted to pay but transaction failed
+    const criticalOrders = await Order.find({
+      $and: [
+        { isPaid: false }, // Not paid
+        { status: { $ne: "Deleted" } }, // Not deleted
+        { status: { $ne: "Cancelled" } }, // Not cancelled (optional - you might want to include cancelled too)
+        {
+          $or: [
+            { actualPaymentMethod: { $in: ["card", "tabby", "tamara"] } },
+            { paymentMethod: { $in: ["card", "tabby", "tamara", "Credit Card", "Debit Card"] } },
+          ],
+        },
+      ],
+    })
+      .populate({ path: "user", select: "name email" })
+      .populate({
+        path: "orderItems.product",
+        select: "name image sku price offerPrice oldPrice discount",
+      })
+      .sort({ createdAt: -1 })
+
+    console.log(`[CRITICAL ORDERS] Found ${criticalOrders.length} critical orders`)
+    res.json(criticalOrders)
+  }),
+)
 
 export default router

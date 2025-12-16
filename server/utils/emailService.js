@@ -1,5 +1,23 @@
 import nodemailer from "nodemailer"
 
+// Helper to ensure image URLs are absolute for email clients
+const toAbsoluteUrl = (src) => {
+  if (!src) return "https://via.placeholder.com/56?text=No+Image"
+  const s = String(src)
+  if (s.startsWith("http://") || s.startsWith("https://")) return s
+  if (s.startsWith("//")) return `https:${s}`
+  // prefer explicit public/base URLs if provided
+  const base =
+    process.env.PUBLIC_BASE_URL ||
+    process.env.SERVER_PUBLIC_URL ||
+    process.env.API_BASE_URL ||
+    process.env.FRONTEND_URL ||
+    "https://www.graba2z.ae"
+  if (s.startsWith("/")) return `${base}${s}`
+  // otherwise treat as uploads path
+  return `${base}/uploads/${s}`
+}
+
 // Create transporters for order and support emails
 const orderTransporter = nodemailer.createTransport({
   host: process.env.ORDER_EMAIL_HOST,
@@ -419,7 +437,7 @@ const getEmailTemplate = (type, data) => {
         .map(
           (item) => `
         <div class="product-item">
-          <img src="${item.product?.image || item.image || "/placeholder.svg?height=80&width=80"}" alt="${item.product?.name || item.name || "Product"}" class="product-image" />
+          <img src="${toAbsoluteUrl(item.product?.image || item.image)}" alt="${item.product?.name || item.name || "Product"}" class="product-image" />
           <div class="product-details">
             <div class="product-name">${item.product?.name || item.name || "Product"}</div>
             <div class="product-quantity">Quantity: ${item.quantity || 1}</div>
@@ -435,11 +453,15 @@ const getEmailTemplate = (type, data) => {
       const total = data.totalPrice || 0
       const vatAmount = (total * 0.05).toFixed(2) // Assuming 5% VAT
 
-      // Get customer info based on delivery type
+      // Get customer info - works for both guest and logged-in users
       const customerName = data.shippingAddress?.name || data.pickupDetails?.name || data.customerName || "Customer"
       const customerEmail = data.shippingAddress?.email || data.pickupDetails?.email || data.customerEmail || ""
       const customerPhone = data.shippingAddress?.phone || data.pickupDetails?.phone || ""
 
+      // Determine payment method display
+      const paymentMethodDisplay = data.paymentMethod || (data.paymentResult?.method) || "Cash on Delivery"
+
+      // Billing and Shipping addresses - handle both guest and logged-in users
       const billingAddress = data.shippingAddress || data.pickupDetails || {}
       const shippingAddress = data.deliveryType === "pickup" ? data.pickupDetails : data.shippingAddress
 
@@ -481,7 +503,7 @@ const getEmailTemplate = (type, data) => {
             .order-icon {
               width: 80px;
               height: 80px;
-              background-color: #2c3e50;
+              background-color: #8BC34A;
               border-radius: 50%;
               margin: 20px auto 0 auto;
               display: flex;
@@ -489,6 +511,7 @@ const getEmailTemplate = (type, data) => {
               justify-content: center;
               color: white;
               font-size: 30px;
+              line-height: 1;
             }
             .content {
               padding: 40px 30px 32px 30px;
@@ -623,7 +646,7 @@ const getEmailTemplate = (type, data) => {
             }
             .address-section {
               display: flex;
-              gap: 20px;
+              gap: 0;
               margin: 20px 0;
             }
             .address-block {
@@ -669,78 +692,22 @@ const getEmailTemplate = (type, data) => {
               <a href="https://www.graba2z.ae/" target="_blank">
                 <img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753105567/admin-logo_ruxcjj.png" alt="Graba2z Logo" />
               </a>
-              <div class="order-icon">🛒</div>
             </div>
             <div class="content">
-              <div class="order-number">Order #${data.orderNumber || data._id?.toString().slice(-6) || "N/A"}</div>
-              <div class="greeting">Hi ${customerName}, Thank you for your purchase.</div>
-              <div class="processing-text">We are processing your order.</div>
-              <div class="action-buttons">
-                <a href="${process.env.FRONTEND_URL || "https://graba2z.ae"}" class="button">Visit Website</a>
-                <a href="${process.env.FRONTEND_URL || "https://graba2z.ae"}/track-order" class="button">Track Your Order</a>
-              </div>
-              ${
-                orderItems.length > 0
-                  ? `
-              <div class="product-section">
-                ${orderItemsHtml}
-              </div>
-              `
-                  : ""
-              }
-              <div class="info-section">
-                <div class="info-title">Payment Method</div>
-                <div class="info-content">${data.paymentMethod || "Cash on delivery"}</div>
-              </div>
-              <div class="info-section">
-                <div class="info-title">Shipment Method</div>
-                <div class="info-content">${data.deliveryType === "pickup" ? "Store Pickup" : "Home Delivery"}</div>
-              </div>
-              ${
-                data.customerNotes
-                  ? `
-              <div class="info-section">
-                <div class="info-title">Note</div>
-                <div class="info-content">${data.customerNotes}</div>
-              </div>
-              `
-                  : ""
-              }
-              <div class="order-summary">
-                <div class="summary-row">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}AED</span>
+              <div class="status-section" style="background:#E8F5E9;border-radius:16px;padding:40px 30px 32px;margin:0 auto 30px;max-width:520px;text-align:center;">
+                <div class="order-number" style="margin-bottom:18px;">Order #${data.orderNumber || data._id?.toString().slice(-6) || "N/A"}</div>
+                <div class="greeting" style="margin-bottom:8px;">Hi ${customerName}, Thank you for your purchase.</div>
+                <div class="processing-text" style="margin-bottom:32px;">Your order has been placed.</div>
+                <div class="status-card" style="background:transparent;padding:0;margin:0;">
+                  <div class="status-icon" style="color:#2E7D32;font-size:44px;line-height:1;margin:0 auto 12px auto;">📦</div>
+                  <div class="status-label" style="color:#2E7D32;margin-top:4px;font-size:20px;font-weight:700;letter-spacing:0.2px;">Order Placed</div>
                 </div>
-                <div class="summary-row">
-                  <span>Shipping</span>
-                  <span>${shipping.toFixed(2)}AED</span>
-                </div>
-                <div class="summary-row total">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}AED</span>
-                </div>
-                <div class="vat-note">(includes ${vatAmount}AED VAT)</div>
               </div>
-              <div class="address-section">
-                <div class="address-block">
-                  <div class="info-title">Billing Address</div>
-                  <div class="info-content">
-                    ${billingAddress.name || customerName}<br>
-                    ${billingAddress.address || "N/A"}<br>
-                    ${billingAddress.city || "N/A"}<br>
-                    ${billingAddress.phone || customerPhone}<br>
-                    ${billingAddress.email || customerEmail}
-                  </div>
-                </div>
-                <div class="address-block">
-                  <div class="info-title">${data.deliveryType === "pickup" ? "Pickup Location" : "Shipping Address"}</div>
-                  <div class="info-content">
-                    ${shippingAddress?.name || customerName}<br>
-                    ${shippingAddress?.address || shippingAddress?.location || "N/A"}<br>
-                    ${shippingAddress?.city || "N/A"}<br>
-                    ${shippingAddress?.phone || customerPhone}
-                  </div>
-                </div>
+              <div style="text-align:center;margin-top:16px;">
+                <a href="https://www.graba2z.ae/track-order" 
+                   style="display:inline-block;background:#84cc16;color:#ffffff;text-decoration:none;padding:14px 32px;font-size:14px;font-weight:600;border-radius:28px;letter-spacing:0.5px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
+                  TRACK YOUR ORDER
+                </a>
               </div>
             </div>
             <div class="footer">
@@ -765,11 +732,15 @@ const getEmailTemplate = (type, data) => {
       `
 
     case "orderStatusUpdate":
-      // Status icon and label for current status only
+      // Status icon/label and theming
       const statusSteps = [
-        { key: "Processing", label: "Processing", icon: "⚙️" },
+        { key: "Order Placed", label: "Order Placed", icon: "🛒" },
+        { key: "Order Processing", label: "Order Processing", icon: "🔄" },
+        { key: "On Hold", label: "On Hold", icon: "⏸️" },
         { key: "Confirmed", label: "Confirmed", icon: "✅" },
+        { key: "Ready for Shipment", label: "Ready for Shipment", icon: "📦" },
         { key: "Shipped", label: "Shipped", icon: "📦" },
+        { key: "On the Way", label: "On the Way", icon: "🚚" },
         { key: "Out for Delivery", label: "Out for Delivery", icon: "🚚" },
         { key: "Delivered", label: "Delivered", icon: "🎉" },
         { key: "Cancelled", label: "Cancelled", icon: "❌" },
@@ -777,36 +748,145 @@ const getEmailTemplate = (type, data) => {
       const getCurrentStep = (status) => {
         if (!status) return statusSteps[0]
         const normalized = status.trim().toLowerCase()
-        if (normalized === "processing") return statusSteps[0]
-        if (normalized === "confirmed") return statusSteps[1]
-        if (normalized === "shipped") return statusSteps[2]
-        if (normalized === "out for delivery") return statusSteps[3]
-        if (normalized === "delivered") return statusSteps[4]
-        if (normalized === "cancelled") return statusSteps[5]
-        return statusSteps[0]
+        // Map legacy initial statuses to Order Placed for customer-facing display
+        if (["new", "new order", "order placed"].includes(normalized)) return statusSteps.find(s=>s.key==="Order Placed")
+        if (["processing", "in process", "order processing"].includes(normalized)) return statusSteps.find(s=>s.key==="Order Processing")
+        if (["on hold", "on-hold", "hold"].includes(normalized)) return statusSteps.find(s=>s.key==="On Hold")
+        if (["confirmed", "confirm"].includes(normalized)) return statusSteps.find(s=>s.key==="Confirmed")
+        if (["ready for shipment", "ready for shipping", "ready to ship", "rts"].includes(normalized)) return statusSteps.find(s=>s.key==="Ready for Shipment")
+        if (["shipped", "dispatched", "dispatch"].includes(normalized)) return statusSteps.find(s=>s.key==="Shipped")
+        if (["on the way", "on-the-way"].includes(normalized)) return statusSteps.find(s=>s.key==="On the Way")
+        if (["out for delivery", "out of delivery", "out-of-delivery"].includes(normalized)) return statusSteps.find(s=>s.key==="Out for Delivery")
+        if (["delivered"].includes(normalized)) return statusSteps.find(s=>s.key==="Delivered")
+        if (["cancelled", "canceled"].includes(normalized)) return statusSteps.find(s=>s.key==="Cancelled")
+        return statusSteps.find(s=>s.key==="Order Placed")
       }
       const currentStep = getCurrentStep(data.status)
-      // Order summary table (scoped variables)
-      const statusOrderItems = Array.isArray(data.orderItems) ? data.orderItems : []
-      const statusOrderItemsHtml = statusOrderItems
-        .map((item) => {
-          // Truncate product name to two lines (max 80 chars)
-          let name = item.product?.name || item.name || "Product"
-          if (name.length > 80) name = name.slice(0, 77) + "..."
-          return `
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="padding:10px 0;"><img src="${item.product?.image || item.image || "/placeholder.svg?height=80&width=80"}" alt="${name}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;background:#f0f0f0;" /></td>
-            <td style="padding:10px 0 10px 12px;font-size:15px;color:#222;max-width:220px;line-height:1.3;">${name}</td>
-            <td style="padding:10px 0;font-size:15px;color:#333;">AED ${(item.price || 0).toFixed(2)}</td>
-            <td style="padding:10px 0;font-size:15px;color:#333;">${item.quantity || 1}</td>
-          </tr>
-        `
-        })
-        .join("")
-      const statusSubtotal = data.itemsPrice || 0
-      const statusShipping = data.shippingPrice || 0
-      const statusTotal = data.totalPrice || 0
-      const statusVatAmount = (statusTotal * 0.05).toFixed(2)
+
+      // Theme colors per status (background, text, icon background)
+      const getTheme = (status) => {
+        const n = (status || "").toString().trim().toLowerCase()
+        if (["order placed", "new order", "new"].includes(n)) return { bg: "#E3F2FD", text: "#1565C0", iconBg: "#1E88E5" }
+        if (["processing", "in process", "order processing"].includes(n)) return { bg: "#E3F2FD", text: "#1565C0", iconBg: "#1E88E5" }
+        if (["confirmed", "confirm"].includes(n)) return { bg: "#E8F5E9", text: "#2E7D32", iconBg: "#43A047" }
+        if (["ready for shipment", "ready for shipping", "ready to ship", "rts"].includes(n)) return { bg: "#FFF3E0", text: "#EF6C00", iconBg: "#FB8C00" }
+        if (["shipped", "dispatched", "dispatch"].includes(n)) return { bg: "#E3F2FD", text: "#1565C0", iconBg: "#1E88E5" }
+        if (["on the way", "on-the-way"].includes(n)) return { bg: "#E3F2FD", text: "#1565C0", iconBg: "#1E88E5" }
+        if (["out for delivery", "out of delivery", "out-of-delivery"].includes(n)) return { bg: "#FFF8E1", text: "#F57F17", iconBg: "#F9A825" }
+        if (["delivered"].includes(n)) return { bg: "#E8F5E9", text: "#2E7D32", iconBg: "#43A047" }
+        if (["cancelled", "canceled"].includes(n)) return { bg: "#FFEBEE", text: "#C62828", iconBg: "#E53935" }
+        if (["on hold", "on-hold", "hold"].includes(n)) return { bg: "#ECEFF1", text: "#455A64", iconBg: "#78909C" }
+        // default: processing
+        return { bg: "#E3F2FD", text: "#1565C0", iconBg: "#1E88E5" }
+      }
+      const theme = getTheme(data.status)
+      // Build invoice table ONLY for Delivered status
+      const normalizedStatusForInvoice = (data.status || '').toString().trim().toLowerCase()
+      const isDeliveredStatus = normalizedStatusForInvoice === 'delivered'
+      const orderItemsList = Array.isArray(data.orderItems) ? data.orderItems : []
+      const currency = 'AED'
+      const itemsSubtotal = orderItemsList.reduce((sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0)
+      const shippingPrice = Number(data.shippingPrice || 0)
+      const taxPrice = Number(data.taxPrice || 0)
+      const discountAmount = Number(data.discountAmount || 0)
+      // Calculate grandTotal from items to ensure accuracy (handles variations correctly)
+      const calculatedTotal = itemsSubtotal + shippingPrice + taxPrice - discountAmount
+      const storedTotal = Number(data.totalPrice || 0)
+      // Use calculated total if higher (indicates stored value might be wrong due to variations)
+      const grandTotal = calculatedTotal > storedTotal ? calculatedTotal : storedTotal
+      const paymentMethod = data.paymentMethod || 'Cash on Delivery'
+      const paymentStatus = data.isPaid ? 'Paid' : 'Unpaid'
+      const paidAtDisplay = data.isPaid && data.paidAt ? new Date(data.paidAt).toLocaleDateString() : ''
+      const invoiceSection = isDeliveredStatus ? `
+        <style>
+          .invoice-wrapper {margin:40px auto 24px;max-width:560px;background:#f9f9f9;border:1px solid #e0e0e0;border-radius:12px;padding:24px;}
+          .invoice-wrapper h3 {margin:0 0 16px;font-size:20px;color:#333;font-weight:600;}
+          table.invoice-table {width:100%;border-collapse:collapse;font-size:14px;}
+          table.invoice-table thead th {text-align:left;background:#eceff1;padding:10px 8px;font-weight:600;color:#37474f;border-bottom:1px solid #cfd8dc;}
+          table.invoice-table tbody td {padding:8px 8px;border-bottom:1px solid #e0e0e0;vertical-align:middle;}
+          table.invoice-table tbody tr:last-child td {border-bottom:none;}
+          table.invoice-table tfoot td {padding:8px 8px;font-weight:600;}
+          table.invoice-table tfoot tr.total-row td {border-top:2px solid #ccc;font-size:15px;}
+          .text-right {text-align:right;}
+          .muted {color:#666;font-weight:400;}
+          .paid-at {font-size:12px;color:#2e7d32;font-weight:500;}
+          /* Force predictable image sizing in most email clients */
+          .img-cell {width:56px;}
+          .img-cell img {display:block;width:56px;height:56px;max-width:56px;max-height:56px;object-fit:cover;border-radius:8px;background:#fff;border:1px solid #ddd;}
+          @media (max-width:600px){
+            .invoice-wrapper{padding:16px;margin:32px 8px;}
+            table.invoice-table thead{display:none;}
+            table.invoice-table tbody td{display:block;padding:6px 4px;border-bottom:1px solid #e0e0e0;}
+            table.invoice-table tbody tr{margin-bottom:16px;display:block;}
+            table.invoice-table tbody td[data-label]{position:relative;padding-left:52%;}
+            table.invoice-table tbody td[data-label]:before{content:attr(data-label);position:absolute;left:0;width:48%;padding-left:4px;font-weight:600;color:#455a64;}
+            table.invoice-table tbody td.img-cell{padding-left:0;}
+            /* Larger but constrained image on mobile */
+            table.invoice-table tbody td.img-cell img{display:block;width:96px;height:96px;max-width:96px;max-height:96px;border-radius:10px;object-fit:cover;}
+          }
+        </style>
+        <div class="invoice-wrapper">
+          <h3>Delivery Invoice</h3>
+          <table class="invoice-table" role="presentation" cellspacing="0" cellpadding="0">
+            <thead>
+              <tr>
+                <th style="width:12%;">Image</th>
+                <th style="width:56%;">Item</th>
+                <th style="width:12%;">Qty</th>
+                <th style="width:20%;" class="text-right">Price (${currency})</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orderItemsList.map(it => {
+                const lineTotal = (Number(it.price)||0) * (Number(it.quantity)||1)
+                const name = (it.product && (it.product.name || it.product.title)) || it.name || 'Item'
+                const rawImg = (it.product && it.product.image) || it.image
+                const imgSrc = toAbsoluteUrl(rawImg)
+                const colorInfo = it.selectedColorData && it.selectedColorData.colorName ? `<br><span style="font-size:12px;color:#7c3aed;">Color: ${it.selectedColorData.colorName}</span>` : ''
+                const dosInfo = it.selectedDosData && it.selectedDosData.dosType ? `<br><span style="font-size:12px;color:#2563eb;">OS: ${it.selectedDosData.dosType}</span>` : ''
+                return `<tr>
+                  <td class="img-cell" data-label="Image" style="width:56px;">
+                    <img src="${imgSrc}" alt="${name}" width="56" height="56" style="display:block;width:56px;height:56px;max-width:56px;max-height:56px;object-fit:cover;border-radius:8px;background:#fff;border:1px solid #ddd;" />
+                  </td>
+                  <td data-label="Item">${name}${colorInfo}${dosInfo}</td>
+                  <td data-label="Qty">${Number(it.quantity)||1}</td>
+                  <td data-label="Price" class="text-right">${(Number(it.price)||0).toFixed(2)}</td>
+                </tr>`
+              }).join('')}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right muted">Items Subtotal</td>
+                <td class="text-right">${itemsSubtotal.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right muted">Shipping</td>
+                <td class="text-right">${shippingPrice.toFixed(2)}</td>
+              </tr>
+              ${taxPrice > 0 ? `<tr>
+                <td colspan="3" class="text-right muted">Tax</td>
+                <td class="text-right">${taxPrice.toFixed(2)}</td>
+              </tr>` : ''}
+              ${discountAmount > 0 ? `<tr>
+                <td colspan="3" class="text-right muted">Discount</td>
+                <td class="text-right">- ${discountAmount.toFixed(2)}</td>
+              </tr>` : ''}
+              <tr class="total-row">
+                <td colspan="3" class="text-right">Grand Total (${currency})</td>
+                <td class="text-right">${grandTotal.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right muted">Payment Method</td>
+                <td class="text-right">${paymentMethod}</td>
+              </tr>
+              <tr>
+                <td colspan="3" class="text-right muted">Payment Status</td>
+                <td class="text-right">${paymentStatus} ${paidAtDisplay ? `<span class="paid-at">(on ${paidAtDisplay})</span>` : ''}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      ` : ''
       return `
         <!DOCTYPE html>
         <html lang="en">
@@ -842,16 +922,10 @@ const getEmailTemplate = (type, data) => {
             .order-number { font-size: 24px; font-weight: bold; color: #333; text-align: center; margin-bottom: 20px; }
             .greeting { font-size: 18px; text-align: center; margin-bottom: 10px; color: #333; }
             .processing-text { font-size: 16px; text-align: center; color: #666; margin-bottom: 30px; }
-            .status-badge { display: flex; align-items: center; justify-content: center; margin: 24px 0 24px 0; }
-            .status-icon { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; background: #8BC34A; color: #fff; margin-right: 16px; box-shadow: 0 2px 8px #8BC34A33; }
-            .status-label { font-size: 20px; font-weight: bold; color: #689f38; letter-spacing: 0.2px; }
-            .order-summary-table { width: 100%; border-collapse: collapse; margin: 30px 0 10px 0; }
-            .order-summary-table th { background: #f9f9f9; color: #333; font-size: 15px; font-weight: 600; padding: 10px 0; border-bottom: 2px solid #e0e0e0; }
-            .order-summary-table td { text-align: center; }
-            .order-summary-totals { width: 100%; margin-top: 10px; }
-            .order-summary-totals td { font-size: 15px; padding: 6px 0; color: #333; }
-            .order-summary-totals .total { font-weight: bold; font-size: 17px; color: #689f38; }
-            .order-summary-totals .vat { font-size: 13px; color: #888; text-align: right; }
+            .status-card { margin: 0 auto 24px auto; padding: 24px; border-radius: 12px; text-align: center; }
+            .status-icon { font-size: 44px; line-height: 1; margin: 0 auto 12px auto; }
+            .status-label { font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+            /* Removed tables per request */
             .footer { background-color: #e8f7ee; padding: 32px 20px 20px 20px; text-align: center; font-size: 13px; color: #888; }
             .footer .socials { margin: 18px 0 10px 0; }
             .footer .socials a { display: inline-block; margin: 0 10px; text-decoration: none; }
@@ -868,30 +942,31 @@ const getEmailTemplate = (type, data) => {
               </a>
             </div>
             <div class="content">
-              <div class="order-number">Order #${data.orderNumber || data._id?.toString().slice(-6) || "N/A"}</div>
-              <div class="greeting">Hello ${data.customerName || "Customer"}!</div>
-              <div class="processing-text">Your order status has been updated.</div>
-              <div class="status-badge">
-                <div class="status-icon">${currentStep.icon}</div>
-                <span class="status-label">${currentStep.label}</span>
+              <div class="status-section" style="background:${theme.bg};border-radius:16px;padding:40px 30px 32px;margin:0 auto 30px;max-width:520px;">
+                <div class="order-number" style="margin-bottom:18px;">Order #${data.orderNumber || data._id?.toString().slice(-6) || "N/A"}</div>
+                <div class="greeting" style="margin-bottom:8px;">Hello ${data.customerName || "Customer"}!</div>
+                <div class="processing-text" style="margin-bottom:32px;">Your order status has been updated.</div>
+                <div class="status-card" style="background:transparent;padding:0;margin:0;">
+                  <div class="status-icon" style="color:${theme.text};">${currentStep.icon}</div>
+                  <div class="status-label" style="color:${theme.text};margin-top:4px;">${currentStep.label}</div>
+                </div>
               </div>
-              <table class="order-summary-table">
-                <tr>
-                  <th>Image</th>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Qty</th>
-                </tr>
-                ${statusOrderItemsHtml}
-              </table>
-              <table class="order-summary-totals">
-                <tr><td style="text-align:right;">Subtotal:</td><td style="text-align:right;">AED ${statusSubtotal.toFixed(2)}</td></tr>
-                <tr><td style="text-align:right;">Shipping:</td><td style="text-align:right;">AED ${statusShipping.toFixed(2)}</td></tr>
-                <tr class="total"><td style="text-align:right;">Total:</td><td style="text-align:right;">AED ${statusTotal.toFixed(2)}</td></tr>
-                <tr><td colspan="2" class="vat">(includes ${statusVatAmount} AED VAT)</td></tr>
-              </table>
-              <div class="action-buttons">
-                <a href="${process.env.FRONTEND_URL || "https://graba2z.ae"}/track-order" class="button">Track Your Order</a>
+              <!-- STATUS_TEMPLATE_MINIMAL v2: only header + status badge retained -->
+              <!-- If you still see tables, production hasn't redeployed this file. -->
+              ${invoiceSection}
+              ${data.sellerMessage ? `
+              <div style="max-width:520px;margin:24px auto;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px 24px;">
+                <div style="font-size:14px;font-weight:600;color:#166534;margin-bottom:8px;display:flex;align-items:center;">
+                  <span style="margin-right:8px;">📝</span> Message from Seller
+                </div>
+                <div style="font-size:14px;color:#15803d;line-height:1.6;white-space:pre-wrap;">${data.sellerMessage}</div>
+              </div>
+              ` : ''}
+              <div style="text-align:center;margin-top:16px;">
+                <a href="https://www.graba2z.ae/track-order" 
+                   style="display:inline-block;background:#84cc16;color:#ffffff;text-decoration:none;padding:14px 32px;font-size:14px;font-weight:600;border-radius:28px;letter-spacing:0.5px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
+                  TRACK YOUR ORDER
+                </a>
               </div>
             </div>
             <div class="footer">
@@ -908,6 +983,173 @@ const getEmailTemplate = (type, data) => {
               <div style="margin-top: 10px; color: #888;">
                 &copy; 2025 Graba2z. All rights reserved.<br />
                 <span style="font-size:12px;">If you did not enter this email address when signing up for Graba2z, disregard this message.</span>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+    case "accountDeletion":
+      return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Account Deletion Verification</title>
+          <style>
+            body {
+              background-color: #fee;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 32px auto;
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+              border: 1px solid #e0e0e0;
+            }
+            .header {
+              background-color: #fff;
+              padding: 32px 0 16px 0;
+              text-align: center;
+              border-bottom: 1px solid #e0e0e0;
+            }
+            .header a {
+              display: inline-block;
+            }
+            .header img {
+              max-height: 60px;
+            }
+            .content {
+              padding: 40px 30px 32px 30px;
+              text-align: center;
+            }
+            .warning-icon {
+              width: 80px;
+              height: 80px;
+              background-color: #ef4444;
+              border-radius: 50%;
+              margin: 20px auto;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-size: 40px;
+            }
+            .content h2 {
+              color: #dc2626;
+              font-size: 1.5rem;
+              margin-bottom: 0.5em;
+            }
+            .content p {
+              color: #444;
+              font-size: 1.1rem;
+              margin: 0.5em 0 1.5em 0;
+            }
+            .code-box {
+              background: #fef2f2;
+              border: 2px solid #fecaca;
+              border-radius: 10px;
+              margin: 32px auto 24px auto;
+              padding: 24px 0;
+              font-size: 2.2rem;
+              font-weight: bold;
+              color: #dc2626;
+              letter-spacing: 10px;
+              max-width: 320px;
+            }
+            .warning-box {
+              background: #fef2f2;
+              border-left: 4px solid #ef4444;
+              border-radius: 8px;
+              padding: 16px 20px;
+              margin: 20px 0;
+              text-align: left;
+            }
+            .warning-box strong {
+              color: #dc2626;
+            }
+            .footer {
+              background-color: #fee;
+              padding: 32px 20px 20px 20px;
+              text-align: center;
+              font-size: 13px;
+              color: #888;
+            }
+            .footer .socials {
+              margin: 18px 0 10px 0;
+            }
+            .footer .socials a {
+              display: inline-block;
+              margin: 0 10px;
+              text-decoration: none;
+            }
+            .footer .socials img {
+              width: 32px;
+              height: 32px;
+              vertical-align: middle;
+              border-radius: 50%;
+              background: #fff;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+              transition: box-shadow 0.2s;
+            }
+            .footer .socials img:hover {
+              box-shadow: 0 4px 16px rgba(239,68,68,0.15);
+            }
+            @media (max-width: 600px) {
+              .container { border-radius: 0; margin: 0; }
+              .content { padding: 24px 8px 24px 8px; }
+              .footer { padding: 24px 4px 12px 4px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <a href="https://www.graba2z.ae/" target="_blank">
+                <img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753105567/admin-logo_ruxcjj.png" alt="Graba2z Logo" />
+              </a>
+              <div class="warning-icon">⚠️</div>
+            </div>
+            <div class="content">
+              <h2>Account Deletion Request</h2>
+              <p>Hi <b>${data.name || "User"}</b>,<br />
+              We received a request to permanently delete your Graba2z account. If you want to proceed, please enter the verification code below:</p>
+              <div class="code-box">${data.code || "000000"}</div>
+              <div class="warning-box">
+                <strong>⚠️ Warning:</strong> This action is permanent and cannot be undone. Once your account is deleted:
+                <ul style="text-align: left; margin: 10px 0 0 0; padding-left: 20px; color: #666;">
+                  <li>All your personal data will be permanently removed</li>
+                  <li>Your order history will be deleted</li>
+                  <li>Your wishlist and preferences will be lost</li>
+                  <li>You won't be able to recover your account</li>
+                </ul>
+              </div>
+              <p style="margin: 16px 0 0 0; color: #dc2626; font-weight: bold;">
+                Copy the code above and paste it on the website to confirm account deletion.
+              </p>
+              <p style="margin-top: 2em; color: #888; font-size: 1em;">This code will expire in 10 minutes.<br />If you didn't request account deletion, please ignore this email and secure your account immediately.</p>
+            </div>
+            <div class="footer">
+              <div class="socials">
+                <a href="https://www.facebook.com/grabatozae/" target="_blank"><img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753107123/WhatsApp_Image_2025-07-21_at_7.10.18_AM_1_axvzvv.jpg" alt="Facebook" style="width:32px;height:32px;margin:0 10px;vertical-align:middle;background:transparent;border-radius:8px;box-shadow:none;" /></a>
+                <a href="https://www.instagram.com/grabatoz/" target="_blank"><img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753107124/WhatsApp_Image_2025-07-21_at_7.10.18_AM_xgjv5f.jpg" alt="Instagram" style="width:32px;height:32px;margin:0 10px;vertical-align:middle;background:transparent;border-radius:8px;box-shadow:none;" /></a>
+                <a href="https://x.com/GrabAtoz" target="_blank"><img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753107545/WhatsApp_Image_2025-07-21_at_7.10.18_AM_2_cwzjg6.png" alt="X" style="width:32px;height:32px;margin:0 10px;vertical-align:middle;background:transparent;border-radius:8px;box-shadow:none;" /></a>
+                <a href="https://www.linkedin.com/company/grabatozae" target="_blank"><img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753107123/WhatsApp_Image_2025-07-21_at_7.10.18_AM_3_ll6y2i.jpg" alt="LinkedIn" style="width:32px;height:32px;margin:0 10px;vertical-align:middle;background:transparent;border-radius:8px;box-shadow:none;" /></a>
+              </div>
+              <p>This email was sent by: support@grabatoz.ae</p>
+              <br/>
+              <p>Kindly Do Not Reply to this Email</p>
+              <br/>
+              <div style="margin-top: 10px; color: #888;">
+                &copy; 2025 Graba2z. All rights reserved.<br />
+                <span style="font-size:12px;">If you did not request account deletion, please secure your account immediately.</span>
               </div>
             </div>
           </div>
@@ -1103,9 +1345,13 @@ const getEmailTemplate = (type, data) => {
 // Generic send email function with sender type
 const sendEmail = async (to, subject, html, senderType = "support") => {
   try {
+    console.log(`[sendEmail] Starting - To: ${to}, Subject: ${subject}, Sender: ${senderType}`)
     const { transporter, from } = getMailConfig(senderType)
+    console.log(`[sendEmail] Transporter configured, From: ${from}`)
     if (senderType === "support") {
-      console.log("[DEBUG] SUPPORT_EMAIL_USER:", process.env.SUPPORT_EMAIL_USER)
+      console.log("[sendEmail] SUPPORT_EMAIL_USER:", process.env.SUPPORT_EMAIL_USER)
+      console.log("[sendEmail] SUPPORT_EMAIL_HOST:", process.env.SUPPORT_EMAIL_HOST)
+      console.log("[sendEmail] SUPPORT_EMAIL_PORT:", process.env.SUPPORT_EMAIL_PORT)
     }
     const mailOptions = {
       from,
@@ -1113,11 +1359,14 @@ const sendEmail = async (to, subject, html, senderType = "support") => {
       subject,
       html,
     }
+    console.log("[sendEmail] Sending email with options:", { from, to, subject: mailOptions.subject })
     const result = await transporter.sendMail(mailOptions)
-    console.log(`Email sent successfully from ${from}:`, result.messageId)
+    console.log(`[sendEmail] Email sent successfully from ${from}:`, result.messageId)
     return { success: true, messageId: result.messageId }
   } catch (error) {
-    console.error("Failed to send email:", error)
+    console.error("[sendEmail] Failed to send email:", error)
+    console.error("[sendEmail] Error code:", error.code)
+    console.error("[sendEmail] Error response:", error.response)
     throw new Error(`Email sending failed: ${error.message}`)
   }
 }
@@ -1138,13 +1387,19 @@ export const sendVerificationEmail = async (email, name, code) => {
 export const sendOrderPlacedEmail = async (order) => {
   try {
     const orderNumber = order._id.toString().slice(-6)
-    const customerName = order.shippingAddress?.name || order.pickupDetails?.name || "Customer"
+    
+    // Get customer name and email - works for both guest and logged-in users
+    const customerName = order.shippingAddress?.name || order.pickupDetails?.name || order.user?.name || "Customer"
     const customerEmail = order.shippingAddress?.email || order.pickupDetails?.email || order.user?.email
 
     if (!customerEmail) {
       console.error("No customer email found for order:", order._id)
       return { success: false, error: "No customer email" }
     }
+
+    // Log whether this is a guest or logged-in user order
+    const isGuestOrder = !order.user
+    console.log(`[sendOrderPlacedEmail] Sending confirmation email for ${isGuestOrder ? 'GUEST' : 'LOGGED-IN'} user order ${order._id} to ${customerEmail}`)
 
     const html = getEmailTemplate("orderConfirmation", {
       ...order.toObject(),
@@ -1154,6 +1409,7 @@ export const sendOrderPlacedEmail = async (order) => {
     })
 
     await sendEmail(customerEmail, `Order Confirmation #${orderNumber} - Graba2z`, html, "order")
+    console.log(`[sendOrderPlacedEmail] Confirmation email sent successfully for order ${order._id}`)
     return { success: true }
   } catch (error) {
     console.error("Failed to send order placed email:", error)
@@ -1164,8 +1420,23 @@ export const sendOrderPlacedEmail = async (order) => {
 // Send order status update email
 export const sendOrderStatusUpdateEmail = async (order) => {
   try {
+    // Normalize status for checking
+    const normalizedStatus = (order.status || '').toString().trim().toLowerCase()
+    
+    // IMPORTANT: Do NOT send email to customer if order status is "Deleted"
+    // This applies to both logged-in users and guest users
+    if (normalizedStatus === 'deleted') {
+      console.log(`[sendOrderStatusUpdateEmail] Skipping email for Deleted status order ${order._id}`)
+      return { success: true, skipped: true, reason: 'Deleted status - no customer notification' }
+    }
+
     const orderNumber = order._id.toString().slice(-6)
+    
+    // Get customer name - works for both guest and logged-in users
     const customerName = order.shippingAddress?.name || order.pickupDetails?.name || order.user?.name || "Customer"
+    
+    // Get customer email - works for both guest and logged-in users
+    // Priority: shippingAddress.email > pickupDetails.email > user.email
     const customerEmail = order.shippingAddress?.email || order.pickupDetails?.email || order.user?.email
 
     if (!customerEmail) {
@@ -1173,22 +1444,54 @@ export const sendOrderStatusUpdateEmail = async (order) => {
       return { success: false, error: "No customer email" }
     }
 
+    // Log whether this is a guest or logged-in user order
+    const isGuestOrder = !order.user
+    console.log(`[sendOrderStatusUpdateEmail] Sending email for ${isGuestOrder ? 'GUEST' : 'LOGGED-IN'} user order ${order._id} to ${customerEmail}`)
+
     const html = getEmailTemplate("orderStatusUpdate", {
       ...order.toObject(),
       orderNumber,
       customerName,
     })
+    // Defensive: strip any product/totals blocks if present due to stale template
+    let sanitizedHtml = html
+      // Remove product-section blocks
+      .replace(/<div class="product-section">[\s\S]*?<\/div>\s*/g, '')
+      // Remove order-summary blocks
+      .replace(/<div class="order-summary">[\s\S]*?<\/div>\s*/g, '')
+      // Remove summary rows if present standalone
+      .replace(/<div class="summary-row[^"]*">[\s\S]*?<\/div>\s*/g, '')
+    
+    // Debug marker to ensure minimal template is deployed
+    console.log('[sendOrderStatusUpdateEmail] Template length:', sanitizedHtml.length)
+    console.log('[sendOrderStatusUpdateEmail] Minimal marker present:', sanitizedHtml.includes('STATUS_TEMPLATE_MINIMAL'))
 
     const statusMessages = {
-      processing: "Order is Being Processed",
+      processing: "Order Processing",
+      "in process": "Order Placed",
+      placed: "Order Placed",
+      "order placed": "Order Placed",
+      "new order": "Order Placed",
+      new: "Order Placed",
       confirmed: "Order Confirmed",
+      "ready for shipment": "Order Ready for Shipment",
+      "ready for shipping": "Order Ready for Shipment",
+      "ready to ship": "Order Ready for Shipment",
+      rts: "Order Ready for Shipment",
       shipped: "Order Shipped",
       delivered: "Order Delivered",
       cancelled: "Order Cancelled",
+      hold: "Order On Hold",
+      "on hold": "Order On Hold",
+      dispatched: "Order Shipped",
+      "on the way": "Order On The Way",
+      "out for delivery": "Order Out for Delivery",
+      returned: "Order Returned",
     }
 
-    const subject = `${statusMessages[order.status] || "Order Update"} #${orderNumber} - Graba2z`
-    await sendEmail(customerEmail, subject, html, "order")
+    const subject = `${statusMessages[normalizedStatus] || "Order Update"} #${orderNumber} - Graba2z`
+    await sendEmail(customerEmail, subject, sanitizedHtml, "order")
+    console.log(`[sendOrderStatusUpdateEmail] Email sent successfully for order ${order._id}`)
     return { success: true }
   } catch (error) {
     console.error("Failed to send order status update email:", error)
@@ -1204,6 +1507,24 @@ export const sendReviewVerificationEmail = async (email, name, code, productName
     return { success: true }
   } catch (error) {
     console.error("Failed to send review verification email:", error)
+    throw error
+  }
+}
+
+// Send account deletion verification email
+export const sendAccountDeletionEmail = async (email, name, code) => {
+  try {
+    console.log("[sendAccountDeletionEmail] Starting - Email:", email, "Name:", name, "Code:", code)
+    const html = getEmailTemplate("accountDeletion", { name, code })
+    console.log("[sendAccountDeletionEmail] Template generated, length:", html.length)
+    console.log("[sendAccountDeletionEmail] Calling sendEmail with support sender")
+    const result = await sendEmail(email, "Account Deletion Verification - Graba2z", html, "support")
+    console.log("[sendAccountDeletionEmail] Email sent successfully:", result)
+    return { success: true }
+  } catch (error) {
+    console.error("[sendAccountDeletionEmail] Failed to send account deletion email:", error)
+    console.error("[sendAccountDeletionEmail] Error details:", error.message)
+    console.error("[sendAccountDeletionEmail] Error stack:", error.stack)
     throw error
   }
 }
@@ -1255,3 +1576,153 @@ export default {
   sendNewsletterConfirmation,
   sendReviewVerificationEmail,
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

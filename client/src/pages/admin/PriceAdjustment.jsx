@@ -5,6 +5,7 @@ import axios from "axios"
 import AdminSidebar from "../../components/admin/AdminSidebar"
 import { useToast } from "../../context/ToastContext"
 import { Search, Tag, CheckSquare, Square, TrendingUp, Percent, DollarSign } from "lucide-react"
+import { getFullImageUrl } from "../../utils/imageUtils"
 import config from "../../config/config"
 
 const PriceAdjustment = () => {
@@ -82,7 +83,7 @@ const PriceAdjustment = () => {
       console.error("Failed to load products:", error)
       if (error.response?.status === 401) {
         setError("Authentication failed. Please login again.")
-        window.location.href = "/bigbossadmin/login"
+        window.location.href = "/grabiansadmin/login"
       } else {
         setError("Failed to load products. Please try again later.")
       }
@@ -244,8 +245,21 @@ const PriceAdjustment = () => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-gray-900">Price Adjustment</h1>
-            <div className="flex items-center gap-2">
-              {totalSelected > 0 && <span className="text-sm text-lime-500">{totalSelected} selected</span>}
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-gray-600">
+                Total Products: <span className="font-semibold text-gray-900">{products.length}</span>
+              </div>
+              {totalSelected > 0 && (
+                <>
+                  <span className="text-sm text-lime-600 font-medium">{totalSelected} selected</span>
+                  <button
+                    onClick={clearSelection}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                  >
+                    Clear Selection
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => setShowAdjustmentModal(true)}
                 disabled={totalSelected === 0}
@@ -266,7 +280,7 @@ const PriceAdjustment = () => {
               {error}
               {error.includes("Authentication") && (
                 <button
-                  onClick={() => (window.location.href = "/bigbossadmin/login")}
+                  onClick={() => (window.location.href = "/grabiansadmin/login")}
                   className="ml-4 px-3 py-1 bg-red-600 text-white rounded text-sm"
                 >
                   Login Again
@@ -424,7 +438,7 @@ const PriceAdjustment = () => {
                             <div className="flex items-center">
                               <div className="h-10 w-10 flex-shrink-0">
                                 <img
-                                  src={product.image || "/placeholder.svg"}
+                                  src={getFullImageUrl(product.image) || "/placeholder.svg"}
                                   alt={product.name}
                                   className="h-10 w-10 rounded-md object-cover"
                                 />
@@ -471,15 +485,6 @@ const PriceAdjustment = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
-
-          {/* Clear selection */}
-          {totalSelected > 0 && (
-            <div className="flex justify-between items-center mt-3">
-              <button onClick={clearSelection} className="text-xs text-gray-600 hover:underline">
-                Clear selection
-              </button>
             </div>
           )}
         </div>

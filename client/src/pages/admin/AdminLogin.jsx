@@ -48,19 +48,20 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-lime-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-lime-500 rounded-2xl mb-4 shadow-lg">
-            <Shield className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Portal</h1>
-          <p className="text-slate-600">Sign in to your account</p>
-        </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-blue-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg">
         {/* Login Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+        <div className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-10">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl mb-6 shadow-xl">
+              <Shield className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-3">
+              Super Boss Admin
+            </h1>
+            <p className="text-slate-500 text-lg">Welcome back! Please sign in to continue</p>
+          </div>
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
               <p className="text-red-600 text-sm">{error}</p>
@@ -80,7 +81,7 @@ const AdminLogin = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all duration-200 text-slate-900"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-slate-900"
                   placeholder="Enter your email"
                   required
                 />
@@ -99,7 +100,7 @@ const AdminLogin = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all duration-200 text-slate-900"
+                  className="w-full pl-10 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-slate-900"
                   placeholder="Enter your password"
                   required
                 />
@@ -117,7 +118,7 @@ const AdminLogin = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-lime-500 hover:bg-lime-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -128,15 +129,15 @@ const AdminLogin = () => {
                   Signing In...
                 </div>
               ) : (
-                "Sign In"
+                "Sign In to Dashboard"
               )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-slate-500 text-sm">
-              <a href="grabatoz.ae">Grab A2Z </a> &copy; All Copyrights Reserved
+          <div className="mt-10 pt-6 border-t border-slate-200 text-center">
+            <p className="text-slate-400 text-sm font-medium">
+              &copy; {new Date().getFullYear()} Super Boss. All Rights Reserved.
             </p>
           </div>
         </div>

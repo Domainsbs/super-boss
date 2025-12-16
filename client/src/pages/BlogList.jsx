@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import { Calendar, User, Eye, Tag, Search, Filter } from "lucide-react"
-import LoadingSpinner from "../components/LoadingSpinner"
+import { getFullImageUrl } from "../utils/imageUtils"
 
 import config from "../config/config"
 
@@ -102,10 +102,14 @@ const BlogList = () => {
   }
 
   // Add this style for bounce animation
+  const bounceStyle = {
+    animation: 'bounce 1s infinite',
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="medium" />
+        <img src="/g.png" alt="Loading..." style={{ width: 80, height: 80, ...bounceStyle }} />
       </div>
     )
   }
@@ -213,7 +217,7 @@ const BlogList = () => {
                 {/* Blog Image */}
                 <div className="h-48 w-full bg-gray-100 flex items-center justify-center overflow-hidden">
                   <img
-                    src={blog.mainImage || blog.image || "/placeholder.svg"}
+                    src={getFullImageUrl(blog.mainImage || blog.image) || "/placeholder.svg"}
                     alt={blog.title}
                     className="object-cover w-full h-full"
                   />

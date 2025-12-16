@@ -90,15 +90,15 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
       </div>
 
       {/* Order Summary Section */}
-      <div className="bg-white  border-l-4 pl-2 border-lime-500">
-        <h3 className="text-2xl font-bold text-lime-800 mb-2 uppercase tracking-wide">📋 Order Summary</h3>
+      <div className="bg-white  border-l-4 pl-2 border-blue-500">
+        <h3 className="text-2xl font-bold text-blue-800 mb-2 uppercase tracking-wide">📋 Order Summary</h3>
 
         {/* Addresses */}
         <div className="grid grid-cols-2 md:grid-cols-2 gap-6 mb-2">
           {/* Shipping Address */}
-          <div className="bg-white border-2 border-lime-200 rounded-lg px-3 py-1 relative">
-            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-lime-400 to-lime-600"></div>
-            <h4 className="text-lg font-bold text-lime-800 flex items-center">🚚 Shipping Address</h4>
+          <div className="bg-white border-2 border-blue-200 rounded-lg px-3 py-1 relative">
+            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-blue-400 to-blue-600"></div>
+            <h4 className="text-lg font-bold text-blue-800 flex items-center">🚚 Shipping Address</h4>
             <div className=" text-sm">
               <p className="font-semibold text-gray-900 text-base">{order.shippingAddress?.name || "N/A"}</p>
               <p className="text-gray-700">{order.shippingAddress?.address || "N/A"}</p>
@@ -112,9 +112,9 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
           </div>
 
           {/* Billing Address */}
-          <div className="bg-white border-2 border-lime-200 rounded-lg px-3 py-1 relative">
-            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-lime-400 to-lime-600"></div>
-            <h4 className="text-lg font-bold text-lime-800 flex items-center">💳 Billing Address</h4>
+          <div className="bg-white border-2 border-blue-200 rounded-lg px-3 py-1 relative">
+            <div className="absolute top-0 left-0 right-0  bg-gradient-to-r from-blue-400 to-blue-600"></div>
+            <h4 className="text-lg font-bold text-blue-800 flex items-center">💳 Billing Address</h4>
             <div className="text-sm">
               <p className="font-semibold text-gray-900 text-base">
                 {order.billingAddress?.name || order.shippingAddress?.name || "N/A"}
@@ -137,7 +137,7 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
         <div className="mb-2">
           <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
             <thead>
-              <tr className="bg-gradient-to-r from-lime-500 to-lime-600 text-white">
+              <tr className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                 <th className="text-left p-4 font-bold"> Product</th>
                 <th className="text-left p-4 font-bold"> SKU</th>
                 <th className="text-center p-4 font-bold"> Quantity</th>
@@ -150,9 +150,9 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
                 <tr key={item._id || index} className={`border-b ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
                   <td className="p-4 font-medium text-gray-900">{item.name}</td>
                   <td className="p-4 text-gray-600 whitespace-nowrap">{item.product?.sku || item.sku || "-"}</td>
-                  <td className="p-4 text-center font-semibold text-lime-600">{item.quantity}</td>
+                  <td className="p-4 text-center font-semibold text-blue-600">{item.quantity}</td>
                   <td className="p-4 text-right font-medium">{formatPrice(item.price)}</td>
-                  <td className="p-4 text-right font-bold text-lime-600">{formatPrice(item.price * item.quantity)}</td>
+                  <td className="p-4 text-right font-bold text-blue-600">{formatPrice(item.price * item.quantity)}</td>
                 </tr>
               )) || (
                 <tr>
@@ -166,7 +166,7 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
         </div>
 
         {/* Totals */}
-        <div className="bg-white border-2 border-lime-200 rounded-lg p-3">
+        <div className="bg-white border-2 border-blue-200 rounded-lg p-3">
           <div className="space-y-1">
             <div className="flex justify-between text-gray-700">
               <span>💰 Sub-Total:</span>
@@ -207,8 +207,8 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
               <span className="font-medium">{formatPrice(order.shippingPrice || 0)}</span>
             </div>
 
-            <div className="border-t-2 border-lime-500">
-              <div className="flex justify-between text-xl font-bold text-lime-800 bg-lime-100 p-2 rounded-lg">
+            <div className="border-t-2 border-blue-500">
+              <div className="flex justify-between text-xl font-bold text-blue-800 bg-blue-100 p-2 rounded-lg">
                 <span> TOTAL AMOUNT:</span>
                 <span>{formatPrice(order.totalPrice || 0)}</span>
               </div>
@@ -223,7 +223,7 @@ const InvoiceComponent = forwardRef(({ order }, ref) => {
               <p className="font-semibold text-gray-800 mb-2">💳 Payment Status:</p>
               <span
                 className={`px-4 py-2 rounded-full text-sm font-bold ${
-                  order.isPaid ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
+                  order.isPaid ? "bg-blue-200 text-blue-800" : "bg-red-200 text-red-800"
                 }`}
               >
                 {order.isPaid ? "✅ Paid" : "❌ Unpaid"}
@@ -661,7 +661,7 @@ const ProcessingOrders = () => {
         </div>
         <button
           onClick={fetchOrders}
-          className="flex items-center space-x-2 bg-lime-500 hover:bg-lime-600 text-white px-4 py-2 rounded-md transition-colors"
+          className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
           disabled={loading}
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
@@ -679,7 +679,7 @@ const ProcessingOrders = () => {
       )}
 
       {showBulkActions && (
-        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border-l-4 border-lime-500">
+        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-gray-700">
@@ -690,7 +690,7 @@ const ProcessingOrders = () => {
                 <select
                   value={bulkStatus}
                   onChange={(e) => setBulkStatus(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500"
+                  className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Status</option>
                   {orderStatusOptions.map((status) => (
@@ -702,7 +702,7 @@ const ProcessingOrders = () => {
                 <button
                   onClick={handleBulkStatusUpdate}
                   disabled={!bulkStatus || processingAction}
-                  className="bg-lime-500 hover:bg-lime-600 disabled:bg-gray-400 text-white px-4 py-1 rounded-md text-sm font-medium transition-colors"
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-1 rounded-md text-sm font-medium transition-colors"
                 >
                   {processingAction ? "Updating..." : "Update"}
                 </button>
@@ -730,17 +730,17 @@ const ProcessingOrders = () => {
             placeholder="Search orders by ID, customer name, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full md:w-96 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+            className="pl-10 pr-4 py-2 w-full md:w-96 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div className="text-sm text-gray-600">
-          Total Processing Orders: <span className="font-semibold text-lime-600">{filteredOrders.length}</span>
+          Total Processing Orders: <span className="font-semibold text-blue-600">{filteredOrders.length}</span>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lime-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -753,7 +753,7 @@ const ProcessingOrders = () => {
                       type="checkbox"
                       checked={selectAll}
                       onChange={handleSelectAll}
-                      className="h-4 w-4 text-lime-500 focus:ring-lime-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -783,18 +783,18 @@ const ProcessingOrders = () => {
                 {filteredOrders.map((order) => (
                   <tr
                     key={order._id}
-                    className={`hover:bg-gray-50 ${selectedOrders.includes(order._id) ? "bg-lime-50" : ""}`}
+                    className={`hover:bg-gray-50 ${selectedOrders.includes(order._id) ? "bg-blue-50" : ""}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
                         type="checkbox"
                         checked={selectedOrders.includes(order._id)}
                         onChange={() => handleSelectOrder(order._id)}
-                        className="h-4 w-4 text-lime-500 focus:ring-lime-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-lime-600">#{order._id.slice(-6)}</div>
+                      <div className="text-sm font-medium text-blue-600">#{order._id.slice(-6)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {order.deliveryType === "pickup" ? (
@@ -827,7 +827,7 @@ const ProcessingOrders = () => {
                               : order.status === "Processing"
                                 ? "bg-yellow-100 text-yellow-800"
                                 : order.status === "Confirmed"
-                                  ? "bg-lime-100 text-lime-800"
+                                  ? "bg-blue-100 text-blue-800"
                                   : order.status === "Ready For Shipment"
                                     ? "bg-orange-100 text-orange-800"
                                     : order.status === "Shipped"
@@ -837,7 +837,7 @@ const ProcessingOrders = () => {
                                         : order.status === "Out for Delivery"
                                           ? "bg-indigo-100 text-indigo-800"
                                           : order.status === "Delivered"
-                                            ? "bg-green-100 text-green-800"
+                                            ? "bg-blue-100 text-blue-800"
                                             : order.status === "On Hold"
                                               ? "bg-stone-100 text-stone-800"
                                               : order.status === "Cancelled"
@@ -878,7 +878,7 @@ const ProcessingOrders = () => {
                             togglePaymentDropdown(order._id)
                           }}
                           className={`px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full cursor-pointer hover:opacity-80 transition-colors
-                          ${order.isPaid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                          ${order.isPaid ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}
                         >
                           {order.isPaid ? "Paid" : "Unpaid"}
                           <ChevronDown size={12} className="ml-1" />
@@ -909,14 +909,14 @@ const ProcessingOrders = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleViewOrder(order)}
-                        className="text-lime-600 hover:text-lime-900 mr-4"
+                        className="text-blue-600 hover:text-blue-900 mr-4"
                         title="View Order Details"
                       >
                         <Eye size={18} />
                       </button>
                       <button
                         onClick={() => handleSendNotification(order._id)}
-                        className="text-green-600 hover:text-green-900"
+                        className="text-blue-600 hover:text-blue-900"
                         disabled={processingAction}
                         title="Send Email Notification"
                       >
@@ -950,7 +950,7 @@ const ProcessingOrders = () => {
                   <span>/</span>
                   <span>Processing Orders</span>
                   <span>/</span>
-                  <span className="text-lime-600">View</span>
+                  <span className="text-blue-600">View</span>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Order ID: {selectedOrder._id.slice(-6)}</h2>
               </div>
@@ -965,22 +965,22 @@ const ProcessingOrders = () => {
             <div className="p-6">
               {/* Order Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-lime-50 p-4 rounded-lg">
+                <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center space-x-2">
-                    <Package className="text-lime-600" size={20} />
+                    <Package className="text-blue-600" size={20} />
                     <div>
                       <p className="text-sm text-gray-600">Status</p>
-                      <p className="font-semibold text-lime-900">{selectedOrder.status || "Processing"}</p>
+                      <p className="font-semibold text-blue-900">{selectedOrder.status || "Processing"}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-green-50 p-4 rounded-lg">
+                <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center space-x-2">
-                    <CreditCard className="text-green-600" size={20} />
+                    <CreditCard className="text-blue-600" size={20} />
                     <div>
                       <p className="text-sm text-gray-600">Payment Type</p>
-                      <p className="font-semibold text-green-900">
+                      <p className="font-semibold text-blue-900">
                         {selectedOrder.isPaid ? "Paid" : selectedOrder.paymentMethod || "Cash on Delivery"}
                       </p>
                     </div>
@@ -1015,7 +1015,7 @@ const ProcessingOrders = () => {
                   <select
                     value={selectedOrder.status || "Processing"}
                     onChange={(e) => handleUpdateStatus(selectedOrder._id, e.target.value)}
-                    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                    className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     disabled={processingAction}
                   >
                     {orderStatusOptions.map((status) => (
@@ -1031,7 +1031,7 @@ const ProcessingOrders = () => {
                         : selectedOrder.status === "Processing"
                           ? "bg-yellow-100 text-yellow-800"
                           : selectedOrder.status === "Confirmed"
-                            ? "bg-lime-100 text-lime-800"
+                            ? "bg-blue-100 text-blue-800"
                             : selectedOrder.status === "Ready For Shipment"
                               ? "bg-orange-100 text-orange-800"
                               : selectedOrder.status === "Shipped"
@@ -1041,7 +1041,7 @@ const ProcessingOrders = () => {
                                   : selectedOrder.status === "Out for Delivery"
                                     ? "bg-indigo-100 text-indigo-800"
                                     : selectedOrder.status === "Delivered"
-                                      ? "bg-green-100 text-green-800"
+                                      ? "bg-blue-100 text-blue-800"
                                       : selectedOrder.status === "On Hold"
                                         ? "bg-stone-100 text-stone-800"
                                         : selectedOrder.status === "Cancelled"
@@ -1061,7 +1061,7 @@ const ProcessingOrders = () => {
                     <select
                       value={selectedOrder.isPaid ? "Paid" : "Unpaid"}
                       onChange={(e) => handleUpdatePaymentStatus(selectedOrder._id, e.target.value === "Paid")}
-                      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       disabled={processingAction}
                     >
                       <option value="Unpaid">Unpaid</option>
@@ -1069,7 +1069,7 @@ const ProcessingOrders = () => {
                     </select>
                     <span
                       className={`px-3 py-1 text-sm font-medium rounded-full ${
-                        selectedOrder.isPaid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        selectedOrder.isPaid ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"
                       }`}
                     >
                       {selectedOrder.isPaid ? "Paid" : "Unpaid"}
@@ -1124,12 +1124,12 @@ const ProcessingOrders = () => {
                   {selectedOrder.discountAmount > 0 && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Discount:</span>
-                      <span className="text-green-600">-{formatPrice(selectedOrder.discountAmount)}</span>
+                      <span className="text-blue-600">-{formatPrice(selectedOrder.discountAmount)}</span>
                     </div>
                   )}
                   <div className="border-t pt-2 flex justify-between">
                     <span className="text-lg font-semibold text-gray-900">Total:</span>
-                    <span className="text-lg font-bold text-lime-600">
+                    <span className="text-lg font-bold text-blue-600">
                       {formatPrice(selectedOrder.totalPrice || 0)}
                     </span>
                   </div>
@@ -1233,7 +1233,7 @@ const ProcessingOrders = () => {
                       <p className="mb-2">
                         <span className="font-medium">Payment Status:</span>
                         <span
-                          className={`ml-2 px-2 py-1 text-xs rounded-full ${selectedOrder.isPaid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                          className={`ml-2 px-2 py-1 text-xs rounded-full ${selectedOrder.isPaid ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}
                         >
                           {selectedOrder.isPaid ? "Paid" : "Unpaid"}
                         </span>
@@ -1252,7 +1252,7 @@ const ProcessingOrders = () => {
                         value={trackingId}
                         onChange={(e) => setTrackingId(e.target.value)}
                         placeholder="Enter tracking ID"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -1264,7 +1264,7 @@ const ProcessingOrders = () => {
                         type="date"
                         value={estimatedDelivery}
                         onChange={(e) => setEstimatedDelivery(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -1283,7 +1283,7 @@ const ProcessingOrders = () => {
                   <button
                     onClick={handleSaveOrderDetails}
                     disabled={processingAction}
-                    className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md transition-colors"
+                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md transition-colors"
                   >
                     <Save size={16} />
                     <span>{processingAction ? "Saving..." : "Save Details"}</span>
@@ -1308,7 +1308,7 @@ const ProcessingOrders = () => {
                 </button>
                 <button
                   onClick={() => handleSendNotification(selectedOrder._id)}
-                  className="bg-lime-600 hover:bg-lime-700 text-white font-medium py-2 px-6 rounded-md flex items-center transition-colors"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md flex items-center transition-colors"
                   disabled={processingAction}
                 >
                   <Mail size={18} className="mr-2" />

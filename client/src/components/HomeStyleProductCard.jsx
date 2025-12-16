@@ -6,9 +6,9 @@
 // import { getImageUrl } from "../utils/imageUtils"
 
 // const getStatusColor = (status) => {
-//   if (status === "Available Product" || status === "Available") return "bg-primary-600"
-//   if (status === "Stock Out" || status === "Out of Stock") return "bg-dark-900"
-//   if (status === "Pre-Order") return "bg-primary-500 text-black"
+//   if (status === "Available Product" || status === "Available") return "bg-green-600"
+//   if (status === "Stock Out" || status === "Out of Stock") return "bg-red-600"
+//   if (status === "Pre-Order") return "bg-yellow-400 text-black"
 //   return "bg-gray-400"
 // }
 
@@ -75,7 +75,7 @@
 //           {stockStatus}
 //         </div>
 //         {discount && (
-//           <div className="bg-primary-500 text-white px-1 py-0.5 rounded text-xs  inline-block">{discount}</div>
+//           <div className="bg-yellow-400 text-white px-1 py-0.5 rounded text-xs  inline-block">{discount}</div>
 //         )}
 //       </div>
 //       <Link to={`/product/${product.slug || product._id}`}>
@@ -140,9 +140,9 @@ import { useToast } from "../context/ToastContext"
 import { getImageUrl } from "../utils/imageUtils"
 
 const getStatusColor = (status) => {
-  if (status === "Available Product" || status === "Available") return "bg-primary-600"
-  if (status === "Stock Out" || status === "Out of Stock") return "bg-dark-900"
-  if (status === "Pre-Order") return "bg-primary-500 text-black"
+  if (status === "Available Product" || status === "Available") return "bg-green-600"
+  if (status === "Stock Out" || status === "Out of Stock") return "bg-red-600"
+  if (status === "Pre-Order") return "bg-yellow-400 text-black"
   return "bg-gray-400"
 }
 
@@ -187,13 +187,13 @@ const HomeStyleProductCard = ({ product }) => {
   return (
     <div className="border p-2 h-[400px] flex flex-col justify-between bg-white">
       <div className="relative mb-2 flex h-[180px] justify-center items-cente">
-        <Link to={`/product/${product.slug || product._id}`}>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
           <img
-            src={getImageUrl(product) || "/placeholder.svg"}
+            src={getImageUrl(product) || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E"}
             alt={product.name}
             className="w-full h-full cover object-contain rounded mx-auto"
             onError={(e) => {
-              e.target.src = "/placeholder.svg?height=120&width=120"
+              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E"
             }}
           />
         </Link>
@@ -214,10 +214,10 @@ const HomeStyleProductCard = ({ product }) => {
           {stockStatus}
         </div>
         {discount && (
-          <div className="bg-primary-500 text-white px-1 py-0.5 rounded text-xs  inline-block">{discount}</div>
+          <div className="bg-yellow-400 text-white px-1 py-0.5 rounded text-xs  inline-block">{discount}</div>
         )}
       </div>
-      <Link to={`/product/${product.slug || product._id}`}>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
         <h3 className="text-xs font-sm text-gray-900  line-clamp-4 hover:text-blue-600 h-[65px]">{product.name}</h3>
       </Link>
       {product.category && <div className="text-xs text-yellow-600 ">Category: {categoryName}</div>}
@@ -258,7 +258,7 @@ const HomeStyleProductCard = ({ product }) => {
           }, 100)
           addToCart(product)
         }}
-        className="w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className="w-full bg-lime-500 hover:bg-lime-400 border border-lime-300 hover:border-transparent text-black text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
         <ShoppingBag size={12} />

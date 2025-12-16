@@ -3,25 +3,17 @@ import { AuthProvider } from "./context/AuthContext"
 import { CartProvider } from "./context/CartContext"
 import { WishlistProvider } from "./context/WishlistContext"
 import { ToastProvider } from "./context/ToastContext"
- 
+
 // Import components
-import Navbar from "./components/Navbar"
-import Footer from "./components/Footer"
 import Layout from "./components/Layout"
 import ProtectedRoute from "./components/ProtectedRoute"
 import AdminRoute from "./components/AdminRoute"
 import ScrollToTop from "./components/ScrollToTop"
-import CacheStatus from "./components/CacheStatus"
+import RedirectHandler from "./components/RedirectHandler"
 import CreateOrder from "./pages/admin/CreateOrder"
-
-
-
-
-
 
 import { Helmet } from "react-helmet-async"
 import { useLocation } from "react-router-dom"
-
 
 // Import admin components
 import AdminHeader from "./components/admin/AdminHeader"
@@ -49,20 +41,20 @@ import DisclaimerPolicy from "./pages/DisclaimerPolicy"
 import TermAndCondition from "./pages/TermAndCondition"
 import RefundAndReturn from "./pages/RefundAndReturn"
 import CookiesAndPolicy from "./pages/CookiesAndPolicy"
-import ReqBulkPurchase from "./pages/ReqBulkPurchase";
+import ReqBulkPurchase from "./pages/ReqBulkPurchase"
 import ContactUs from "./pages/ContactUs"
-import NotFound from "./pages/NotFound";
-import GuestOrder from "./pages/GuestOrder";
+import NotFound from "./pages/NotFound"
+import GuestOrder from "./pages/GuestOrder"
 import Guest from "./pages/Guest"
 import PaymentSuccess from "./pages/PaymentSuccess"
 import PaymentCancel from "./pages/PaymentCancel"
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import BackToSchoolGaming from "./pages/BackToSchoolGaming";
-import BackToSchoolProfessional from "./pages/BackToSchoolProfessional";
-import VoucherTerms from "./pages/VoucherTerms";
-import DeliveryTerms from "./pages/DeliveryTerms";
-
+import ForgotPassword from "./pages/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword"
+import PromotionalPage from "./pages/PromotionalPage"
+import BackToSchoolProfessional from "./pages/BackToSchoolProfessional"
+import VoucherTerms from "./pages/VoucherTerms"
+import DeliveryTerms from "./pages/DeliveryTerms"
+import OfferPage from "./pages/OfferPage"
 
 // Import admin pages
 import AdminLogin from "./pages/admin/AdminLogin"
@@ -71,6 +63,7 @@ import AdminProducts from "./pages/admin/AdminProducts"
 import AdminOrders from "./pages/admin/AdminOrders"
 import AdminUsers from "./pages/admin/AdminUsers"
 import AdminCategories from "./pages/admin/AdminCategories"
+import AdminCategorySlider from "./pages/admin/AdminCategorySlider"
 import AdminBrands from "./pages/admin/AdminBrands"
 import AdminColors from "./pages/admin/AdminColors"
 import AdminSizes from "./pages/admin/AdminSizes"
@@ -80,19 +73,33 @@ import AdminWarranty from "./pages/admin/AdminWarranty"
 import AdminTax from "./pages/admin/AdminTax"
 import AllCoupons from "./pages/admin/AllCoupons"
 import AdminBanners from "./pages/admin/AdminBanners"
+import AdminBannerCards from "./pages/admin/AdminBannerCards"
+import AddBannerCard from "./pages/admin/AddBannerCard"
+import AddHomeSection from "./pages/admin/AddHomeSection"
+import OfferPages from "./pages/admin/OfferPages"
+import AddOfferPage from "./pages/admin/AddOfferPage"
+import AddOfferProduct from "./pages/admin/AddOfferProduct"
+import AddOfferBrand from "./pages/admin/AddOfferBrand"
+import AddOfferCategory from "./pages/admin/AddOfferCategory"
 import AdminDeliveryCharges from "./pages/admin/AdminDeliveryCharges"
 import AdminSettings from "./pages/admin/AdminSettings"
 import AdminBlogs from "./pages/admin/AdminBlogs"
 import AdminRequestCallbacks from "./pages/admin/AdminRequestCallbacks"
+import AdminBulkPurchase from "./pages/admin/AdminBulkPurchase"
+import BuyerProtectionAdmin from "./pages/admin/BuyerProtectionAdmin"
 import AdminSubCategories from "./pages/admin/AdminSubCategories"
-import AdminEmailTemplates from "./pages/admin/AdminEmailTemplates";
-import AdminNewsletter from "./pages/admin/AdminNewsletter";
+import AdminSubCategories2 from "./pages/admin/AdminSubCategories2"
+import AdminSubCategories3 from "./pages/admin/AdminSubCategories3"
+import AdminSubCategories4 from "./pages/admin/AdminSubCategories4"
+import AdminEmailTemplates from "./pages/admin/AdminEmailTemplates"
+import AdminNewsletter from "./pages/admin/AdminNewsletter"
+import ResetCache from "./pages/admin/ResetCache"
 
 // Add review management imports
-import AdminReviews from "./pages/admin/AdminReviews";
-import AdminReviewsPending from "./pages/admin/AdminReviewsPending";
-import AdminReviewsApproved from "./pages/admin/AdminReviewsApproved";
-import AdminReviewsRejected from "./pages/admin/AdminReviewsRejected";
+import AdminReviews from "./pages/admin/AdminReviews"
+import AdminReviewsPending from "./pages/admin/AdminReviewsPending"
+import AdminReviewsApproved from "./pages/admin/AdminReviewsApproved"
+import AdminReviewsRejected from "./pages/admin/AdminReviewsRejected"
 
 // Add other admin pages as needed
 import AddProduct from "./pages/admin/AddProduct"
@@ -114,8 +121,9 @@ import BlogCategories from "./pages/admin/BlogCategories"
 import BlogTopics from "./pages/admin/BlogTopics"
 import BlogRating from "./pages/admin/BlogRating"
 import AddBulkProducts from "./pages/admin/AddBulkProducts"
-import EditCategory from "./pages/admin/EditCategory";
-import EditSubCategory from "./pages/admin/EditSubCategory";
+import EditCategory from "./pages/admin/EditCategory"
+import EditSubCategory from "./pages/admin/EditSubCategory"
+import AdminSEOSettings from "./pages/admin/AdminSEOSettings"
 
 // Order status pages
 import ReceivedOrders from "./pages/admin/ReceivedOrders"
@@ -127,7 +135,7 @@ import OnHold from "./pages/admin/OnHold"
 import Rejected from "./pages/admin/Rejected"
 import OnlineOrders from "./pages/admin/OnlineOrders"
 import TrashCategories from "./pages/admin/TrashCategories"
-
+import TrashSubCategories from "./pages/admin/TrashSubCategories"
 
 import NewOrders from "./pages/admin/NewOrders"
 import ConfirmedOrders from "./pages/admin/ConfirmedOrders"
@@ -135,23 +143,11 @@ import ProcessingOrders from "./pages/admin/ProcessingOrders"
 import OnHoldOrders from "./pages/admin/OnHoldOrders"
 import CancelledOrders from "./pages/admin/CancelledOrders"
 import DeletedOrders from "./pages/admin/DeletedOrders"
-
-
-
-
-
-
-
+import CriticalOrders from "./pages/admin/CriticalOrders"
 
 // Stock Adjustment page imports
 import PriceAdjustment from "./pages/admin/PriceAdjustment"
 import PriceAdjustmentReports from "./pages/admin/PriceAdjustmentReports"
-
-
-
-
-
-
 
 function DefaultCanonical() {
   const location = useLocation()
@@ -162,14 +158,11 @@ function DefaultCanonical() {
   return (
     <Helmet prioritizeSeoTags>
       {/* Default Site Title can be adjusted by SEO team */}
-      <title>SeenAlif</title>
+      <title>Grabatoz</title>
       <link rel="canonical" href={href} />
     </Helmet>
   )
 }
-
-
-
 
 function RouteCanonical() {
   const location = useLocation()
@@ -185,29 +178,6 @@ function RouteCanonical() {
   )
 }
 
-
-
-
-function WhatsAppButton() {
-  return (
-    <a
-      href="https://wa.me/971508604360"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-16 md:bottom-8 right-4 z-[9998]"
-      aria-label="Chat on WhatsApp"
-      style={{ transition: 'transform 0.2s' }}
-    >
-      <img
-        src="/whatsapp.png"
-        alt="WhatsApp"
-        className="w-14 h-14 rounded-full border-2 hover:scale-110"
-        style={{ background: '#25D366' }}
-      />
-    </a>
-  );
-}
-
 function App() {
   return (
     <ToastProvider>
@@ -215,13 +185,13 @@ function App() {
         <CartProvider>
           <WishlistProvider>
             <Router>
-                <DefaultCanonical />
+              <DefaultCanonical />
               <ScrollToTop />
-                
+              <RedirectHandler />
               <div className="App">
                 <Routes>
                   {/* Admin Routes */}
-                  <Route path="/superbossadmin/login" element={<AdminLogin />} />
+                  <Route path="/grabiansadmin/login" element={<AdminLogin />} />
                   <Route
                     path="/admin/*"
                     element={
@@ -244,21 +214,32 @@ function App() {
                               <Route path="orders/on-hold" element={<OnHold />} />
                               <Route path="orders/rejected" element={<Rejected />} />
                               <Route path="orders/online" element={<OnlineOrders />} />
-                              
+
                               {/* Review Management Routes */}
                               <Route path="reviews" element={<AdminReviews />} />
                               <Route path="reviews/pending" element={<AdminReviewsPending />} />
                               <Route path="reviews/approved" element={<AdminReviewsApproved />} />
                               <Route path="reviews/rejected" element={<AdminReviewsRejected />} />
-                              
+
                               <Route path="users" element={<AdminUsers />} />
                               <Route path="categories" element={<AdminCategories />} />
                               <Route path="categories/add" element={<AddCategory />} />
                               <Route path="categories/edit/:id" element={<EditCategory />} />
                               <Route path="categories/trash" element={<TrashCategories />} />
+                              <Route path="categories/slider" element={<AdminCategorySlider />} />
                               <Route path="subcategories" element={<AdminSubCategories />} />
                               <Route path="subcategories/add" element={<AddSubCategory />} />
                               <Route path="subcategories/edit/:id" element={<EditSubCategory />} />
+                              <Route path="subcategories/trash" element={<TrashSubCategories />} />
+                              <Route path="subcategories-2" element={<AdminSubCategories2 />} />
+                              <Route path="subcategories-2/add" element={<AddSubCategory />} />
+                              <Route path="subcategories-2/edit/:id" element={<EditSubCategory />} />
+                              <Route path="subcategories-3" element={<AdminSubCategories3 />} />
+                              <Route path="subcategories-3/add" element={<AddSubCategory />} />
+                              <Route path="subcategories-3/edit/:id" element={<EditSubCategory />} />
+                              <Route path="subcategories-4" element={<AdminSubCategories4 />} />
+                              <Route path="subcategories-4/add" element={<AddSubCategory />} />
+                              <Route path="subcategories-4/edit/:id" element={<EditSubCategory />} />
                               <Route path="brands" element={<AdminBrands />} />
                               <Route path="brands/add" element={<AddBrand />} />
                               <Route path="edit-brand/:id" element={<AddBrand />} />
@@ -277,6 +258,21 @@ function App() {
                               <Route path="coupons" element={<AllCoupons />} />
                               <Route path="coupons/all" element={<AllCoupons />} />
                               <Route path="banners" element={<AdminBanners />} />
+                              <Route path="banner-cards" element={<AdminBannerCards />} />
+                              <Route path="banner-cards/add" element={<AddBannerCard />} />
+                              <Route path="banner-cards/edit/:id" element={<AddBannerCard />} />
+                              <Route path="home-sections" element={<AdminBannerCards />} />
+                              <Route path="home-sections/add" element={<AddHomeSection />} />
+                              <Route path="home-sections/edit/:id" element={<AddHomeSection />} />
+                              <Route path="offer-pages" element={<OfferPages />} />
+                              <Route path="offer-pages/add" element={<AddOfferPage />} />
+                              <Route path="offer-pages/edit/:id" element={<AddOfferPage />} />
+                              <Route path="offer-products/add" element={<AddOfferProduct />} />
+                              <Route path="offer-products/edit/:id" element={<AddOfferProduct />} />
+                              <Route path="offer-brands/add" element={<AddOfferBrand />} />
+                              <Route path="offer-brands/edit/:id" element={<AddOfferBrand />} />
+                              <Route path="offer-categories/add" element={<AddOfferCategory />} />
+                              <Route path="offer-categories/edit/:id" element={<AddOfferCategory />} />
                               <Route path="delivery-charges" element={<AdminDeliveryCharges />} />
                               <Route path="delivery-charges/add" element={<AddDeliveryCharge />} />
                               <Route path="settings" element={<AdminSettings />} />
@@ -289,49 +285,30 @@ function App() {
                               <Route path="blogs/topics/add" element={<AddBlogTopic />} />
                               <Route path="blogs/rating" element={<BlogRating />} />
                               <Route path="request-callbacks" element={<AdminRequestCallbacks />} />
+                              <Route path="bulk-purchase" element={<AdminBulkPurchase />} />
+                              <Route path="buyer-protection" element={<BuyerProtectionAdmin />} />
                               <Route path="email-templates" element={<AdminEmailTemplates />} />
                               <Route path="newsletter-subscribers" element={<AdminNewsletter />} />
+                              <Route path="reset-cache" element={<ResetCache />} />
                               <Route path="*" element={<NotFound />} />
-                            
-                            
-                            
 
+                              {/* SEO Settings Routes */}
+                              <Route path="seo-settings/redirects" element={<AdminSEOSettings />} />
 
-
-
-                          {/* Stock Adjustment routes */}
+                              {/* Stock Adjustment routes */}
                               <Route path="stock-adjustment/price-adjustment" element={<PriceAdjustment />} />
                               <Route path="stock-adjustment/reports" element={<PriceAdjustmentReports />} />
 
-
-
-                            
-                            
-
-
-
-
-         {/* New Order Status Routes */}
+                              {/* New Order Status Routes */}
                               <Route path="orders/new" element={<NewOrders />} />
                               <Route path="orders/confirmed" element={<ConfirmedOrders />} />
                               <Route path="orders/processing" element={<ProcessingOrders />} />
                               <Route path="orders/on-hold" element={<OnHoldOrders />} />
                               <Route path="orders/cancelled" element={<CancelledOrders />} />
                               <Route path="orders/deleted" element={<DeletedOrders />} />
-
-
-
-
-
-
+                              <Route path="orders/critical" element={<CriticalOrders />} />
 
                               <Route path="orders/create" element={<CreateOrder />} />
-
-
-
-                            
-                            
-                            
                             </Routes>
                           </div>
                         </div>
@@ -339,47 +316,70 @@ function App() {
                     }
                   />
 
-                  {/* Public Routes - Wrapped in Layout */}
-                  <Route element={<Layout />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/shop/:parentCategory" element={<Shop />} />
-                    <Route path="/shop/:parentCategory/:subcategory" element={<Shop />} />
-                    <Route path="/product-category" element={<Shop />} />
-                    <Route path="/product-category/:parentCategory" element={<Shop />} />
-                    <Route path="/product-category/:parentCategory/:subcategory" element={<Shop />} />
-                    <Route path="/product-brand/:brand" element={<Shop />} />
-                    <Route path="/product/:slug" element={<ProductDetails />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/verify-email" element={<EmailVerification />} />
-                    <Route path="/track-order" element={<TrackOrder />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/blogs" element={<BlogList />} />
-                    <Route path="/blogs/:slug" element={<BlogPost />} />
-                    <Route path="/privacy-policy" element={<PrivacyAndPolicy />} />
-                    <Route path="/privacy-policy-arabic" element={<ArabicContent />} />
-                    <Route path="/disclaimer-policy" element={<DisclaimerPolicy />} />
-                    <Route path="/terms-conditions" element={<TermAndCondition />} />
-                    <Route path="/refund-return" element={<RefundAndReturn />} />
-                    <Route path="/cookies-policy" element={<CookiesAndPolicy />} />
-                    <Route path="/bulk-purchase" element={<ReqBulkPurchase />} />
-                    <Route path="/contact" element={<ContactUs />} />
-                    <Route path="/guest" element={<Guest />} />
-                    <Route path="/guest-order" element={<GuestOrder />} />
-                    <Route path="/payment/success" element={<PaymentSuccess />} />
-                    <Route path="/payment/cancel" element={<PaymentCancel />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/backtoschool-acer-gaming" element={<BackToSchoolGaming />} />
-                    <Route path="/backtoschool-acer-professional" element={<BackToSchoolProfessional />} />
-                    <Route path="/voucher-terms" element={<VoucherTerms />} />
-                    <Route path="/delivery-terms" element={<DeliveryTerms />} />
-                    
+                  {/* Public Routes */}
+                  <Route
+                    path="*"
+                    element={
+                      <>
+                        <RouteCanonical />
+                        <Layout />
+                      </>
+                    }
+                  >
+                    <Route index element={<Home />} />
+                    <Route path="shop" element={<Shop />} />
+                    <Route path="shop/:parentCategory" element={<Shop />} />
+                    <Route path="shop/:parentCategory/:subcategory" element={<Shop />} />
+                    <Route path="shop/:parentCategory/:subcategory/:subcategory2" element={<Shop />} />
+                    <Route path="shop/:parentCategory/:subcategory/:subcategory2/:subcategory3" element={<Shop />} />
+                    <Route
+                      path="shop/:parentCategory/:subcategory/:subcategory2/:subcategory3/:subcategory4"
+                      element={<Shop />}
+                    />
+                    <Route path="product-category" element={<Shop />} />
+                    <Route path="product-category/:parentCategory" element={<Shop />} />
+                    <Route path="product-category/:parentCategory/:subcategory" element={<Shop />} />
+                    <Route path="product-category/:parentCategory/:subcategory/:subcategory2" element={<Shop />} />
+                    <Route
+                      path="product-category/:parentCategory/:subcategory/:subcategory2/:subcategory3"
+                      element={<Shop />}
+                    />
+                    <Route
+                      path="product-category/:parentCategory/:subcategory/:subcategory2/:subcategory3/:subcategory4"
+                      element={<Shop />}
+                    />
+                    <Route path="product/:slug" element={<ProductDetails />} />
+                    <Route path="cart" element={<Cart />} />
+                    <Route path="login" element={<Login />} />
+                    <Route path="register" element={<Register />} />
+                    <Route path="verify-email" element={<EmailVerification />} />
+                    <Route path="track-order" element={<TrackOrder />} />
+                    <Route path="about" element={<About />} />
+                    <Route path="blogs" element={<BlogList />} />
+                    <Route path="blogs/:slug" element={<BlogPost />} />
+                    <Route path="privacy-policy" element={<PrivacyAndPolicy />} />
+                    <Route path="privacy-policy-arabic" element={<ArabicContent />} />
+                    <Route path="disclaimer-policy" element={<DisclaimerPolicy />} />
+                    <Route path="terms-conditions" element={<TermAndCondition />} />
+                    <Route path="refund-return" element={<RefundAndReturn />} />
+                    <Route path="cookies-policy" element={<CookiesAndPolicy />} />
+                    <Route path="bulk-purchase" element={<ReqBulkPurchase />} />
+                    <Route path="contact" element={<ContactUs />} />
+                    <Route path="guest" element={<Guest />} />
+                    <Route path="guest-order" element={<GuestOrder />} />
+                    <Route path="payment/success" element={<PaymentSuccess />} />
+                    <Route path="payment/cancel" element={<PaymentCancel />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
+                    <Route path="green-friday-promotional" element={<PromotionalPage />} />
+                    <Route path="backtoschool-acer-professional" element={<BackToSchoolProfessional />} />
+                    <Route path="voucher-terms" element={<VoucherTerms />} />
+                    <Route path="delivery-terms" element={<DeliveryTerms />} />
+                    <Route path="offers/:slug" element={<OfferPage />} />
+
                     {/* Protected Routes */}
                     <Route
-                      path="/checkout"
+                      path="checkout"
                       element={
                         <ProtectedRoute>
                           <Checkout />
@@ -387,7 +387,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/profile"
+                      path="profile"
                       element={
                         <ProtectedRoute>
                           <Profile />
@@ -395,7 +395,7 @@ function App() {
                       }
                     />
                     <Route
-                      path="/orders"
+                      path="orders"
                       element={
                         <ProtectedRoute>
                           <UserOrders />
@@ -403,18 +403,16 @@ function App() {
                       }
                     />
                     <Route
-                      path="/wishlist"
+                      path="wishlist"
                       element={
                         <ProtectedRoute>
                           <Wishlist />
                         </ProtectedRoute>
                       }
                     />
-                    <Route path="*" element={<NotFound />} />
                   </Route>
                 </Routes>
               </div>
-              
             </Router>
           </WishlistProvider>
         </CartProvider>
@@ -424,4 +422,3 @@ function App() {
 }
 
 export default App
-

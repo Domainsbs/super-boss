@@ -597,13 +597,16 @@ class ProductCacheService {
       const minimalProducts = products.map((product) => ({
         _id: product._id,
         name: product.name,
-  sku: product.sku, // include SKU for client-side search
+        sku: product.sku, // include SKU for client-side search
         price: product.price,
         basePrice: product.basePrice,
         offerPrice: product.offerPrice,
         brand: product.brand,
         category: product.category,
         parentCategory: product.parentCategory,
+        subCategory2: product.subCategory2,
+        subCategory3: product.subCategory3,
+        subCategory4: product.subCategory4,
         countInStock: product.countInStock,
         stockStatus: product.stockStatus,
         discount: product.discount,
@@ -804,26 +807,69 @@ class ProductCacheService {
 
     let filteredProducts = [...products]
 
-    // Filter by category
-    if (filters.category && filters.category !== "all") {
-      filteredProducts = filteredProducts.filter((product) => {
-        if (!product.category) return false
-
-        const categoryId = typeof product.category === "string" ? product.category : product.category._id
-
-        return categoryId === filters.category
-      })
-    }
-
-    // Filter by parent_category
+    // Filter by parent_category FIRST (most general filter)
     if (filters.parent_category && filters.parent_category !== "all") {
       filteredProducts = filteredProducts.filter((product) => {
         if (!product.parentCategory) return false
-
         const parentCategoryId =
           typeof product.parentCategory === "string" ? product.parentCategory : product.parentCategory._id
-
         return parentCategoryId === filters.parent_category
+      })
+    }
+
+    // Filter by category (subcategory level 1)
+    if (filters.category && filters.category !== "all") {
+      filteredProducts = filteredProducts.filter((product) => {
+        if (!product.category) return false
+        const categoryId = typeof product.category === "string" ? product.category : product.category._id
+        const categorySlug = typeof product.category === "string" ? null : product.category.slug
+        const categoryName = typeof product.category === "string" ? null : product.category.name
+        // Match by ID, slug, or name
+        return categoryId === filters.category || 
+               categorySlug === filters.category ||
+               (categoryName && categoryName.toLowerCase().replace(/\s+/g, '-') === filters.category)
+      })
+    }
+
+    // Filter by subcategory level 2
+    if (filters.subcategory2) {
+      filteredProducts = filteredProducts.filter((product) => {
+        if (!product.subCategory2) return false
+        const subCategory2Id = typeof product.subCategory2 === "string" ? product.subCategory2 : product.subCategory2._id
+        const subCategory2Slug = typeof product.subCategory2 === "string" ? null : product.subCategory2.slug
+        const subCategory2Name = typeof product.subCategory2 === "string" ? null : product.subCategory2.name
+        // Match by ID, slug, or name
+        return subCategory2Id === filters.subcategory2 || 
+               subCategory2Slug === filters.subcategory2 ||
+               (subCategory2Name && subCategory2Name.toLowerCase().replace(/\s+/g, '-') === filters.subcategory2)
+      })
+    }
+
+    // Filter by subcategory level 3
+    if (filters.subcategory3) {
+      filteredProducts = filteredProducts.filter((product) => {
+        if (!product.subCategory3) return false
+        const subCategory3Id = typeof product.subCategory3 === "string" ? product.subCategory3 : product.subCategory3._id
+        const subCategory3Slug = typeof product.subCategory3 === "string" ? null : product.subCategory3.slug
+        const subCategory3Name = typeof product.subCategory3 === "string" ? null : product.subCategory3.name
+        // Match by ID, slug, or name
+        return subCategory3Id === filters.subcategory3 || 
+               subCategory3Slug === filters.subcategory3 ||
+               (subCategory3Name && subCategory3Name.toLowerCase().replace(/\s+/g, '-') === filters.subcategory3)
+      })
+    }
+
+    // Filter by subcategory level 4
+    if (filters.subcategory4) {
+      filteredProducts = filteredProducts.filter((product) => {
+        if (!product.subCategory4) return false
+        const subCategory4Id = typeof product.subCategory4 === "string" ? product.subCategory4 : product.subCategory4._id
+        const subCategory4Slug = typeof product.subCategory4 === "string" ? null : product.subCategory4.slug
+        const subCategory4Name = typeof product.subCategory4 === "string" ? null : product.subCategory4.name
+        // Match by ID, slug, or name
+        return subCategory4Id === filters.subcategory4 || 
+               subCategory4Slug === filters.subcategory4 ||
+               (subCategory4Name && subCategory4Name.toLowerCase().replace(/\s+/g, '-') === filters.subcategory4)
       })
     }
 
@@ -893,14 +939,6 @@ class ProductCacheService {
           return matches
         })
       }
-    }
-
-    // Filter by minimum discount percentage
-    if (filters.minDiscount && filters.minDiscount > 0) {
-      filteredProducts = filteredProducts.filter((product) => {
-        const discount = product.discount || 0
-        return discount >= filters.minDiscount
-      })
     }
 
     // Sort products - Always prioritize in-stock products first

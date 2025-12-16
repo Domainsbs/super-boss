@@ -18,8 +18,36 @@ const orderSchema = mongoose.Schema(
         price: { type: Number, required: true },
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          required: true,
+          required: false, // Optional for protection items
           ref: "Product",
+        },
+        // Color variation data
+        selectedColorIndex: { type: Number, default: null },
+        selectedColorData: {
+          color: { type: String },
+          image: { type: String },
+          price: { type: Number },
+          offerPrice: { type: Number },
+          sku: { type: String },
+        },
+        // DOS/Windows variation data
+        selectedDosIndex: { type: Number, default: null },
+        selectedDosData: {
+          dosType: { type: String },
+          image: { type: String },
+          price: { type: Number },
+          offerPrice: { type: Number },
+          sku: { type: String },
+        },
+        // Buyer protection fields
+        isProtection: { type: Boolean, default: false },
+        protectionFor: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        protectionData: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "BuyerProtection",
         },
       },
     ],
@@ -47,13 +75,29 @@ const orderSchema = mongoose.Schema(
       type: String,
       required: true,
       default: "Cash on Delivery",
-      enum: ["Cash on Delivery", "Credit Card", "Debit Card", "PayPal", "Bank Transfer"],
+      enum: ["Cash on Delivery", "Credit Card", "Debit Card", "PayPal", "Bank Transfer", "cod", "card", "tabby", "tamara"],
+    },
+    // Store the actual payment provider used (tabby, tamara, card, cod)
+    actualPaymentMethod: {
+      type: String,
+      enum: ["cod", "card", "tabby", "tamara", null],
+      default: null,
     },
     paymentResult: {
       id: String,
       status: String,
       update_time: String,
       email_address: String,
+      // Provider-specific fields
+      tamara_order_id: String,
+      tamara_checkout_id: String,
+      tabby_payment_id: String,
+      ngenius_order_ref: String,
+      event_type: String,
+      authorized_amount: Object,
+      capture_id: String,
+      captured_amount: Object,
+      webhook_data: Object,
     },
     itemsPrice: {
       type: Number,
@@ -127,6 +171,13 @@ const orderSchema = mongoose.Schema(
     customerNotes: {
       type: String,
       maxlength: 500,
+    },
+    sellerComments: {
+      type: String,
+    },
+    sellerMessage: {
+      type: String,
+      default: "",
     },
   },
   {

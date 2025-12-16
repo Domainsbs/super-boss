@@ -1,16 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import axios from "axios"
 import productCache from "../services/productCache"
-import { createSlug, generateShopURL } from "../utils/urlUtils"
+import { generateShopURL } from "../utils/urlUtils"
+import { getFullImageUrl } from "../utils/imageUtils"
 
 import BigSaleSection from "../components/BigSaleSection"
-import PromotionalOffers from "../components/PromotionalOffers"
-import ShopByCategories from "../components/ShopByCategories"
-import ShopByBrand from "../components/ShopByBrand"
-import CoreServiceAspects from "../components/CoreServiceAspects"
-import LoadingSpinner from "../components/LoadingSpinner"
 import {
   Star,
   Heart,
@@ -30,11 +26,16 @@ import {
 import { Link, useNavigate } from "react-router-dom"
 import BannerSlider from "../components/BannerSlider"
 import CategorySlider from "../components/CategorySlider"
+import CategorySliderUpdated from "../components/CategorySliderUpdated"
 import { useWishlist } from "../context/WishlistContext"
 import { useCart } from "../context/CartContext"
 import BrandSlider from "../components/BrandSlider"
+import SEO from "../components/SEO"
+import DynamicSection from "../components/DynamicSection"
+
 
 import config from "../config/config"
+
 
 const API_BASE_URL = `${config.API_URL}`
 
@@ -78,12 +79,27 @@ const Home = () => {
   const sliderRef = useRef(null)
   const [scrollX, setScrollX] = useState(0)
   const [isAutoScrolling, setIsAutoScrolling] = useState(true)
+  const [settings, setSettings] = useState(null)
+  const [homeSections, setHomeSections] = useState([])
   const [deviceType, setDeviceType] = useState(() => {
     if (typeof window !== "undefined") {
       return window.innerWidth < 768 ? "Mobile" : "Desktop"
     }
     return "Desktop"
   })
+  const brandUrls = useMemo(
+    () => ({
+      HP: generateShopURL({ brand: "HP" }),
+      Dell: generateShopURL({ brand: "Dell" }),
+      ASUS: generateShopURL({ brand: "ASUS" }),
+      Acer: generateShopURL({ brand: "Acer" }),
+      MSI: generateShopURL({ brand: "MSI" }),
+      Lenovo: generateShopURL({ brand: "Lenovo" }),
+      Apple: generateShopURL({ brand: "Apple" }),
+      Samsung: generateShopURL({ brand: "Samsung" }),
+    }),
+    [],
+  )
 
   // Notification popup state
   const [showNotifPopup, setShowNotifPopup] = useState(false)
@@ -130,27 +146,68 @@ const Home = () => {
     document.head.appendChild(style)
   }
 
+  // Helper function to render dynamic section by position
+  const renderDynamicSection = (position) => {
+    const section = homeSections.find(s => s.isActive && s.order === position)
+    if (section) {
+      // Create a unique key that includes settings to force re-render when settings change
+      const settingsKey = section.settings ? JSON.stringify(section.settings) : 'no-settings'
+      const uniqueKey = `${section._id}-${section.sectionType}-${settingsKey}`
+      console.log(`🔴 CLIENT RENDER: Rendering section at position ${position}:`, {
+        name: section.name,
+        sectionType: section.sectionType,
+        settings: section.settings,
+        uniqueKey: uniqueKey
+      })
+      return <DynamicSection key={uniqueKey} section={section} />
+    }
+    return null
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Get products from cache or API
         const products = await productCache.getProducts()
 
-        const [categoriesResponse, brandsResponse, bannersResponse, upgradeFeaturesResponse] = await Promise.all([
+        const [categoriesResponse, brandsResponse, bannersResponse, upgradeFeaturesResponse, settingsResponse, sectionsResponse] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/categories`),
           axios.get(`${API_BASE_URL}/api/brands`),
           axios.get(`${API_BASE_URL}/api/banners?active=true`),
           axios.get(`${API_BASE_URL}/api/upgrade-features?active=true`).catch(() => ({ data: [] })),
+          axios.get(`${API_BASE_URL}/api/settings`).catch(() => ({ 
+            data: { 
+              homeSections: { 
+                categoryCards: true, 
+                brandsCards: true, 
+                productsCards: true, 
+                flashSaleCards: true, 
+                limitedSaleCards: true 
+              } 
+            } 
+          })),
+          axios.get(`${API_BASE_URL}/api/home-sections/active`).catch(() => ({ data: [] })),
         ])
 
         const categoriesData = categoriesResponse.data
         const brandsData = brandsResponse.data
         const bannersData = bannersResponse.data
         const upgradeFeaturesData = upgradeFeaturesResponse.data
+        const settingsData = settingsResponse.data
+        const sectionsData = sectionsResponse.data
 
         console.log("All Products loaded:", products.length)
         console.log("Categories fetched:", categoriesData)
         console.log("Brands fetched:", brandsData)
+        console.log("Settings fetched:", settingsData)
+        console.log("Home Sections fetched:", sectionsData)
+        console.log("Sections with order:", sectionsData.map(s => ({ name: s.name, order: s.order })))
+        console.log('🔴 CLIENT: Sections with full settings:', sectionsData.map(s => ({ 
+          name: s.name, 
+          order: s.order, 
+          sectionType: s.sectionType,
+          settings: s.settings 
+        })))
 
         // Filter and validate categories - ensure they have proper structure
         const validCategories = Array.isArray(categoriesData)
@@ -317,7 +374,7 @@ const Home = () => {
             if (!aInStock && bInStock) return 1
             return 0
           })
-          .slice(0, 6)
+          .slice(0, 3)
         const dellData = filterProductsByBrand(products, "Dell")
           .sort((a, b) => {
             const aInStock =
@@ -362,7 +419,7 @@ const Home = () => {
             if (!aInStock && bInStock) return 1
             return 0
           })
-          .slice(0, 6)
+          .slice(0, 3)
 
         // Get category products and sort by stock status (in-stock first)
         const accessoriesData = filterProductsByMainCategory(products, "Accessories")
@@ -592,6 +649,8 @@ const Home = () => {
         setAppleProducts(appleData)
         setSamsungProducts(samsungData)
         setUpgradeFeatures(upgradeFeaturesData)
+        setSettings(settingsData)
+        setHomeSections(sectionsData) // Don't pre-sort, let each zone handle its own sorting
         setLoading(false)
 
         console.log("Final Categories:", validCategories)
@@ -686,7 +745,7 @@ const Home = () => {
   }
 
   const handleBrandClick = (brandName) => {
-    navigate(`/product-brand/${createSlug(brandName)}`)
+    navigate(generateShopURL({ brand: brandName }))
   }
 
   const nextSlide = () => {
@@ -794,7 +853,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <LoadingSpinner size="large" />
+        <img src="/load.gif" alt="Loading..." style={{ width: 300, height: 175, ...bounceStyle }} />
       </div>
     )
   }
@@ -809,28 +868,35 @@ const Home = () => {
 
   return (
     <div className="bg-white mt-1">
-      {/* Notification/Newsletter Popup - Mobile Responsive */}
+      {/* SEO Meta Tags for Home Page */}
+      <SEO
+        title="Buy Laptops, Mobiles & Electronics Online in UAE | Grabatoz"
+        description="Discover the best deals on laptops, desktops, mobiles, and gaming products in UAE. Grabatoz is your trusted electronics shop in Dubai."
+        canonicalPath="/"
+      />
+      
+      {/* Notification/Newsletter Popup */}
       {showNotifPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-4 md:p-6 max-w-md w-full relative animate-fadeInUp max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative animate-fadeInUp">
             {notifStep === "ask" && (
               <>
-                <div className="flex flex-col sm:flex-row items-center mb-4">
-                  <img src="/bigbossblack2.png" alt="Logo" className="w-16 h-16 rounded-full mb-3 sm:mb-0 sm:mr-4" />
-                  <div className="text-center sm:text-left">
-                    <h2 className="text-base md:text-lg font-bold text-black mb-1">
+                <div className="flex items-center mb-4">
+                  <img src="/g.png" alt="Logo" className="w-16 h-18 rounded-full mr-4" />
+                  <div>
+                    <h2 className="text-lg font-bold text-black mb-1">
                       This website would like to send you awesome updates and offers!
                     </h2>
-                    <p className="text-gray-600 text-xs md:text-sm">
+                    <p className="text-gray-600 text-sm">
                       Notifications can be turned off anytime from browser settings.
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
-                  <button className="px-4 py-2 rounded bg-gray-200 text-black font-semibold text-sm hover:bg-gray-300" onClick={handleNotifDeny}>
+                <div className="flex justify-end gap-2 mt-4">
+                  <button className="px-4 py-2 rounded bg-gray-200 text-black font-semibold" onClick={handleNotifDeny}>
                     Don't Allow
                   </button>
-                  <button className="px-4 py-2 rounded bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-sm" onClick={handleNotifAllow}>
+                  <button className="px-4 py-2 rounded bg-lime-500 text-white font-semibold" onClick={handleNotifAllow}>
                     Allow
                   </button>
                 </div>
@@ -838,17 +904,17 @@ const Home = () => {
             )}
             {notifStep === "email" && !notifSuccess && (
               <form onSubmit={handleNotifEmailSubmit}>
-                <div className="flex flex-col sm:flex-row items-center mb-4">
-                  <img src="/bigbossblack2.png" alt="Logo" className="w-14 h-14 rounded-full mb-3 sm:mb-0 sm:mr-4" />
-                  <div className="text-center sm:text-left">
-                    <h2 className="text-base md:text-lg font-bold text-black mb-1">Subscribe to our newsletter</h2>
-                    <p className="text-gray-600 text-xs md:text-sm">Enter your email to get the best offers and updates!</p>
+                <div className="flex items-center  mb-4">
+                  <img src="/g.png" alt="Logo" className="w-14 h-14 rounded-full mr-4" />
+                  <div>
+                    <h2 className="text-lg font-bold text-black mb-1">Subscribe to our newsletter</h2>
+                    <p className="text-gray-600 text-sm">Enter your email to get the best offers and updates!</p>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 mb-2">
+                <div className="flex gap-2 mb-2">
                   <input
                     type="email"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded"
                     placeholder="Enter your email"
                     value={notifEmail}
                     onChange={handleNotifEmailChange}
@@ -856,16 +922,16 @@ const Home = () => {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-sm whitespace-nowrap"
+                    className="px-4 py-2 rounded bg-lime-500 text-white font-semibold"
                     disabled={notifLoading}
                   >
                     {notifLoading ? "Subscribing..." : "Subscribe"}
                   </button>
                 </div>
                 {/* Preferences checkboxes */}
-                <div className="flex flex-col sm:flex-row gap-3 md:gap-6 mb-2">
+                <div className="flex flex-col md:flex-row gap-6 mb-2">
                   {NEWSLETTER_OPTIONS.map((opt) => (
-                    <label key={opt.value} className="flex items-center text-black text-sm font-normal cursor-pointer">
+                    <label key={opt.value} className="flex items-center text-black font-normal cursor-pointer">
                       <input
                         type="checkbox"
                         value={opt.value}
@@ -878,7 +944,7 @@ const Home = () => {
                     </label>
                   ))}
                 </div>
-                {notifError && <div className="text-red-500 text-xs md:text-sm mb-2">{notifError}</div>}
+                {notifError && <div className="text-red-500 text-sm mb-2">{notifError}</div>}
                 <div className="flex justify-end">
                   <button type="button" className="px-3 py-1 text-xs text-gray-500 underline" onClick={handleNotifDeny}>
                     Cancel
@@ -889,119 +955,704 @@ const Home = () => {
             {notifSuccess && (
               <div className="flex flex-col items-center justify-center py-6">
                 <img src="/logo.png" alt="Logo" className="w-14 h-14 rounded-full mb-3 border border-gray-200" />
-                <h2 className="text-base md:text-lg font-bold text-black mb-2 text-center">Thank you for subscribing!</h2>
-                <p className="text-gray-600 text-xs md:text-sm text-center">A confirmation email has been sent to {notifEmail}.</p>
+                <h2 className="text-lg font-bold text-black mb-2">Thank you for subscribing!</h2>
+                <p className="text-gray-600 text-sm">A confirmation email has been sent to {notifEmail}.</p>
               </div>
             )}
           </div>
         </div>
       )}
-      {/* 1. Banner Section */}
       <BannerSlider
         banners={heroBanners.filter(
           (banner) => banner.deviceType && banner.deviceType.toLowerCase() === deviceType.toLowerCase(),
         )}
       />
+      {/* Categories Section - Admin Controlled Slider */}
+      <CategorySliderUpdated onCategoryClick={handleCategoryClick} />
 
-      {/* 2. Sale Product (Featured Section - BigSaleSection with slider, no bg) */}
+     
+      {/* Three Cards Section - Simple Mobile Grid */}
+      <div className="m-3">
+        {/* Desktop & Tablet - Grid Layout */}
+        <div className="hidden md:flex justify-between gap-4">
+          <div className="w-1/3 lg:w-1/3">
+            <Link to="product-category/laptops" aria-label="Browse Lenovo products">
+              <img
+                src="laptop00.png"
+                alt="Lenovo Banner"
+                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="w-1/3 lg:w-1/3">
+            <Link to="/product-category/electronics" aria-label="Browse Acer products">
+              <img
+                src="electronoc resixe.png"
+                alt="Acer Banner"
+                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="w-1/3 lg:w-1/3">
+            <Link to="/product-category/camera" aria-label="Browse Asus products">
+              <img
+                src="camera (2).png"
+                alt="Asus Banner"
+                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+              />
+            </Link>
+          </div>
+        </div>
+
+        {/* Mobile - Simple Grid */}
+        <div className="md:hidden grid grid-cols-2 gap-3">
+          <div>
+            <Link to="/product-category/electronics" aria-label="Browse Lenovo products">
+              <img
+                src="electronoc resixe.png"
+                alt="Lenovo Banner"
+                className="w-full h-auto rounded-lg cover hover:opacity-95 transition-opacity cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div>
+            <Link to="/product-category/camera" aria-label="Browse Acer products">
+              <img
+                src="camera (2).png"
+                alt="Acer Banner"
+                className="w-full h-auto rounded-lg cover hover:opacity-95 transition-opacity cursor-pointer"
+              />
+            </Link>
+          </div>
+        </div>
+      </div>
+      {/* <div className=" flex items-center justify-center mt-2 mx-2">
+        <img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757761484/tamara_tabby_kooxbn.webp" alt="" className="w-full  sm:mx-4 h-auto rounded-lg" />
+      </div> */}
+
+      {/* Dynamic Section Position 1 */}
+      {renderDynamicSection(1)}
+
+      {/* Big Sale Section - Handles both mobile and desktop views */}
       <BigSaleSection products={featuredProducts} />
 
-      {/* 3. Promotional Offers Section - Replaces HP Products */}
-      <PromotionalOffers />
+      {/* Featured Products Section - Mobile Grid */}
+      <section className="py-6 mx-3 md:hidden">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900">Featured Products</h2>
+          <button className="text-green-600 hover:text-green-800 font-medium text-sm">View All</button>
+        </div>
+         
+        <div className="grid grid-cols-2 gap-3">
+          {featuredProducts.slice(0, 4).map((product, index) => (
+            <MobileProductCard key={product._id} product={product} index={index} />
+          ))}
+        </div>
+      </section>
 
-      {/* 4. Shop By Categories Section - Card Style Grid */}
-      <ShopByCategories categories={categories} onCategoryClick={handleCategoryClick} />
+      {/* Mobile Banner (now clickable linking to HP brand page) */}
+      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
+  <Link to={brandUrls.HP} aria-label="Browse HP products">
+          <img
+          //  src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939738/hp_ntmpcm.png"
+           src="11.png" 
+          alt="HP Products Banner Mobile"
+            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+          />
+        </Link>
+      </div>
 
-      {/* 5. Product Section - 6 Products (Accessories) */}
-      <section className="py-6 md:py-8 px-3 md:px-4">
-        <div className="flex items-center justify-between mb-4 md:mb-6">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Accessories</h2>
+      {/* Dynamic Section Position 2 */}
+      {/* {renderDynamicSection(2)} */}
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
+        <div className="w-1/2">
+          <Link to={brandUrls.HP}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854476/hp_half_side_1_iqvlks.png"
+             src="hp.png"
+             alt="HP Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+        <div className="w-1/2">
+          <Link to={brandUrls.Dell}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/dell_half_side_6_igop3u.png"
+             src="dell1.png"
+             alt="Dell Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+      </div>
+
+      {/* HP and Dell Section - Mobile shows only HP */}
+      <section className="py-8 mx-3">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* HP Products */}
+          <div className="w-full md:w-1/2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">HP Products</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("HP")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                View All HP
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 h-full">
+              {hpProducts.length > 0 ? (
+                <>
+                  {hpProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {hpProducts[2] && <DynamicBrandProductCard product={hpProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No HP products available</div>
+              )}
+            </div>
+          </div>
+
+          {/* Dell Products - Hidden on Mobile */}
+          <div className="w-full md:w-1/2 hidden md:block">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-900">Dell Products</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("Dell")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                View All Dell
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {dellProducts.length > 0 ? (
+                <>
+                  {dellProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {dellProducts[2] && <DynamicBrandProductCard product={dellProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No Dell products available</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dynamic Section Position 3 */}
+      {/* {renderDynamicSection(3)} */}
+
+      {/* Accessories Banner - Desktop/Mobile Responsive */}
+      <div className="mx-3 my-4 h-[160px] lg:h-[300px]">
+        <Link to="/product-category/accessories-components">
+          <img
+            src="12.png"
+            alt="Accessories Promotion Banner Mobile"
+            className="w-full h-full cover rounded-lg lg:hidden"
+          />
+          <img
+            src="acessories (1).png"
+            alt="Accessories Promotion Banner Desktop"
+            className="w-full h-full cover rounded-lg hidden lg:block"
+          />
+        </Link>
+      </div>
+
+      {/* Accessories Section - Mobile shows 2 products */}
+      <section className="py-8 mx-3">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Accessories</h2>
           <button
             onClick={() => handleCategoryClick("Accessories")}
-            className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm md:text-base"
+            className="text-green-600 hover:text-green-800 font-medium flex items-center"
           >
-            See All
+            See All Products
             <ChevronRight className="ml-1" size={16} />
           </button>
         </div>
 
         {accessoriesProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
-            {accessoriesProducts
-              .slice(0, 6)
-              .map((product) => (
-                <AccessoriesProductCard key={product._id} product={product} />
-              ))}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+            {accessoriesProducts.slice(0, 2).map((product) => (
+              <AccessoriesProductCard key={product._id} product={product} />
+            ))}
+            {accessoriesProducts.slice(2, 6).map((product) => (
+              <div key={product._id} className="hidden md:block">
+                <AccessoriesProductCard product={product} />
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="text-center py-8 md:py-12 text-gray-500 text-sm md:text-base">
+          <div className="text-center py-12 text-gray-500">
             <p>No accessories products available</p>
           </div>
         )}
       </section>
+  {/* <CategoryBanners /> */}
+      {/* Dynamic Section Position 4 */}
+      {/* {renderDynamicSection(4)} */}
 
-      {/* 6. Brand Section - Auto-Scrolling Brand Carousel */}
-      {brands.length > 0 && <ShopByBrand brands={brands} onBrandClick={handleBrandClick} />}
+      {/* Mobile Banner Asus */}
+      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
+  <Link to={brandUrls.ASUS} aria-label="Browse ASUS products">
+          <img
+            //src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939737/asus_f95cjw.png"
+            src="laptop (2).png"
+            alt="ASUS Products Banner Mobile"
+            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+          />
+        </Link>
+      </div>
 
-      {/* 7. Product Section - 6 Products (ASUS Products) */}
-      <section className="py-6 md:py-8 px-3 md:px-4">
-        <div className="flex items-center justify-between mb-4 md:mb-6">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">ASUS Products</h2>
-          <button
-            onClick={() => handleBrandClick("ASUS")}
-            className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm md:text-base"
-          >
-            See All
-            <ChevronRight className="ml-1" size={16} />
-          </button>
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
+        <div className="w-1/2">
+          <Link to={brandUrls.Acer}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/acer_half_side_jkun9a.png"
+             src="acer01.png"
+             alt="HP Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
         </div>
+        <div className="w-1/2">
+          <Link to={brandUrls.ASUS}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/asus_half_side_aikrmo.png"
+             src="asus01.png"
+             alt="Dell Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+      </div>
 
-        {asusProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
-            {asusProducts
-              .slice(0, 6)
-              .map((product) => (
-                <AccessoriesProductCard key={product._id} product={product} />
-              ))}
+      {/* Acer and ASUS Section - Mobile shows only ASUS */}
+      <section className="py-8 mx-3">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Acer Products - Hidden on Mobile */}
+          <div className="w-full md:w-1/2 hidden md:block">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-900">Shop Acer</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("Acer")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {acerProducts.length > 0 ? (
+                <>
+                  {acerProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {acerProducts[2] && <DynamicBrandProductCard product={acerProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No Acer products available</div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-8 md:py-12 text-gray-500 text-sm md:text-base">
-            <p>No ASUS products available</p>
+
+          {/* ASUS Products */}
+          <div className="w-full md:w-1/2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop Asus</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("ASUS")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {asusProducts.length > 0 ? (
+                <>
+                  {asusProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {asusProducts[2] && <DynamicBrandProductCard product={asusProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">
+                  No ASUS products available
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </section>
 
-      {/* 8. Product Section - 6 Products (Networking Products) */}
-      <section className="py-6 md:py-8 px-3 md:px-4">
-        <div className="flex items-center justify-between mb-4 md:mb-6">
-          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Networking Products</h2>
+      {/* Dynamic Section Position 5 */}
+      {/* {renderDynamicSection(5)} */}
+
+      {/* Networking Banner - Desktop/Mobile Responsive */}
+      <div className="mx-3 my-4 h-[160px] lg:h-[300px]">
+        <Link to="/product-category/networking">
+          <img
+            src="13.png"
+            alt="Networking Banner Mobile"
+            className="w-full h-full cover rounded-lg lg:hidden"
+          />
+          <img
+            src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939592/networking_kr6uvk.png"
+            alt="Networking Banner Desktop"
+            className="w-full h-full cover rounded-lg hidden lg:block"
+          />
+        </Link>
+      </div>
+
+      {/* Networking Products Section - Mobile shows 2 products */}
+      <section className="py-8 mx-3">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Networking</h2>
           <button
             onClick={() => handleCategoryClick("Networking")}
-            className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm md:text-base"
+            className="text-green-600 hover:text-green-800 font-medium flex items-center"
           >
-            See All
+            See All Products
             <ChevronRight className="ml-1" size={16} />
           </button>
         </div>
 
         {networkingProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3">
-            {networkingProducts
-              .slice(0, 6)
-              .map((product) => (
-                <AccessoriesProductCard key={product._id} product={product} />
-              ))}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+            {networkingProducts.slice(0, 2).map((product) => (
+              <AccessoriesProductCard key={product._id} product={product} />
+            ))}
+            {networkingProducts.slice(2, 6).map((product) => (
+              <div key={product._id} className="hidden md:block">
+                <AccessoriesProductCard product={product} />
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="text-center py-8 md:py-12 text-gray-500 text-sm md:text-base">
+          <div className="text-center py-12 text-gray-500">
             <p>No networking products available</p>
           </div>
         )}
       </section>
 
-      {/* Core Service Section (Before Footer) */}
-      <CoreServiceAspects />
-      
+      {/* Dynamic Section Position 6 */}
+      {/* {renderDynamicSection(6)} */}
+
+      {/* Mobile Banner MSI */}
+      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
+  <Link to={brandUrls.MSI} aria-label="Browse MSI products">
+          <img
+            //src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939739/msi_mmaozn.png"
+            src="14.png"
+            alt="MSI Products Banner Mobile"
+            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+          />
+        </Link>
+      </div>
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
+        <div className="w-1/2">
+          <Link to={brandUrls.MSI}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854476/msi_half_side_1_k4dmhz.png"
+             src="msi01.png"
+             alt="HP Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+        <div className="w-1/2">
+          <Link to={brandUrls.Lenovo}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/lenovo_half_side_daug2k.png"
+             src="lenovo01.png"
+             alt="Dell Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+      </div>
+
+      {/* MSI and Lenovo Products Section - Mobile shows only MSI */}
+      <section className="py-8 mx-3">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* MSI Products */}
+          <div className="w-full md:w-1/2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop MSI</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("MSI")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {msiProducts.length > 0 ? (
+                <>
+                  {msiProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {msiProducts[2] && <DynamicBrandProductCard product={msiProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No MSI products available</div>
+              )}
+            </div>
+          </div>
+
+          {/* Lenovo Products - Hidden on Mobile */}
+          <div className="w-full md:w-1/2 hidden md:block">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-900">Shop Lenovo</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("Lenovo")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {lenovoProducts.length > 0 ? (
+                <>
+                  {lenovoProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {lenovoProducts[2] && <DynamicBrandProductCard product={lenovoProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No Lenovo products available</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dynamic Section Position 7 */}
+      {/* {renderDynamicSection(7)} */}
+
+      {/* Mobile Banner Apple */}
+      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
+  <Link to={brandUrls.Apple} aria-label="Browse Apple products">
+          <img
+          //  src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757769951/apple_half_side_n1cxhc.png"
+          src="15.png"
+          alt="Apple Products Banner Mobile"
+            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+          />
+        </Link>
+      </div>
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
+        <div className="w-1/2">
+          <Link to={brandUrls.Apple}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757769951/apple_half_side_n1cxhc.png"
+             src="apple (1).png"
+             alt="HP Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+        <div className="w-1/2">
+          <Link to={brandUrls.Samsung}>
+            <img
+             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939592/samsung_half_side_gtslyc.png"
+             src="samsung01.png" 
+             alt="Dell Products Banner"
+              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+            />
+          </Link>
+        </div>
+      </div>
+
+      {/* Apple and Samsung Products Section - Mobile shows only Apple */}
+      <section className="py-8 mx-3">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Apple Products */}
+          <div className="w-full md:w-1/2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop Apple</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("Apple")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {appleProducts.length > 0 ? (
+                <>
+                  {appleProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {appleProducts[2] && <DynamicBrandProductCard product={appleProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">
+                  No Apple products available
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Samsung Products - Hidden on Mobile */}
+          <div className="w-full md:w-1/2 hidden md:block">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-900">Shop Samsung</h2>
+              </div>
+              <button
+                onClick={() => handleBrandClick("Samsung")}
+                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+              >
+                See All
+                <ChevronRight className="ml-1" size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {samsungProducts.length > 0 ? (
+                <>
+                  {samsungProducts.slice(0, 2).map((product) => (
+                    <DynamicBrandProductCard key={product._id} product={product} />
+                  ))}
+                  <div className="hidden md:block">
+                    {samsungProducts[2] && <DynamicBrandProductCard product={samsungProducts[2]} />}
+                  </div>
+                </>
+              ) : (
+                <div className="col-span-2 md:col-span-3 text-center py-8 text-gray-500">No Samsung products available</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Dynamic Section Position 8 */}
+      {/* {renderDynamicSection(8)} */}
+
+      {/* Upgrade Features Section - Responsive */}
+      {upgradeFeatures.length > 0 && (
+        <section className="py-8 md:py-12 bg-gradient-to-br from-blue-50 to-indigo-100 mx-3 rounded-lg my-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="text-center mb-8 md:mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Upgrade Features</h2>
+              <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+                Discover the latest technology upgrades and premium features available for your devices
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {upgradeFeatures.map((feature) => (
+                <UpgradeFeatureCard key={feature._id} feature={feature} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Dynamic Section Position 9 */}
+      {/* {renderDynamicSection(9)} */}
+
+      {/* Featured Brands Section - Use BrandSlider component */}
+      {brands.length > 0 && <BrandSlider brands={brands} onBrandClick={handleBrandClick} />}
+
+      {/* Dynamic Section Position 10 */}
+      {/* {renderDynamicSection(10)} */}
+
+      {/* Core Service Section - Responsive: Desktop(4 in row), Mobile(2x2 grid) */}
+      <section className="py-8 md:py-10 bg-white mt-2">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+          <h2 className="text-lg lg:text-xl xl:text-2xl font-bold text-center text-gray-900 mb-6 lg:mb-8 xl:mb-12">
+            Core Service Aspects
+          </h2>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-6 xl:gap-8 2xl:gap-10">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
+                <CreditCard className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+              </div>
+              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Secure Payment Method</h3>
+              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
+                Available Different secure Payment Methods
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
+                <Truck className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+              </div>
+              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Extreme Fast Delivery</h3>
+              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
+                Fast and convenient From door to door delivery
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
+                <Heart className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+              </div>
+              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Quality & Savings</h3>
+              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
+                Comprehensive quality control and affordable price
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
+                <Headphones className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+              </div>
+              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Professional Support</h3>
+              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
+                Efficient customer support from passionate team
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <style>{`
         @keyframes fadeInUp {
           0% { opacity: 0; transform: translateY(32px); }
@@ -1048,11 +1699,11 @@ const MobileProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex h-[150px] md:h-[170px] justify-center items-center">
-        <Link to={`/product/${product.slug || product._id}`}>
+    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex h-[170px] justify-center items-center">
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
           <img
-            src={product.image || "/placeholder.svg?height=120&width=120"}
+            src={getFullImageUrl(product.image) || "/placeholder.svg?height=120&width=120"}
             alt={product.name}
             className="w-full h-full object-contain rounded mx-auto"
           />
@@ -1070,45 +1721,45 @@ const MobileProductCard = ({ product }) => {
         </button>
       </div>
       
-      <div className="mb-1 flex items-center gap-1 md:gap-2">
-        <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-xs inline-block`}>
+      <div className="mb-1 flex flex-wrap items-center gap-2">
+        <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-xs inline-block`}>
           {stockStatus}
         </div>
         {discount && (
-          <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-xs inline-block font-bold">{discount}</div>
+          <div className="bg-yellow-400 text-white px-1 py-0.5 rounded text-xs inline-block">{discount}</div>
         )}
       </div>
       
-      <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px] mb-1">{product.name}</h3>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
+        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px] mb-1">{product.name}</h3>
       </Link>
       
-      {product.category && <div className="text-[10px] md:text-xs text-yellow-600 mb-1">Category: {categoryName}</div>}
-      <div className="text-[10px] md:text-xs text-green-600 mb-1">Inclusive VAT</div>
+      {product.category && <div className="text-xs text-yellow-600 mb-1">Category: {categoryName}</div>}
+      <div className="text-xs text-green-600 mb-1">Inclusive VAT</div>
       
-      <div className="flex items-center gap-1 md:gap-2 mb-1">
-        <div className="text-red-600 font-bold text-xs md:text-sm">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0 mb-1">
+        <div className="text-red-600 font-bold text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
+          <div className="text-gray-400 line-through text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with responsive stars */}
-      <div className="flex items-center mb-2 min-h-[20px] md:min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with 20px stars */}
+      <div className="flex items-center mb-2 min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={16}
-              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              size={17}
+              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
 
       <button
@@ -1121,10 +1772,10 @@ const MobileProductCard = ({ product }) => {
           }, 100)
           addToCart(product)
         }}
-        className="mt-auto w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className="mt-auto w-full bg-lime-500 hover:bg-lime-400 border border-lime-300 hover:border-transparent text-black text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={10} className="md:w-3 md:h-3" />
+        <ShoppingBag size={12} />
         Add to Cart
       </button>
     </div>
@@ -1172,14 +1823,14 @@ const DynamicBrandProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex justify-center items-center h-[150px] md:h-[190px]">
-        <Link to={`/product/${product.slug || product._id}`} className="w-full h-full flex items-center justify-center">
+    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex justify-center items-center" style={{height:190}}>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`} className="w-full h-full flex items-center justify-center">
           <img
-            src={product.image || "/placeholder.svg?height=120&width=120"}
+            src={getFullImageUrl(product.image) || "/placeholder.svg?height=120&width=120"}
             alt={product.name}
-            className="w-full h-full object-contain bg-white rounded mx-auto"
-            style={{maxHeight: '145px'}}
+            className="w-full h-full object-contain bg-white rounded mx-auto mb-4"
+            style={{maxHeight:165}}
           />
         </Link>
         <button
@@ -1193,45 +1844,45 @@ const DynamicBrandProductCard = ({ product }) => {
         >
           <Heart size={12} className={isInWishlist(product._id) ? "text-red-500 fill-red-500" : "text-gray-400"} />
         </button>
-        {/* Status & Discount badges overlayed at bottom of image */}
-        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-1 z-10">
-          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
+        {/* Status & Discount badges overlayed at bottom of image, always inside image area */}
+        <div className="absolute inset-x-0 -bottom-2 px-2 flex flex-wrap items-center gap-2 z-10">
+          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
           {finalDiscountLabel && (
-            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-bold shadow-sm">
+            <div className="bg-yellow-400 text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm">
               {finalDiscountLabel}
             </div>
           )}
         </div>
       </div>
       
-      <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px]">{product.name}</h3>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
+        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px]">{product.name}</h3>
       </Link>
-      {product.category && <div className="text-[10px] md:text-xs text-yellow-600">Category: {categoryName}</div>}
-      <div className="text-[10px] md:text-xs text-green-600">Inclusive VAT</div>
-      <div className="flex items-center gap-1 md:gap-2">
-        <div className="text-red-600 font-bold text-xs md:text-sm">
+      {product.category && <div className="text-xs text-yellow-600">Category: {categoryName}</div>}
+      <div className="text-xs text-green-600">Inclusive VAT</div>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0">
+        <div className="text-red-600 font-bold text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
+          <div className="text-gray-400 line-through text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with responsive stars */}
-      <div className="flex items-center min-h-[20px] md:min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with 20px stars */}
+      <div className="flex items-center min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
               size={16}
-              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
       
       <button
@@ -1244,10 +1895,10 @@ const DynamicBrandProductCard = ({ product }) => {
           }, 100)
           addToCart(product)
         }}
-        className="w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className=" w-full bg-lime-500 hover:bg-lime-400 border border-lime-300 hover:border-transparent text-black text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={10} className="md:w-3 md:h-3" />
+        <ShoppingBag size={12} />
         Add to Cart
       </button>
     </div>
@@ -1295,14 +1946,14 @@ const AccessoriesProductCard = ({ product }) => {
   const categoryName = product.category?.name || "Unknown"
 
   return (
-    <div className="border p-2 h-[380px] md:h-[410px] flex flex-col justify-between bg-white">
-      <div className="relative mb-2 flex justify-center items-center h-[150px] md:h-[190px]">
-        <Link to={`/product/${product.slug || product._id}`} className="w-full h-full flex items-center justify-center">
+    <div className="border p-2 h-[410px] flex flex-col justify-between bg-white">
+      <div className="relative mb-2 flex justify-center items-center" style={{height:190}}>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`} className="w-full h-full flex items-center justify-center">
           <img
-            src={product.image || "/placeholder.svg?height=120&width=120"}
+            src={getFullImageUrl(product.image) || "/placeholder.svg?height=120&width=120"}
             alt={product.name}
-            className="w-full h-full object-contain bg-white rounded mx-auto"
-            style={{maxHeight: '145px'}}
+            className="w-full h-full object-contain bg-white rounded mx-auto mb-4"
+            style={{maxHeight:165}}
           />
         </Link>
         <button
@@ -1316,44 +1967,44 @@ const AccessoriesProductCard = ({ product }) => {
         >
           <Heart size={12} className={isInWishlist(product._id) ? "text-red-500 fill-red-500" : "text-gray-400"} />
         </button>
-        {/* Status & Discount badges overlayed at bottom of image */}
-        <div className="absolute inset-x-0 -bottom-2 px-2 flex items-center gap-1 z-10">
-          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
+        {/* Status & Discount badges overlayed at bottom of image, always inside image area */}
+        <div className="absolute inset-x-0 -bottom-2 px-2 flex flex-wrap items-center gap-2 z-10">
+          <div className={`${getStatusColor(stockStatus)} text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm`}>{stockStatus}</div>
           {finalDiscountLabel && (
-            <div className="bg-red-600 text-white px-1 py-0.5 rounded text-[9px] md:text-[10px] font-bold shadow-sm">
+            <div className="bg-yellow-400 text-white px-1 py-0.5 rounded text-[10px] font-medium shadow-sm">
               {finalDiscountLabel}
             </div>
           )}
         </div>
       </div>
-      <Link to={`/product/${product.slug || product._id}`}>
-        <h3 className="text-[11px] md:text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[45px] md:h-[50px]">{product.name}</h3>
+  <Link to={`/product/${encodeURIComponent(product.slug || product._id)}`}>
+        <h3 className="text-xs font-sm text-gray-900 line-clamp-3 hover:text-blue-600 h-[50px]">{product.name}</h3>
       </Link>
-      {product.category && <div className="text-[10px] md:text-xs text-yellow-600">Category: {categoryName}</div>}
-      <div className="text-[10px] md:text-xs text-green-600">Inclusive VAT</div>
-      <div className="flex items-center gap-1 md:gap-2">
-        <div className="text-red-600 font-bold text-xs md:text-sm">
+      {product.category && <div className="text-xs text-yellow-600">Category: {categoryName}</div>}
+      <div className="text-xs text-green-600">Inclusive VAT</div>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-0">
+        <div className="text-red-600 font-bold text-sm">
           {Number(priceToShow).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
         </div>
         {showOldPrice && (
-          <div className="text-gray-400 line-through text-[10px] md:text-xs font-medium">
+          <div className="text-gray-400 line-through text-xs font-medium">
             {Number(basePrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}AED
           </div>
         )}
       </div>
 
-      {/* Rating and Reviews Section - Fixed with responsive stars */}
-      <div className="flex items-center min-h-[20px] md:min-h-[24px]">
+      {/* Rating and Reviews Section - Fixed with 20px stars */}
+      <div className="flex items-center min-h-[24px]">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
               size={16}
-              className={`md:w-5 md:h-5 ${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+              className={`${i < Math.round(Number(product.rating) || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
             />
           ))}
         </div>
-        <span className="text-[10px] md:text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
+        <span className="text-xs text-gray-500 ml-1">({Number(product.numReviews) || 0})</span>
       </div>
       
       <button
@@ -1364,10 +2015,10 @@ const AccessoriesProductCard = ({ product }) => {
           setTimeout(() => { if (e.target) e.target.style.transform = "scale(1)" }, 100)
           addToCart(product)
         }}
-        className="w-full bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 text-white text-[10px] md:text-xs font-medium py-1.5 md:py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
+        className=" w-full bg-lime-500 hover:bg-lime-400 border border-lime-300 hover:border-transparent text-black text-xs font-medium py-2 px-1 rounded flex items-center justify-center gap-1 transition-all duration-100"
         disabled={stockStatus === "Out of Stock"}
       >
-        <ShoppingBag size={10} className="md:w-3 md:h-3" />
+        <ShoppingBag size={12} />
         Add to Cart
       </button>
     </div>
