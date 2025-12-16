@@ -191,15 +191,15 @@ function App() {
               <div className="App">
                 <Routes>
                   {/* Admin Routes */}
-                  <Route path="/grabiansadmin/login" element={<AdminLogin />} />
+                  <Route path="/superboss-admin/login" element={<AdminLogin />} />
                   <Route
                     path="/admin/*"
                     element={
                       <AdminRoute>
-                        <div className="min-h-screen bg-gray-100">
+                        <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
                           <AdminSidebar />
                           <AdminHeader />
-                          <div className=" ">
+                          <div className="">
                             <Routes>
                               <Route path="dashboard" element={<AdminDashboard />} />
                               <Route path="products" element={<AdminProducts />} />

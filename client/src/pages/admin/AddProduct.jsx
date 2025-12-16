@@ -122,7 +122,7 @@ const AddProduct = () => {
 
       if (!token) {
         showToast("Please login as admin first", "error")
-        navigate("/grabiansadmin/login")
+        navigate("/superboss-admin/login")
         return
       }
 
@@ -397,7 +397,7 @@ const AddProduct = () => {
 
       if (!token) {
         showToast("Please login as admin first", "error")
-        navigate("/grabiansadmin/login")
+        navigate("/superboss-admin/login")
         return
       }
 

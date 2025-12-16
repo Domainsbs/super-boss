@@ -165,7 +165,30 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
+    // Check if admin is logged in on app start
+    const checkAdminAuth = () => {
+      const adminToken = localStorage.getItem("adminToken")
+      const adminData = localStorage.getItem("adminData")
+      
+      if (adminToken && adminData) {
+        try {
+          const admin = JSON.parse(adminData)
+          dispatch({
+            type: AUTH_ACTIONS.ADMIN_LOGIN_SUCCESS,
+            payload: {
+              admin,
+              token: adminToken,
+            },
+          })
+        } catch (error) {
+          localStorage.removeItem("adminToken")
+          localStorage.removeItem("adminData")
+        }
+      }
+    }
+
     checkAuth()
+    checkAdminAuth()
   }, [])
 
   // Login function
@@ -271,6 +294,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await adminAPI.login(credentials)
       localStorage.setItem("adminToken", data.token)
+      // Store admin data in localStorage for persistence
+      localStorage.setItem("adminData", JSON.stringify({
+        _id: data._id,
+        name: data.name,
+        email: data.email,
+        isAdmin: data.isAdmin,
+      }))
       dispatch({
         type: AUTH_ACTIONS.ADMIN_LOGIN_SUCCESS,
         payload: {
@@ -286,6 +316,7 @@ export const AuthProvider = ({ children }) => {
 
   const adminLogout = () => {
     localStorage.removeItem("adminToken")
+    localStorage.removeItem("adminData")
     dispatch({ type: AUTH_ACTIONS.ADMIN_LOGOUT })
   }
 

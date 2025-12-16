@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import AdminSidebar from "../../components/admin/AdminSidebar"
-import { ShoppingBag, Users, DollarSign, TrendingUp } from "lucide-react"
+import AdminHeader from "../../components/admin/AdminHeader"
+import { ShoppingBag, Users, DollarSign, TrendingUp, ArrowRight, Package, Eye } from "lucide-react"
 import { adminAPI } from "../../services/api"
 
 const AdminDashboard = () => {
@@ -41,11 +42,13 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <AdminSidebar />
+      <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
       
-        <div className="ml-64 flex justify-center items-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <div className="ml-64 flex justify-center items-center h-[calc(100vh-80px)]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400"></div>
+            <p className="text-white/70">Loading dashboard...</p>
+          </div>
         </div>
       </div>
     )
@@ -53,139 +56,186 @@ const AdminDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <AdminSidebar />
-        
+      <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
+   
         <div className="ml-64 p-8">
-          <div className="bg-red-50 text-red-600 p-4 rounded-md">{error}</div>
+          <div className="bg-red-500/20 text-red-200 p-4 rounded-xl border border-red-500/30">{error}</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminSidebar />
-    
+    <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
+   
 
       <div className="ml-64 p-8">
+        {/* Welcome Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Welcome Card */}
+          <div className="lg:col-span-2 bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Welcome back,<br />
+              <span className="text-yellow-400">{admin?.name || "Admin"}!</span>
+            </h1>
+            <p className="text-white/70 mb-6">
+              Great to see you again. Here's a quick look at your store's activity.
+            </p>
+            <Link 
+              to="/admin/orders/new" 
+              className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
+            >
+              View New Orders
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {/* Quick Stats Mini */}
+          <div className="bg-white rounded-3xl p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Summary</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">New Orders</span>
+                <span className="text-2xl font-bold text-emerald-600">{stats.totalOrders}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Revenue</span>
+                <span className="text-xl font-bold text-emerald-600">{formatPrice(stats.totalRevenue)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-blue-100 p-3 rounded-full mb-4">
-                <ShoppingBag className="h-6 w-6 text-blue-600" />
+          <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Total Orders</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalOrders}</p>
               </div>
-              <h3 className="text-sm font-medium text-gray-500">Total Orders</h3>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalOrders}</p>
+              <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-3 rounded-xl shadow-lg">
+                <ShoppingBag className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium">+12%</span>
+              <span className="text-gray-400 ml-2">from last month</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-green-100 p-3 rounded-full mb-4">
-                <DollarSign className="h-6 w-6 text-green-600" />
+          <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Total Revenue</p>
+                <p className="text-3xl font-bold text-gray-900">{formatPrice(stats.totalRevenue)}</p>
               </div>
-              <h3 className="text-sm font-medium text-gray-500">Total Revenue</h3>
-              <p className="text-2xl font-semibold text-gray-900">{formatPrice(stats.totalRevenue)}</p>
+              <div className="bg-gradient-to-br from-green-400 to-green-600 p-3 rounded-xl shadow-lg">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium">+8%</span>
+              <span className="text-gray-400 ml-2">from last month</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-purple-100 p-3 rounded-full mb-4">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+          <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Total Products</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalProducts}</p>
               </div>
-              <h3 className="text-sm font-medium text-gray-500">Total Products</h3>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalProducts}</p>
+              <div className="bg-gradient-to-br from-purple-400 to-purple-600 p-3 rounded-xl shadow-lg">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium">+5%</span>
+              <span className="text-gray-400 ml-2">from last month</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-yellow-100 p-3 rounded-full mb-4">
-                <Users className="h-6 w-6 text-yellow-600" />
+          <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-shadow duration-300">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">Total Users</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
               </div>
-              <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalUsers}</p>
+              <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-3 rounded-xl shadow-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm">
+              <span className="text-green-500 font-medium">+15%</span>
+              <span className="text-gray-400 ml-2">from last month</span>
             </div>
           </div>
         </div>
 
         {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-          <div className="px-6 py-4 border-b">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-900">Recent Orders</h2>
-              <Link to="/admin/orders" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Your Recent Orders</h2>
+                <p className="text-sm text-gray-500 mt-1">Latest transactions from your store</p>
+              </div>
+              <Link 
+                to="/admin/orders" 
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+              >
+                <Eye className="w-4 h-4" />
                 View all
               </Link>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Order ID
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Order#
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Customer
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Total
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50">
+              <tbody className="bg-white divide-y divide-gray-100">
+                {recentOrders.map((order, index) => (
+                  <tr key={order._id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-blue-600">
-                        <Link to={`/admin/orders/${order._id}`}>#{order._id.slice(-6)}</Link>
-                      </div>
+                      <Link 
+                        to={`/admin/orders/${order._id}`}
+                        className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+                      >
+                        #{order._id.slice(-6)}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {order.deliveryType === "pickup" ? (
-                        <>
-                          <div className="text-sm text-gray-900">{order.pickupDetails?.location || "N/A"}</div>
-                          <div className="text-sm text-gray-500">{order.pickupDetails?.phone || "N/A"}</div>
-                        </>
+                        <div className="text-sm text-gray-900 font-medium">{order.pickupDetails?.location || "N/A"}</div>
                       ) : (
-                        <>
-                          <div className="text-sm text-gray-900">{order.shippingAddress?.name || "N/A"}</div>
-                          <div className="text-sm text-gray-500">{order.shippingAddress?.email || "N/A"}</div>
-                        </>
+                        <div className="text-sm text-gray-900 font-medium">{order.shippingAddress?.name || "N/A"}</div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${
                           order.status === "Processing"
                             ? "bg-yellow-100 text-yellow-800"
@@ -199,8 +249,8 @@ const AdminDashboard = () => {
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatPrice(order.totalPrice)}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-semibold text-gray-900">{formatPrice(order.totalPrice)}</span>
                     </td>
                   </tr>
                 ))}
