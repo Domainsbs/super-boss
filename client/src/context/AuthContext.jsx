@@ -163,20 +163,17 @@ export const AuthProvider = ({ children }) => {
           payload: false,
         })
       }
-    }
 
-    // Check if admin is logged in on app start
-    const checkAdminAuth = () => {
+      // Check admin authentication
       const adminToken = localStorage.getItem("adminToken")
       const adminData = localStorage.getItem("adminData")
-      
       if (adminToken && adminData) {
         try {
-          const admin = JSON.parse(adminData)
+          const parsedAdminData = JSON.parse(adminData)
           dispatch({
             type: AUTH_ACTIONS.ADMIN_LOGIN_SUCCESS,
             payload: {
-              admin,
+              admin: parsedAdminData,
               token: adminToken,
             },
           })
@@ -188,7 +185,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     checkAuth()
-    checkAdminAuth()
   }, [])
 
   // Login function
@@ -296,15 +292,20 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("adminToken", data.token)
       // Store admin data in localStorage for persistence
       localStorage.setItem("adminData", JSON.stringify({
-        _id: data._id,
         name: data.name,
         email: data.email,
-        isAdmin: data.isAdmin,
+        role: data.role || "Super Admin",
+        _id: data._id,
       }))
       dispatch({
         type: AUTH_ACTIONS.ADMIN_LOGIN_SUCCESS,
         payload: {
-          admin: data,
+          admin: {
+            name: data.name,
+            email: data.email,
+            role: data.role || "Super Admin",
+            _id: data._id,
+          },
           token: data.token,
         },
       })

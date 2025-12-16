@@ -25,11 +25,13 @@ import {
   Phone,
   Star,
   TrendingUp,
+  Cog,
+  ShoppingBag,
+  RefreshCw,
   LogOut,
-  Heart,
-  CreditCard,
-  Gift,
   Mail,
+  Gift,
+  Home,
 } from "lucide-react"
 
 const AdminSidebar = () => {
@@ -50,9 +52,14 @@ const AdminSidebar = () => {
     orders: false,
     blogs: false,
     subcategories: false,
+    subcategories2: false,
+    subcategories3: false,
+    subcategories4: false,
     coupons: false,
     reviews: false,
     stockAdjustment: false,
+    seoSettings: false,
+    deliveryCharges: false,
   })
 
   // Auto-open dropdowns based on current route
@@ -61,106 +68,38 @@ const AdminSidebar = () => {
     const newOpenDropdowns = { ...openDropdowns }
 
     if (
-      path.includes("/admin/products") ||
-      path.includes("/admin/add-product") ||
-      path.includes("/admin/categories") ||
-      path.includes("/admin/add-category") ||
-      path.includes("/admin/trash-categories") ||
-      path.includes("/admin/brands") ||
-      path.includes("/admin/add-brand") ||
-      path.includes("/admin/volumes") ||
-      path.includes("/admin/add-volume") ||
-      path.includes("/admin/warranty") ||
-      path.includes("/admin/add-warranty") ||
-      path.includes("/admin/colors") ||
-      path.includes("/admin/add-color") ||
-      path.includes("/admin/units") ||
-      path.includes("/admin/add-unit") ||
-      path.includes("/admin/tax") ||
-      path.includes("/admin/add-tax") ||
-      path.includes("/admin/sizes") ||
-      path.includes("/admin/add-size") ||
-      path.includes("/admin/subcategories") ||
-      path.includes("/admin/add-subcategory")
+      path.includes("/superboss-admin/products") ||
+      path.includes("/superboss-admin/categories") ||
+      path.includes("/superboss-admin/brands") ||
+      path.includes("/superboss-admin/volumes") ||
+      path.includes("/superboss-admin/warranty") ||
+      path.includes("/superboss-admin/colors") ||
+      path.includes("/superboss-admin/units") ||
+      path.includes("/superboss-admin/tax") ||
+      path.includes("/superboss-admin/sizes") ||
+      path.includes("/superboss-admin/subcategories")
     ) {
       newOpenDropdowns.productSystem = true
     }
 
-    if (
-      path.includes("/admin/orders") ||
-      path.includes("/admin/orders/new") ||
-      path.includes("/admin/orders/online") ||
-      path.includes("/admin/orders/received") ||
-      path.includes("/admin/orders/confirmed") ||
-      path.includes("/admin/orders/processing") ||
-      path.includes("/admin/orders/ready-for-shipment") ||
-      path.includes("/admin/orders/on-the-way") ||
-      path.includes("/admin/orders/delivered") ||
-      path.includes("/admin/orders/on-hold") ||
-      path.includes("/admin/orders/cancelled") ||
-      path.includes("/admin/orders/deleted") ||
-      path.includes("/admin/orders/create")
-    ) {
+    if (path.includes("/superboss-admin/orders")) {
       newOpenDropdowns.orders = true
     }
 
-    if (
-      path.includes("/admin/blogs") ||
-      path.includes("/admin/add-blog") ||
-      path.includes("/admin/blog-topics") ||
-      path.includes("/admin/add-blog-topic") ||
-      path.includes("/admin/blog-categories") ||
-      path.includes("/admin/add-blog-category") ||
-      path.includes("/admin/blog-rating")
-    ) {
+    if (path.includes("/superboss-admin/blogs")) {
       newOpenDropdowns.blogs = true
     }
 
-    if (path.includes("/admin/coupons")) {
-      newOpenDropdowns.coupons = true
-    }
-
-    if (path.includes("/admin/reviews")) {
+    if (path.includes("/superboss-admin/reviews")) {
       newOpenDropdowns.reviews = true
     }
 
-    if (path.includes("/admin/stock-adjustment")) {
+    if (path.includes("/superboss-admin/stock-adjustment")) {
       newOpenDropdowns.stockAdjustment = true
     }
 
-    if (path.includes("/admin/products") || path.includes("/admin/add-product")) {
-      newOpenDropdowns.products = true
-    }
-    if (
-      path.includes("/admin/categories") ||
-      path.includes("/admin/add-category") ||
-      path.includes("/admin/trash-categories")
-    ) {
-      newOpenDropdowns.categories = true
-    }
-    if (path.includes("/admin/brands") || path.includes("/admin/add-brand")) {
-      newOpenDropdowns.brands = true
-    }
-    if (path.includes("/admin/volumes") || path.includes("/admin/add-volume")) {
-      newOpenDropdowns.volumes = true
-    }
-    if (path.includes("/admin/warranty") || path.includes("/admin/add-warranty")) {
-      newOpenDropdowns.warranty = true
-    }
-    if (path.includes("/admin/colors") || path.includes("/admin/add-color")) {
-      newOpenDropdowns.colors = true
-    }
-    if (path.includes("/admin/units") || path.includes("/admin/add-unit")) {
-      newOpenDropdowns.units = true
-    }
-    if (path.includes("/admin/tax") || path.includes("/admin/add-tax")) {
-      newOpenDropdowns.tax = true
-    }
-    if (path.includes("/admin/sizes") || path.includes("/admin/add-size")) {
-      newOpenDropdowns.sizes = true
-    }
-    if (path.includes("/admin/subcategories") || path.includes("/admin/add-subcategory")) {
-      newOpenDropdowns.subcategories = true
+    if (path.includes("/superboss-admin/delivery-charges")) {
+      newOpenDropdowns.deliveryCharges = true
     }
 
     setOpenDropdowns(newOpenDropdowns)
@@ -185,7 +124,7 @@ const AdminSidebar = () => {
   }
 
   const isDropdownActive = (items) => {
-    return items?.some(item => {
+    return items?.some((item) => {
       if (item.items) {
         return isDropdownActive(item.items)
       }
@@ -197,23 +136,23 @@ const AdminSidebar = () => {
     {
       title: "Dashboard",
       icon: LayoutDashboard,
-      path: "/admin/dashboard",
+      path: "/superboss-admin/dashboard",
     },
     {
       title: "Orders",
       icon: ShoppingCart,
       dropdown: "orders",
       items: [
-        { title: "Create Order", path: "/admin/orders/create" },
-        { title: "New Orders", path: "/admin/orders/new" },
-        { title: "Confirmed", path: "/admin/orders/confirmed" },
-        { title: "Processing", path: "/admin/orders/processing" },
-        { title: "Ready for Shipment", path: "/admin/orders/ready-for-shipment" },
-        { title: "On the Way", path: "/admin/orders/on-the-way" },
-        { title: "Delivered", path: "/admin/orders/delivered" },
-        { title: "On Hold", path: "/admin/orders/on-hold" },
-        { title: "Cancelled", path: "/admin/orders/cancelled" },
-        { title: "Deleted", path: "/admin/orders/deleted" },
+        { title: "Create Order", path: "/superboss-admin/orders/create" },
+        { title: "New Orders", path: "/superboss-admin/orders/new" },
+        { title: "Confirmed", path: "/superboss-admin/orders/confirmed" },
+        { title: "Processing", path: "/superboss-admin/orders/processing" },
+        { title: "Ready for Shipment", path: "/superboss-admin/orders/ready-for-shipment" },
+        { title: "On the Way", path: "/superboss-admin/orders/on-the-way" },
+        { title: "Delivered", path: "/superboss-admin/orders/delivered" },
+        { title: "On Hold", path: "/superboss-admin/orders/on-hold" },
+        { title: "Cancelled", path: "/superboss-admin/orders/cancelled" },
+        { title: "Deleted", path: "/superboss-admin/orders/deleted" },
       ],
     },
     {
@@ -225,102 +164,120 @@ const AdminSidebar = () => {
           title: "Products",
           icon: Package,
           dropdown: "products",
-          section: "products",
           items: [
-            { title: "List Products", path: "/admin/products" },
-            { title: "Add Product", path: "/admin/products/add" },
-            { title: "Add Bulk Products", path: "/admin/products/bulk-add" },
+            { title: "List Products", path: "/superboss-admin/products" },
+            { title: "Add Bulk Products", path: "/superboss-admin/products/bulk-add" },
           ],
         },
         {
           title: "Categories",
           icon: Tag,
           dropdown: "categories",
-          section: "categories",
           items: [
-            { title: "List Categories", path: "/admin/categories" },
-            { title: "Add Category", path: "/admin/categories/add" },
-            { title: "Trash Categories", path: "/admin/categories/trash" },
+            { title: "List Categories", path: "/superboss-admin/categories" },
+            { title: "Add Category", path: "/superboss-admin/categories/add" },
+            { title: "Trash Categories", path: "/superboss-admin/categories/trash" },
+            { title: "Category Slider", path: "/superboss-admin/categories/slider" },
           ],
         },
         {
           title: "Sub Categories",
           icon: Tag,
           dropdown: "subcategories",
-          section: "subcategories",
           items: [
-            { title: "List Sub Categories", path: "/admin/subcategories" },
-            { title: "Add Sub Category", path: "/admin/subcategories/add" },
+            { title: "List Sub Categories", path: "/superboss-admin/subcategories" },
+            { title: "Add Sub Category", path: "/superboss-admin/subcategories/add" },
+            { title: "Trash Sub Categories", path: "/superboss-admin/subcategories/trash" },
+          ],
+        },
+        {
+          title: "Sub Categories 2",
+          icon: Tag,
+          dropdown: "subcategories2",
+          items: [
+            { title: "List Sub Categories 2", path: "/superboss-admin/subcategories-2" },
+            { title: "Add Sub Category 2", path: "/superboss-admin/subcategories-2/add" },
+          ],
+        },
+        {
+          title: "Sub Categories 3",
+          icon: Tag,
+          dropdown: "subcategories3",
+          items: [
+            { title: "List Sub Categories 3", path: "/superboss-admin/subcategories-3" },
+            { title: "Add Sub Category 3", path: "/superboss-admin/subcategories-3/add" },
+          ],
+        },
+        {
+          title: "Sub Categories 4",
+          icon: Tag,
+          dropdown: "subcategories4",
+          items: [
+            { title: "List Sub Categories 4", path: "/superboss-admin/subcategories-4" },
+            { title: "Add Sub Category 4", path: "/superboss-admin/subcategories-4/add" },
           ],
         },
         {
           title: "Brands",
           icon: Tag,
           dropdown: "brands",
-          section: "brands",
           items: [
-            { title: "List Brands", path: "/admin/brands" },
-            { title: "Add Brand", path: "/admin/brands/add" },
+            { title: "List Brands", path: "/superboss-admin/brands" },
+            { title: "Add Brand", path: "/superboss-admin/brands/add" },
           ],
         },
         {
           title: "Volumes",
           icon: Box,
           dropdown: "volumes",
-          section: "volumes",
           items: [
-            { title: "List Volumes", path: "/admin/volumes" },
-            { title: "Add Volume", path: "/admin/volumes/add" },
+            { title: "List Volumes", path: "/superboss-admin/volumes" },
+            { title: "Add Volume", path: "/superboss-admin/volumes/add" },
           ],
         },
         {
           title: "Warranty",
           icon: Shield,
           dropdown: "warranty",
-          section: "warranty",
           items: [
-            { title: "List Warranty", path: "/admin/warranty" },
-            { title: "Add Warranty", path: "/admin/warranty/add" },
+            { title: "List Warranty", path: "/superboss-admin/warranty" },
+            { title: "Add Warranty", path: "/superboss-admin/warranty/add" },
           ],
         },
         {
           title: "Colors",
           icon: Palette,
           dropdown: "colors",
-          section: "colors",
           items: [
-            { title: "List Colors", path: "/admin/colors" },
-            { title: "Add Color", path: "/admin/colors/add" },
+            { title: "List Colors", path: "/superboss-admin/colors" },
+            { title: "Add Color", path: "/superboss-admin/colors/add" },
           ],
         },
         {
           title: "Units",
           icon: Ruler,
           dropdown: "units",
-          section: "units",
           items: [
-            { title: "List Units", path: "/admin/units" },
-            { title: "Add Unit", path: "/admin/units/add" },
+            { title: "List Units", path: "/superboss-admin/units" },
+            { title: "Add Unit", path: "/superboss-admin/units/add" },
           ],
         },
         {
           title: "Tax",
           icon: Calculator,
           dropdown: "tax",
-          section: "tax",
           items: [
-            { title: "List Tax", path: "/admin/tax" },
-            { title: "Add Tax", path: "/admin/tax/add" },
+            { title: "List Tax", path: "/superboss-admin/tax" },
+            { title: "Add Tax", path: "/superboss-admin/tax/add" },
           ],
         },
         {
           title: "Sizes",
           icon: Ruler,
           dropdown: "sizes",
-          section: "sizes",
           items: [
-            { title: "List Sizes", path: "/admin/sizes" },
-            { title: "Add Size", path: "/admin/sizes/add" },
+            { title: "List Sizes", path: "/superboss-admin/sizes" },
+            { title: "Add Size", path: "/superboss-admin/sizes/add" },
           ],
         },
       ],
@@ -328,17 +285,17 @@ const AdminSidebar = () => {
     {
       title: "Users",
       icon: Users,
-      path: "/admin/users",
+      path: "/superboss-admin/users",
     },
     {
       title: "Reviews",
       icon: Star,
       dropdown: "reviews",
       items: [
-        { title: "All Reviews", path: "/admin/reviews" },
-        { title: "Pending Reviews", path: "/admin/reviews/pending" },
-        { title: "Approved Reviews", path: "/admin/reviews/approved" },
-        { title: "Rejected Reviews", path: "/admin/reviews/rejected" },
+        { title: "All Reviews", path: "/superboss-admin/reviews" },
+        { title: "Pending Reviews", path: "/superboss-admin/reviews/pending" },
+        { title: "Approved Reviews", path: "/superboss-admin/reviews/approved" },
+        { title: "Rejected Reviews", path: "/superboss-admin/reviews/rejected" },
       ],
     },
     {
@@ -346,8 +303,8 @@ const AdminSidebar = () => {
       icon: TrendingUp,
       dropdown: "stockAdjustment",
       items: [
-        { title: "Price Adjustment", path: "/admin/stock-adjustment/price-adjustment" },
-        { title: "Reports", path: "/admin/stock-adjustment/reports" },
+        { title: "Price Adjustment", path: "/superboss-admin/stock-adjustment/price-adjustment" },
+        { title: "Reports", path: "/superboss-admin/stock-adjustment/reports" },
       ],
     },
     {
@@ -355,172 +312,221 @@ const AdminSidebar = () => {
       icon: Truck,
       dropdown: "deliveryCharges",
       items: [
-        { title: "List Delivery Charges", path: "/admin/delivery-charges" },
-        { title: "Add Delivery Charge", path: "/admin/delivery-charges/add" },
+        { title: "List Charges", path: "/superboss-admin/delivery-charges" },
+        { title: "Add Charge", path: "/superboss-admin/delivery-charges/add" },
       ],
     },
     {
       title: "Request Callbacks",
       icon: Phone,
-      path: "/admin/request-callbacks",
+      path: "/superboss-admin/request-callbacks",
     },
     {
       title: "Blogs",
       icon: BookOpen,
       dropdown: "blogs",
       items: [
-        { title: "Blogs", path: "/admin/blogs" },
-        { title: "Add Blog", path: "/admin/blogs/add" },
-        { title: "Blog Categories", path: "/admin/blogs/categories" },
-        { title: "Add Blog Category", path: "/admin/blogs/categories/add" },
-        { title: "Blog Topics", path: "/admin/blogs/topics" },
-        { title: "Add Blog Topic", path: "/admin/blogs/topics/add" },
-        { title: "Blog Rating", path: "/admin/blogs/rating" },
+        { title: "All Blogs", path: "/superboss-admin/blogs" },
+        { title: "Add Blog", path: "/superboss-admin/blogs/add" },
+        { title: "Blog Categories", path: "/superboss-admin/blogs/categories" },
+        { title: "Add Blog Category", path: "/superboss-admin/blogs/categories/add" },
+        { title: "Blog Topics", path: "/superboss-admin/blogs/topics" },
+        { title: "Add Blog Topic", path: "/superboss-admin/blogs/topics/add" },
+        { title: "Blog Rating", path: "/superboss-admin/blogs/rating" },
       ],
     },
     {
       title: "Banners",
       icon: ImageIcon,
-      path: "/admin/banners",
+      path: "/superboss-admin/banners",
+    },
+    {
+      title: "Home Sections",
+      icon: Home,
+      path: "/superboss-admin/home-sections",
+    },
+    {
+      title: "Offer Pages",
+      icon: Gift,
+      path: "/superboss-admin/offer-pages",
     },
     {
       title: "Coupons",
       icon: Percent,
-      dropdown: "coupons",
-      items: [{ title: "All Coupons", path: "/admin/coupons/all" }],
+      path: "/superboss-admin/coupons/all",
+    },
+    {
+      title: "SEO Settings",
+      icon: Cog,
+      path: "/superboss-admin/seo-settings/redirects",
     },
     {
       title: "Email Templates",
       icon: Mail,
-      path: "/admin/email-templates",
+      path: "/superboss-admin/email-templates",
     },
     {
       title: "Newsletter",
       icon: Users,
-      path: "/admin/newsletter-subscribers",
+      path: "/superboss-admin/newsletter-subscribers",
     },
-    // {
-    //   title: "Settings",
-    //   icon: Settings,
-    //   path: "/admin/settings",
-    // },
+    {
+      title: "Reset Cache",
+      icon: RefreshCw,
+      path: "/superboss-admin/reset-cache",
+    },
   ]
 
   const renderMenuItem = (item, level = 0) => {
-    const paddingLeft = level === 0 ? "pl-5" : level === 1 ? "pl-8" : "pl-12"
-
-    // Special case: Dropdown with only one item (e.g., Coupons)
-    if (item.dropdown && item.items && item.items.length === 1) {
-      const subItem = item.items[0]
-      return (
-        <Link
-          key={item.title}
-          to={subItem.path}
-          className={`flex items-center gap-3 ${paddingLeft} py-3 rounded-lg mx-3 transition-all duration-200 ${
-            isActive(subItem.path)
-              ? "bg-yellow-400 text-emerald-900 font-semibold shadow-md"
-              : "text-white/90 hover:bg-white/10"
-          }`}
-        >
-          {item.icon && <item.icon size={20} />}
-          <span className="text-sm">{item.title}</span>
-        </Link>
-      )
-    }
+    const isItemActive = item.path ? isActive(item.path) : isDropdownActive(item.items)
 
     if (item.dropdown) {
-      const dropdownActive = isDropdownActive(item.items)
       return (
         <div key={item.title}>
           <button
             onClick={(e) => toggleDropdown(item.dropdown, e)}
-            className={`w-full flex items-center justify-between ${paddingLeft} pr-4 py-3 rounded-lg mx-3 transition-all duration-200 ${
-              dropdownActive
-                ? "bg-white/10 text-yellow-400"
-                : "text-white/90 hover:bg-white/10"
+            className={`w-full flex items-center justify-between px-4 py-3 mx-2 rounded-xl transition-all duration-200 ${
+              isItemActive
+                ? "bg-yellow-400 text-emerald-900"
+                : "text-white/80 hover:bg-white/10"
             }`}
-            style={{ width: "calc(100% - 24px)" }}
+            style={{ width: "calc(100% - 16px)" }}
           >
             <div className="flex items-center gap-3">
               {item.icon && <item.icon size={20} />}
               <span className="text-sm font-medium">{item.title}</span>
             </div>
-            <ChevronDown 
-              size={16} 
-              className={`transition-transform duration-200 ${openDropdowns[item.dropdown] ? "rotate-180" : ""}`}
+            <ChevronDown
+              size={16}
+              className={`transition-transform duration-200 ${
+                openDropdowns[item.dropdown] ? "rotate-180" : ""
+              }`}
             />
           </button>
 
-          <div className={`overflow-hidden transition-all duration-300 ${openDropdowns[item.dropdown] ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
-            <div className="py-1">
-              {item.items.map((subItem) => renderMenuItem(subItem, level + 1))}
+          <div
+            className={`overflow-hidden transition-all duration-300 ${
+              openDropdowns[item.dropdown] ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="ml-4 mt-1 space-y-1 border-l-2 border-white/20 pl-2">
+              {item.items.map((subItem) =>
+                subItem.dropdown ? (
+                  renderNestedDropdown(subItem, level + 1)
+                ) : (
+                  <Link
+                    key={subItem.title}
+                    to={subItem.path}
+                    className={`flex items-center gap-2 px-4 py-2 mx-2 rounded-lg text-sm transition-all duration-200 ${
+                      isActive(subItem.path)
+                        ? "bg-yellow-400 text-emerald-900 font-medium"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <span>{subItem.title}</span>
+                  </Link>
+                )
+              )}
             </div>
           </div>
         </div>
       )
-    } else {
-      return (
-        <Link
-          key={item.title}
-          to={item.path}
-          className={`flex items-center gap-3 ${paddingLeft} py-2.5 rounded-lg mx-3 transition-all duration-200 ${
-            isActive(item.path)
-              ? "bg-yellow-400 text-emerald-900 font-semibold shadow-md"
-              : "text-white/80 hover:bg-white/10 hover:text-white"
+    }
+
+    return (
+      <Link
+        key={item.title}
+        to={item.path}
+        className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-200 ${
+          isActive(item.path)
+            ? "bg-yellow-400 text-emerald-900 font-semibold shadow-lg"
+            : "text-white/80 hover:bg-white/10"
+        }`}
+      >
+        {item.icon && <item.icon size={20} />}
+        <span className="text-sm font-medium">{item.title}</span>
+      </Link>
+    )
+  }
+
+  const renderNestedDropdown = (item, level) => {
+    const isItemActive = isDropdownActive(item.items)
+
+    return (
+      <div key={item.title}>
+        <button
+          onClick={(e) => toggleDropdown(item.dropdown, e)}
+          className={`w-full flex items-center justify-between px-4 py-2 mx-2 rounded-lg transition-all duration-200 ${
+            isItemActive
+              ? "bg-white/20 text-yellow-400"
+              : "text-white/70 hover:bg-white/10"
+          }`}
+          style={{ width: "calc(100% - 16px)" }}
+        >
+          <div className="flex items-center gap-2">
+            {item.icon && <item.icon size={16} />}
+            <span className="text-sm">{item.title}</span>
+          </div>
+          <ChevronDown
+            size={14}
+            className={`transition-transform duration-200 ${
+              openDropdowns[item.dropdown] ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        <div
+          className={`overflow-hidden transition-all duration-300 ${
+            openDropdowns[item.dropdown] ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          {level === 0 && item.icon && <item.icon size={20} />}
-          <span className={`${level === 0 ? "text-sm font-medium" : "text-sm"}`}>{item.title}</span>
-        </Link>
-      )
-    }
+          <div className="ml-4 mt-1 space-y-1">
+            {item.items.map((subItem) => (
+              <Link
+                key={subItem.title}
+                to={subItem.path}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs transition-all duration-200 ${
+                  isActive(subItem.path)
+                    ? "bg-yellow-400 text-emerald-900 font-medium"
+                    : "text-white/60 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <span>{subItem.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="w-64 bg-gradient-to-b from-emerald-800 via-emerald-900 to-emerald-950 h-screen fixed left-0 top-0 z-50 shadow-2xl flex flex-col">
+    <div className="w-64 bg-gradient-to-b from-emerald-800 via-emerald-900 to-emerald-950 h-screen fixed left-0 top-0 z-50 flex flex-col">
       {/* Logo Section */}
-      <div className="p-6 border-b border-white/10 flex-shrink-0">
-        <Link to="/admin/dashboard" className="flex items-center justify-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Package className="w-7 h-7 text-white" />
+      <div className="p-5 flex-shrink-0">
+        <Link to="/superboss-admin/dashboard" className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Package className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Big Boss</h1>
-            <p className="text-xs text-emerald-300">Admin Panel</p>
+            <h1 className="text-lg font-bold text-white">Big Boss</h1>
+            <p className="text-[10px] text-emerald-300">Admin Panel</p>
           </div>
         </Link>
       </div>
 
       {/* Navigation Menu - Scrollable */}
-      <nav className="flex-1 overflow-y-auto py-4 space-y-1 admin-scrollbar">
-        {menuItems.map((item, index) => (
-          <div key={index}>
-            {item.dropdown ? (
-              renderMenuItem(item)
-            ) : (
-              <Link
-                to={item.path}
-                className={`flex items-center gap-3 pl-5 py-3 rounded-lg mx-3 transition-all duration-200 ${
-                  isActive(item.path)
-                    ? "bg-yellow-400 text-emerald-900 font-semibold shadow-md"
-                    : "text-white/90 hover:bg-white/10"
-                }`}
-              >
-                <item.icon size={20} />
-                <span className="text-sm font-medium">{item.title}</span>
-              </Link>
-            )}
-          </div>
-        ))}
+      <nav className="flex-1 overflow-y-auto py-2 space-y-1 admin-scrollbar px-1">
+        {menuItems.map((item) => renderMenuItem(item))}
       </nav>
 
-      {/* Logout Button at Bottom - Fixed */}
-      <div className="flex-shrink-0 p-4 border-t border-white/10 bg-emerald-950/80">
+      {/* Logout Button - Fixed at Bottom */}
+      <div className="flex-shrink-0 p-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 py-3 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 hover:text-red-200 transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/10 text-white hover:bg-red-500/80 transition-all duration-200"
         >
-          <LogOut size={20} />
+          <LogOut size={18} />
           <span className="text-sm font-medium">Log out</span>
         </button>
       </div>

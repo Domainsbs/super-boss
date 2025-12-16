@@ -193,13 +193,13 @@ function App() {
                   {/* Admin Routes */}
                   <Route path="/superboss-admin/login" element={<AdminLogin />} />
                   <Route
-                    path="/admin/*"
+                    path="/superboss-admin/*"
                     element={
                       <AdminRoute>
                         <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
                           <AdminSidebar />
                           <AdminHeader />
-                          <div className="">
+                          <div className="ml-64 pt-4 px-6 pb-6 min-h-[calc(100vh-64px)]">
                             <Routes>
                               <Route path="dashboard" element={<AdminDashboard />} />
                               <Route path="products" element={<AdminProducts />} />
