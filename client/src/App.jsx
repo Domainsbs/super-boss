@@ -199,7 +199,7 @@ function App() {
                         <div className="min-h-screen bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950">
                           <AdminSidebar />
                           <AdminHeader />
-                          <div className="ml-64 pt-4 px-6 pb-6 min-h-[calc(100vh-64px)]">
+                          <div className=" pt-4 px-6 pb-6 min-h-[calc(100vh-64px)]">
                             <Routes>
                               <Route path="dashboard" element={<AdminDashboard />} />
                               <Route path="products" element={<AdminProducts />} />
