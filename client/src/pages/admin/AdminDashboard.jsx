@@ -94,15 +94,15 @@ const AdminDashboard = () => {
             <span>{formatDate()}</span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            {getGreeting()},<br />
-            <span className="text-yellow-400">{admin?.name || "Admin"}!</span>
+            <span className="text-white">{getGreeting()},</span><br />
+            <span className="text-[#22ba85]">{admin?.name || "Admin"}!</span>
           </h1>
           <p className="text-white/70 mb-6">
             Great to see you again. Here's a quick look at your store's activity.
           </p>
           <Link 
             to="/superboss-admin/orders/new" 
-            className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-[#22ba85] hover:text-[#1da677] font-medium transition-colors"
           >
             View New Orders
             <ArrowRight className="w-5 h-5" />

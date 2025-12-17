@@ -387,7 +387,7 @@ const AdminSidebar = () => {
             onClick={(e) => toggleDropdown(item.dropdown, e)}
             className={`w-full flex items-center justify-between px-4 py-3 mx-2 rounded-xl transition-all duration-200 ${
               isItemActive
-                ? "bg-yellow-400 text-emerald-900"
+                ? "bg-[#22ba85] text-white"
                 : "text-white/80 hover:bg-white/10"
             }`}
             style={{ width: "calc(100% - 16px)" }}
@@ -419,7 +419,7 @@ const AdminSidebar = () => {
                     to={subItem.path}
                     className={`flex items-center gap-2 px-4 py-2 mx-2 rounded-lg text-sm transition-all duration-200 ${
                       isActive(subItem.path)
-                        ? "bg-yellow-400 text-emerald-900 font-medium"
+                        ? "bg-[#22ba85] text-white font-medium"
                         : "text-white/70 hover:bg-white/10 hover:text-white"
                     }`}
                   >
@@ -439,7 +439,7 @@ const AdminSidebar = () => {
         to={item.path}
         className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-200 ${
           isActive(item.path)
-            ? "bg-yellow-400 text-emerald-900 font-semibold shadow-lg"
+            ? "bg-[#22ba85] text-white font-semibold shadow-lg"
             : "text-white/80 hover:bg-white/10"
         }`}
       >
@@ -458,7 +458,7 @@ const AdminSidebar = () => {
           onClick={(e) => toggleDropdown(item.dropdown, e)}
           className={`w-full flex items-center justify-between px-4 py-2 mx-2 rounded-lg transition-all duration-200 ${
             isItemActive
-              ? "bg-white/20 text-yellow-400"
+              ? "bg-white/20 text-[#22ba85]"
               : "text-white/70 hover:bg-white/10"
           }`}
           style={{ width: "calc(100% - 16px)" }}
@@ -487,7 +487,7 @@ const AdminSidebar = () => {
                 to={subItem.path}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs transition-all duration-200 ${
                   isActive(subItem.path)
-                    ? "bg-yellow-400 text-emerald-900 font-medium"
+                    ? "bg-[#22ba85] text-white font-medium"
                     : "text-white/60 hover:bg-white/10 hover:text-white"
                 }`}
               >

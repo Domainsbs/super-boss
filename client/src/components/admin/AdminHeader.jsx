@@ -68,16 +68,16 @@ const AdminHeader = () => {
         <div className="relative">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-3 px-4 py-2 bg-yellow-400 rounded-full hover:bg-yellow-300 transition-colors"
+            className="flex items-center gap-3 px-4 py-2 bg-[#22ba85] rounded-full hover:bg-[#1da677] transition-colors"
           >
             <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-emerald-900">{admin?.name || "Admin"}</p>
-              <p className="text-xs text-emerald-700">{admin?.role || "Super Admin"}</p>
+              <p className="text-sm font-semibold text-white">{admin?.name || "Admin"}</p>
+              <p className="text-xs text-white/80">{admin?.role || "Super Admin"}</p>
             </div>
-            <ChevronDown className={`w-4 h-4 text-emerald-900 transition-transform ${showDropdown ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 text-white transition-transform ${showDropdown ? "rotate-180" : ""}`} />
           </button>
 
           {/* Dropdown */}
