@@ -1,7 +1,7 @@
 "use client"
 
 import { Link } from "react-router-dom"
-import { Facebook, Instagram, Plus, Minus, Linkedin } from "lucide-react"
+import { Facebook, Instagram, Plus, Minus, Linkedin, Mail, Phone, MapPin, ArrowRight, Heart, Send } from "lucide-react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPinterest } from "@fortawesome/free-brands-svg-icons"
 import { faTiktok } from "@fortawesome/free-brands-svg-icons"
@@ -116,221 +116,235 @@ const Footer = ({ className = "" }) => {
   return (
     <>
       {/* Desktop Footer - Hidden on mobile */}
-      <footer className={`hidden md:block text-white  ${className}`}>
-        <div className="w-full bg-[#1F1F39]">
-          <div className="max-w-[1440px] mx-auto pt-8 pb-9 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-            <div className={`grid ${columnCount === 6 ? 'grid-cols-6' : 'grid-cols-5'} gap-4 lg:gap-6 xl:gap-8`}>
-              {/* Column 1 - Newsletter Subscription */}
-              <div className="col-span-1 flex flex-col">
-                {/* Logo and Heading */}
-                <h3 className="text-lg lg:text-xl xl:text-2xl font-bold mb-3 lg:mb-4">
-                  <img src="/logo.png" alt="Logo" className="w-24 lg:w-28 xl:w-32" />
-                </h3>
-                {/* Text */}
-                <p className="text-xs lg:text-sm text-white mb-3 lg:mb-4">Subscribe to our newsletter</p>
-
-                {/* Form */}
-                <form className="mb-3 lg:mb-4 p-1 bg-white rounded-full w-full max-w-[280px]" onSubmit={handleNewsletterSubmit}>
-                  <div className="flex w-full">
-                    {/* Search Input Div */}
-                    <div className="flex-grow">
-                      <input
-                        type="email"
-                        placeholder="Your email"
-                        className="w-full pl-2 lg:pl-3 py-1.5 lg:py-2 xl:py-3 text-xs lg:text-sm bg-white placeholder-gray-400 rounded-full border-white text-black focus:outline-none focus:ring-0 focus:border-white"
-                        value={newsletterEmail}
-                        onChange={handleNewsletterInput}
-                        required
-                      />
+      <footer className={`hidden md:block text-white relative overflow-hidden ${className}`}>
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700"></div>
+        
+        {/* Floating animated shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-lime-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/3 -right-20 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-20 left-1/2 w-32 h-32 bg-lime-300/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        </div>
+        
+        {/* Main Footer Content */}
+        <div className="relative z-10 pt-12 pb-8">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+            {/* Newsletter Section - Premium Design */}
+            <div className="relative mb-14">
+              <div className="bg-gradient-to-r from-blue-400/30 via-blue-500/20 to-blue-400/30 backdrop-blur-md rounded-3xl p-1">
+                <div className="bg-blue-600/40 backdrop-blur-sm rounded-[22px] p-6 lg:p-8">
+                  <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-lime-400 rounded-2xl blur-lg opacity-50 animate-pulse"></div>
+                        <div className="relative w-16 h-16 bg-gradient-to-br from-lime-300 to-lime-500 rounded-2xl flex items-center justify-center shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                          <Mail className="w-8 h-8 text-blue-700" />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-2xl lg:text-3xl font-black text-white tracking-tight">Subscribe to Our Newsletter</h3>
+                        <p className="text-blue-100 text-sm lg:text-base mt-1">Get exclusive deals and latest updates delivered to your inbox</p>
+                      </div>
                     </div>
-
-                    {/* Button Div */}
-                    <div>
-                      <button type="submit" className="h-full bg-lime-500 text-white rounded-full px-2 lg:px-3 xl:px-5 text-xs lg:text-sm whitespace-nowrap">
-                        Subscribe
+                    <form className="flex w-full lg:w-auto gap-3" onSubmit={handleNewsletterSubmit}>
+                      <div className="relative flex-1 lg:w-96">
+                        <input
+                          type="email"
+                          placeholder="Enter your email address"
+                          className="w-full pl-5 pr-5 py-4 text-base bg-white placeholder-gray-400 rounded-2xl text-gray-800 focus:outline-none focus:ring-4 focus:ring-lime-400/50 shadow-xl border-2 border-white/50"
+                          value={newsletterEmail}
+                          onChange={handleNewsletterInput}
+                          required
+                        />
+                      </div>
+                      <button type="submit" className="bg-gradient-to-r from-lime-400 to-lime-500 hover:from-lime-500 hover:to-yellow-600 text-blue-800 font-black rounded-2xl px-8 py-4 text-base flex items-center gap-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-lime-400/25">
+                        <span className="hidden sm:inline">Subscribe</span>
+                        <Send className="w-5 h-5" />
                       </button>
-                    </div>
+                    </form>
                   </div>
-                </form>
-                {showNewsletterModal && (
-                  <NewsletterModal
-                    email={newsletterEmail}
-                    onClose={() => setShowNewsletterModal(false)}
-                  />
-                )}
+                </div>
+              </div>
+            </div>
+            {showNewsletterModal && (
+              <NewsletterModal
+                email={newsletterEmail}
+                onClose={() => setShowNewsletterModal(false)}
+              />
+            )}
 
-                {/* Social Icons */}
-                <div className="flex flex-wrap gap-2 lg:gap-3 pl-0 lg:pl-2">
-                  <a href="https://www.facebook.com/grabatozae/" target="_blank" className="text-white hover:text-lime-400">
-                    <Facebook className="w-4 h-4 lg:w-5 lg:h-5" />
+            <div className="grid grid-cols-4 gap-8 lg:gap-12 xl:gap-16">
+              {/* Column 1 - Brand & Social */}
+              <div className="flex flex-col">
+                {/* Logo */}
+                <div className="mb-6">
+                  <img src="/seenalif.png" alt="Seenalif" className="w-32 lg:w-36 xl:w-40 h-auto object-contain" />
+                </div>
+                
+                {/* Tagline */}
+                <p className="text-blue-100 text-sm lg:text-base mb-6 leading-relaxed">
+                  Your one-stop destination for quality products at amazing prices. Shop with confidence!
+                </p>
+
+                {/* Social Icons - Premium Grid */}
+                <div className="grid grid-cols-4 gap-3">
+                  <a href="https://www.facebook.com/grabatozae/" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <Facebook className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-                  <a href="https://x.com/GrabAtoz" target="_blank" className="text-white hover:text-lime-400 transition-colors duration-200 ease-in-out" aria-label="X (Twitter)">
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 lg:w-5 lg:h-5 fill-current" role="img">
+                  <a href="https://x.com/GrabAtoz" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20" aria-label="X (Twitter)">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current text-white group-hover:text-blue-700" role="img">
                       <path d="M18.25 2h3.5l-7.66 8.73L24 22h-6.87l-5.02-6.58L6.3 22H2.8l8.2-9.34L0 2h7.04l4.54 6.02L18.25 2z" />
                     </svg>
                   </a>
-                  <a href="https://www.instagram.com/grabatoz/" target="_blank" className="text-white hover:text-lime-400">
-                    <Instagram className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <a href="https://www.instagram.com/grabatoz/" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <Instagram className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-                  <a href="https://www.linkedin.com/company/grabatozae" target="_blank" className="text-white hover:text-lime-400">
-                    <Linkedin className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <a href="https://www.linkedin.com/company/grabatozae" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <Linkedin className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-                  <a href="https://www.pinterest.com/grabatoz/" target="_blank" className="text-white hover:text-lime-400">
-                    <FontAwesomeIcon icon={faPinterest} className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <a href="https://www.pinterest.com/grabatoz/" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <FontAwesomeIcon icon={faPinterest} className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-                  <a href="https://www.tiktok.com/@grabatoz" target="_blank" className="text-white hover:text-lime-400">
-                    <FontAwesomeIcon icon={faTiktok} className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <a href="https://www.tiktok.com/@grabatoz" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <FontAwesomeIcon icon={faTiktok} className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-                  <a href="https://www.youtube.com/@grabAtoZ" target="_blank" className="text-white hover:text-lime-400">
-                    <FontAwesomeIcon icon={faYoutube} className="w-4 h-4 lg:w-5 lg:h-5" />
+                  <a href="https://www.youtube.com/@grabAtoZ" target="_blank" className="w-11 h-11 bg-white/10 hover:bg-gradient-to-br hover:from-lime-400 hover:to-lime-500 rounded-xl flex items-center justify-center transition-all duration-300 group border border-white/20 hover:border-lime-400 hover:scale-110 hover:-translate-y-1 hover:shadow-lg hover:shadow-lime-400/20">
+                    <FontAwesomeIcon icon={faYoutube} className="w-5 h-5 text-white group-hover:text-blue-700" />
                   </a>
-
-
-                </div>
-
-                <div className="flex pt-4 lg:pt-6 xl:pt-7 px-0 lg:px-2 space-x-2">
-                  <img src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757938965/google_pj1cxc.webp" alt="Google Play" className="rounded-lg h-8 lg:h-10 xl:h-12" />
                 </div>
               </div>
 
               {/* Column 2 - Top Categories */}
-              <div className="col-span-1 flex flex-col ml-8 lg:ml-10 xl:ml-14 2xl:ml-16">
-                <h3 className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-semibold mb-2 lg:mb-3 xl:mb-4">Top Categories</h3>
-                <ul className="space-y-1 lg:space-y-1.5 text-white text-[10px] lg:text-xs xl:text-sm">
-                  {categories.slice(0, 6).map((category) => (
+              <div className="flex flex-col">
+                <h3 className="text-lg lg:text-xl font-black mb-6 flex items-center gap-3">
+                  <span className="w-10 h-1.5 bg-gradient-to-r from-lime-400 to-lime-500 rounded-full"></span>
+                  Top Categories
+                </h3>
+                <ul className="space-y-3 text-blue-100 text-sm lg:text-base">
+                  {categories.slice(0, 8).map((category) => (
                     <li key={category._id}>
-                      <Link to={generateShopURL({ parentCategory: category.name })} className="hover:text-lime-400">
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                  {subCategories.slice(0, 2).map((subCategory) => (
-                    <li key={`sub-${subCategory._id}`}>
-                      <Link to={generateShopURL({
-                        parentCategory: subCategory.category?.name || '',
-                        subCategory: subCategory.name
-                      })} className="hover:text-lime-400">
-                        {subCategory.name}
+                      <Link to={generateShopURL({ parentCategory: category.name })} className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                        <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                        <span className="group-hover:translate-x-2 transition-transform duration-300">{category.name}</span>
                       </Link>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Column 3 - More Categories */}
-              <div className="col-span-1 flex flex-col ml-8 lg:ml-10 xl:ml-14 2xl:ml-16">
-                <h3 className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-semibold mb-2 lg:mb-3 xl:mb-4">More Categories</h3>
-                <ul className="space-y-1 lg:space-y-1.5 text-white text-[10px] lg:text-xs xl:text-sm">
-                  {categories.slice(6, 10).map((category) => (
-                    <li key={category._id}>
-                      <Link to={generateShopURL({ parentCategory: category.name })} className="hover:text-lime-400">
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                  {subCategories.slice(4, 8).map((subCategory) => (
-                    <li key={`sub-${subCategory._id}`}>
-                      <Link to={generateShopURL({
-                        parentCategory: subCategory.category?.name || '',
-                        subCategory: subCategory.name
-                      })} className="hover:text-lime-400">
-                        {subCategory.name}
-                      </Link>
-                    </li>
-                  ))}
+              {/* Column 3 - Legal */}
+              <div className="flex flex-col">
+                <h3 className="text-lg lg:text-xl font-black mb-6 flex items-center gap-3">
+                  <span className="w-10 h-1.5 bg-gradient-to-r from-lime-400 to-lime-500 rounded-full"></span>
+                  Legal
+                </h3>
+                <ul className="space-y-3 text-blue-100 text-sm lg:text-base">
+                  <li>
+                    <Link to="/refund-return" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Refund and Return</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/cookies-policy" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Cookies Policy</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terms-conditions" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Terms & Conditions</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/privacy-policy" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Privacy Policy</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/disclaimer-policy" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Disclaimer Policy</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/track-order" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Track Order</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/voucher-terms" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Voucher Terms</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/delivery-terms" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Delivery Terms</span>
+                    </Link>
+                  </li>
                 </ul>
               </div>
 
               {/* Column 4 - Support */}
-              <div className="col-span-1 flex flex-col ml-8 lg:ml-10 xl:ml-14 2xl:ml-16">
-                <h3 className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-semibold mb-2 lg:mb-3 xl:mb-4">Legal</h3>
-                <ul className="space-y-1 lg:space-y-1.5 text-white text-[10px] lg:text-xs xl:text-sm">
+              <div className="flex flex-col">
+                <h3 className="text-lg lg:text-xl font-black mb-6 flex items-center gap-3">
+                  <span className="w-10 h-1.5 bg-gradient-to-r from-lime-400 to-lime-500 rounded-full"></span>
+                  Support
+                </h3>
+                <ul className="space-y-3 text-blue-100 text-sm lg:text-base">
                   <li>
-                    <Link to="/refund-return" className="hover:text-lime-400">
-                      Refund and Return
+                    <Link to="/about" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">About Us</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/cookies-policy" className="hover:text-lime-400">
-                      Cookies Policy
+                    <Link to="/contact" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Contact Us</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/terms-conditions" className="hover:text-lime-400">
-                      Terms & Conditions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/privacy-policy" className="hover:text-lime-400">
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/disclaimer-policy" className="hover:text-lime-400">
-                      Disclaimer Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/track-order" className="hover:text-lime-400">
-                      Track Order
-                    </Link>
-                  </li>
-
-                  <li>
-                    <Link to="/voucher-terms" className="hover:text-lime-400">
-                      Voucher Terms
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/delivery-terms" className="hover:text-lime-400">
-                      Delivery Terms
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Column 5 - Legal */}
-              <div className="col-span-1 flex flex-col ml-8 lg:ml-10 xl:ml-14 2xl:ml-16">
-                <h3 className="text-sm lg:text-base xl:text-lg 2xl:text-xl font-semibold mb-2 lg:mb-3 xl:mb-4">Support</h3>
-                <ul className="space-y-1 lg:space-y-1.5 text-white text-[10px] lg:text-xs xl:text-sm">
-                  <li>
-                    <Link to="/about" className="hover:text-lime-400">
-                      About Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/contact" className="hover:text-lime-400">
-                      Contact Us
-                    </Link>
-                  </li>
-                  <li>
-                    <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="hover:text-lime-400">
-                      Blog
+                    <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Blog</span>
                     </a>
                   </li>
                   <li>
-                    <Link to="/shop" className="hover:text-lime-400">
-                      Shop
+                    <Link to="/shop" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Shop</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/login" className="hover:text-lime-400">
-                      Login
+                    <Link to="/login" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Login</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/register" className="hover:text-lime-400">
-                      Register
+                    <Link to="/register" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Register</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/wishlist" className="hover:text-lime-400">
-                      Wishlist
+                    <Link to="/wishlist" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Wishlist</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="/cart" className="hover:text-lime-400 font-semibold">
-                      Cart
+                    <Link to="/cart" className="hover:text-lime-400 transition-all duration-300 flex items-center gap-2 group font-bold">
+                      <span className="w-2 h-2 bg-lime-400/50 rounded-full group-hover:bg-lime-400 group-hover:scale-125 transition-all duration-300"></span>
+                      <span className="group-hover:translate-x-2 transition-transform duration-300">Cart</span>
                     </Link>
                   </li>
                 </ul>
@@ -340,45 +354,81 @@ const Footer = ({ className = "" }) => {
         </div>
       </footer>
 
-      {/* Desktop Bottom Footer */}
-      <section className="hidden md:block">
-        <div className="max-w-[1440px] mx-auto flex flex-row justify-between items-center gap-3 lg:gap-6 xl:gap-8 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-2 lg:py-3">
+      {/* Desktop Bottom Footer - Premium Design */}
+      <section className="hidden md:block bg-gradient-to-r from-blue-700 via-blue-800 to-blue-700 relative">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-[1440px] mx-auto flex flex-row justify-between items-center gap-3 lg:gap-6 xl:gap-8 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-5 lg:py-6">
           {/* 1st Column: Text */}
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] lg:text-xs xl:text-sm font-bold whitespace-nowrap"> 2025 Grabatoz Powered By Crown Excel</p>
+          <div className="flex-1 min-w-0 flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-lime-400 to-lime-500 rounded-lg flex items-center justify-center shadow-lg">
+              <Heart className="w-4 h-4 text-blue-700 fill-blue-700" />
+            </div>
+            <p className="text-sm text-white font-medium"> 2025 Powered By Super Boss Trading LLC</p>
           </div>
 
-          {/* 2nd Column: Image */}
+          {/* 2nd Column: Payment Methods */}
           <div className="flex-1 flex justify-center min-w-0">
-            <img src="/1.svg" alt="Payment Methods" className="rounded-lg h-6 lg:h-8 xl:h-10 w-auto object-contain" />
+            <div className="bg-white rounded-xl px-6 py-3 shadow-xl">
+              <img src="/1.svg" alt="Payment Methods" className="h-8 lg:h-10 w-auto object-contain" />
+            </div>
           </div>
 
-          {/* 3rd Column: App Store Images */}
+          {/* 3rd Column: Developer Credit */}
           <div className="flex-1 flex justify-end items-center min-w-0">
-            <div className="flex items-center">
-              <p className="text-[10px] lg:text-xs xl:text-sm font-bold whitespace-nowrap">Developed By <span className="text-lime-500"><a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer">Tech Solutionor</a></span></p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-white font-medium">Developed By <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:text-lime-300 transition-colors font-bold">Tech Solutionor</a></p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Mobile Footer - Only visible on mobile */}
-      <footer className="md:hidden bg-white">
+      <footer className="md:hidden bg-gradient-to-b from-blue-50 to-white">
+        {/* Mobile Newsletter Section */}
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-lime-400 rounded-full flex items-center justify-center shadow-lg">
+              <Mail className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold">Subscribe to Newsletter</h3>
+              <p className="text-blue-100 text-xs">Get exclusive deals delivered to you</p>
+            </div>
+          </div>
+          <form className="flex gap-2" onSubmit={handleNewsletterSubmit}>
+            <input
+              type="email"
+              placeholder="Your email"
+              className="flex-1 px-4 py-3 rounded-xl text-sm bg-white/90 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-lime-400"
+              value={newsletterEmail}
+              onChange={handleNewsletterInput}
+              required
+            />
+            <button type="submit" className="bg-lime-400 hover:bg-lime-500 text-blue-700 font-bold rounded-xl px-4 py-3 transition-colors duration-300">
+              <Send className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
+
         {/* Categories Section */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-blue-100">
           <button
             onClick={() => toggleSection("categories")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center p-4 text-left bg-white hover:bg-blue-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Categories</span>
-            {openSections.categories ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <span className="w-6 h-1 bg-blue-500 rounded-full"></span>
+              Categories
+            </span>
+            {openSections.categories ? <Minus size={20} className="text-blue-500" /> : <Plus size={20} className="text-blue-500" />}
           </button>
           {openSections.categories && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 bg-white">
               <ul className="space-y-3">
                 {categories.map((category) => (
                   <li key={category._id}>
-                    <Link to={`/shop?parentCategory=${category._id}`} className="text-gray-700 hover:text-orange-500">
+                    <Link to={`/shop?parentCategory=${category._id}`} className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                      <ArrowRight className="w-3 h-3 text-blue-400" />
                       {category.name}
                     </Link>
                   </li>
@@ -389,44 +439,53 @@ const Footer = ({ className = "" }) => {
         </div>
 
         {/* Legal Section */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-blue-100">
           <button
             onClick={() => toggleSection("legal")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center p-4 text-left bg-white hover:bg-blue-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Legal</span>
-            {openSections.legal ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <span className="w-6 h-1 bg-blue-500 rounded-full"></span>
+              Legal
+            </span>
+            {openSections.legal ? <Minus size={20} className="text-blue-500" /> : <Plus size={20} className="text-blue-500" />}
           </button>
           {openSections.legal && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 bg-white">
               <ul className="space-y-3">
                 <li>
-                  <Link to="/about" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/about" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/contact" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/contact" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Contact Us
                   </Link>
                 </li>
                 <li>
-                  <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="text-gray-700 hover:text-orange-500">
+                  <a href="https://blog.grabatoz.ae/" rel="noopener noreferrer" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Blog
                   </a>
                 </li>
                 <li>
-                  <Link to="/shop" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/shop" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Shop
                   </Link>
                 </li>
                 <li>
-                  <Link to="/login" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/login" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Login
                   </Link>
                 </li>
                 <li>
-                  <Link to="/register" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/register" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Register
                   </Link>
                 </li>
@@ -436,54 +495,65 @@ const Footer = ({ className = "" }) => {
         </div>
 
         {/* Support Section */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-blue-100">
           <button
             onClick={() => toggleSection("support")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center p-4 text-left bg-white hover:bg-blue-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Support</span>
-            {openSections.support ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <span className="w-6 h-1 bg-blue-500 rounded-full"></span>
+              Support
+            </span>
+            {openSections.support ? <Minus size={20} className="text-blue-500" /> : <Plus size={20} className="text-blue-500" />}
           </button>
           {openSections.support && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 bg-white">
               <ul className="space-y-3">
                 <li>
-                  <Link to="/refund-return" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/refund-return" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Refund and Return
                   </Link>
                 </li>
                 <li>
-                  <Link to="/cookies-policy" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/cookies-policy" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Cookies Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms-conditions" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/terms-conditions" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Terms & Conditions
                   </Link>
                 </li>
                 <li>
-                  <Link to="/privacy-policy" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/privacy-policy" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/disclaimer-policy" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/disclaimer-policy" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Disclaimer Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/track-order" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/track-order" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Track Order
                   </Link>
                 </li>
                 <li>
-                  <Link to="/wishlist" className="text-gray-700 hover:text-orange-500">
+                  <Link to="/wishlist" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Wishlist
                   </Link>
                 </li>
                 <li>
-                  <Link to="/cart" className="text-gray-700 hover:text-orange-500 font-semibold">
+                  <Link to="/cart" className="text-gray-700 hover:text-blue-500 flex items-center gap-2 transition-colors font-semibold">
+                    <ArrowRight className="w-3 h-3 text-blue-400" />
                     Cart
                   </Link>
                 </li>
@@ -493,69 +563,71 @@ const Footer = ({ className = "" }) => {
         </div>
 
         {/* Connect Section */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-blue-100">
           <button
             onClick={() => toggleSection("connect")}
-            className="w-full flex justify-between items-center p-4 text-left"
+            className="w-full flex justify-between items-center p-4 text-left bg-white hover:bg-blue-50 transition-colors"
           >
-            <span className="text-lg font-semibold text-gray-900">Connect</span>
-            {openSections.connect ? <Minus size={20} /> : <Plus size={20} />}
+            <span className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <span className="w-6 h-1 bg-blue-500 rounded-full"></span>
+              Connect
+            </span>
+            {openSections.connect ? <Minus size={20} className="text-blue-500" /> : <Plus size={20} className="text-blue-500" />}
           </button>
           {openSections.connect && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 bg-white">
               <div className="mb-4">
-                {/* <h4 className="text-sm font-semibold text-gray-900 mb-3">Connect With Us</h4> */}
-                <div className="flex space-x-4">
+                <div className="flex flex-wrap gap-3">
                   <a
                     href="https://www.facebook.com/grabatozae/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-blue-500 hover:bg-blue-600 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="Facebook"
                   >
-                    <Facebook size={20} className="text-[#1877F2]" />
+                    <Facebook size={20} className="text-white" />
                   </a>
                   <a
                     href="https://x.com/GrabAtoz"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-gray-900 hover:bg-gray-800 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="X (Twitter)"
                   >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-black fill-current" role="img">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-white fill-current" role="img">
                       <path d="M18.25 2h3.5l-7.66 8.73L24 22h-6.87l-5.02-6.58L6.3 22H2.8l8.2-9.34L0 2h7.04l4.54 6.02L18.25 2z" />
                     </svg>
                   </a>
                   <a
                     href="https://www.instagram.com/grabatoz/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="Instagram"
                   >
-                    <Instagram size={20} className="text-[#E4405F]" />
+                    <Instagram size={20} className="text-white" />
                   </a>
                   <a
                     href="https://www.linkedin.com/company/grabatozae"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-[#0A66C2] hover:bg-[#084d94] shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="LinkedIn"
                   >
-                    <Linkedin size={20} className="text-[#0A66C2]" />
+                    <Linkedin size={20} className="text-white" />
                   </a>
                   <a
                     href="https://www.pinterest.com/grabatoz/"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-[#E60023] hover:bg-[#c4001e] shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="Pinterest"
                   >
-                    <FontAwesomeIcon icon={faPinterest} style={{ width: '20px', height: '20px', color: '#E60023' }} />
+                    <FontAwesomeIcon icon={faPinterest} className="text-white" style={{ width: '20px', height: '20px' }} />
                   </a>
                   <a
                     href="https://www.tiktok.com/@grabatoz"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-black hover:bg-gray-900 shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="TikTok"
                   >
-                    <FontAwesomeIcon icon={faTiktok} style={{ width: '20px', height: '20px', color: '#000' }} />
+                    <FontAwesomeIcon icon={faTiktok} className="text-white" style={{ width: '20px', height: '20px' }} />
                   </a>
                   <a
                     href="https://www.youtube.com/@grabAtoZ"
-                    className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 bg-white hover:bg-gray-100"
+                    className="w-11 h-11 rounded-full flex items-center justify-center bg-[#FF0000] hover:bg-[#cc0000] shadow-lg transition-all duration-300 hover:scale-110"
                     aria-label="YouTube"
                   >
-                    <FontAwesomeIcon icon={faYoutube} style={{ width: '20px', height: '20px', color: '#FF0000' }} />
+                    <FontAwesomeIcon icon={faYoutube} className="text-white" style={{ width: '20px', height: '20px' }} />
                   </a>
                 </div>
 
@@ -567,22 +639,25 @@ const Footer = ({ className = "" }) => {
         </div>
 
         {/* Shop On The Go Section - Always Visible */}
-        <div className="bg-[#1F1F39] text-white p-6">
-          <h3 className="text-xl font-bold text-center mb-4">Shop On The Go</h3>
-          <div className="flex justify-center space-x-4 mb-6 ">
-            <img src="/google_play.png" alt="Google Play" className="h-8" />
-            <img src="/app_store.png" alt="App Store" className="h-8" />
-          </div>
+        <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white p-6 relative overflow-hidden">
+          {/* Decorative circles */}
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full"></div>
+          <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-lime-400/10 rounded-full"></div>
 
           {/* Payment Methods */}
-          <div className="flex justify-center mb-4">
-            <img src="/1.svg" alt="Payment Methods" className="h-8 w-auto" />
+          <div className="flex justify-center mb-5">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+              <img src="/1.svg" alt="Payment Methods" className="h-8 w-auto" />
+            </div>
           </div>
 
           {/* Copyright */}
-          <div className="text-center text-sm text-gray-300">
-            <p> 2025 Grabatoz powered by Crown Excel.</p>
-            <p className="mt-1">Develop By <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer">Tech Solutionor</a></p>
+          <div className="text-center text-sm">
+            <p className="text-blue-100 flex items-center justify-center gap-2">
+              <Heart className="w-4 h-4 text-lime-400 fill-lime-400" />
+              2025 Powered By Super Boss Trading LLC
+            </p>
+            <p className="mt-2 text-blue-100">Developed By <a href="https://techsolutionor.com" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:text-lime-300 transition-colors font-medium">Tech Solutionor</a></p>
           </div>
         </div>
       </footer>

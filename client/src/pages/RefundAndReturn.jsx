@@ -1,361 +1,257 @@
-"use client";
+﻿"use client";
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Shield, RotateCcw, Clock, CheckCircle, XCircle, CreditCard, AlertTriangle, Phone, Mail, MapPin, FileText, Home, Truck, Settings, Info } from "lucide-react";
+import { Shield, RotateCcw, CheckCircle, CreditCard, AlertTriangle, Phone, Mail, MapPin, Clock, Package, Truck, ArrowRight, XCircle } from "lucide-react";
 
 export default function RefundAndReturn() {
-  const navigate = useNavigate();
-
-  // Future functionality for Arabic version
-  // const handleArabicClick = () => {
-  //   navigate('/refund-return-arabic');
-  // };
-
   return (
-    <div className="bg-white min-h-screen">
-      {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-12 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="bg-lime-500 rounded-full p-4">
-              <Shield className="w-12 h-12 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-2 mb-4">
+                <Shield className="w-5 h-5" />
+                <span className="text-sm font-medium">Customer Protection</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                Refund & Return Policy
+              </h1>
+              <p className="text-xl text-blue-100 max-w-xl">
+                At Seenalif, your satisfaction is our priority. We offer a hassle-free return and refund process.
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+              <div className="text-center">
+                <div className="text-5xl font-bold mb-2">15</div>
+                <div className="text-blue-200">Days Return Window</div>
+              </div>
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Return & Refund & Exchange Policy
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            At Grabatoz, powered by Crown Excel General Trading LLC we value your satisfaction and strive to provide a smooth and reliable shopping experience. for any reason if you are not fully satisfied with our products, you can return or exchange your product.
-          </p>
+        </div>
+      </div>
 
-          {/* Language Switch Button - Commented out until Arabic version is created */}
-          {/* <div className="flex justify-center mt-6">
-            <button
-              onClick={handleArabicClick}
-              className="bg-lime-500 hover:bg-lime-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
-            >
-              العربية Arabic
-            </button>
-          </div> */}
+      {/* Quick Info Cards */}
+      <div className="max-w-6xl mx-auto px-6 -mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+            <CheckCircle className="w-8 h-8 text-blue-500 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Easy Returns</h3>
+            <p className="text-gray-600 text-sm">Simple and quick return process</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500">
+            <CreditCard className="w-8 h-8 text-blue-500 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Fast Refunds</h3>
+            <p className="text-gray-600 text-sm">Refunds processed within 5-15 days</p>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-600">
+            <RotateCcw className="w-8 h-8 text-blue-500 mb-3" />
+            <h3 className="font-semibold text-gray-900 mb-1">Free Exchange</h3>
+            <p className="text-gray-600 text-sm">Exchange for same or different product</p>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-12">
-
-        {/* Return Period */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <Shield className="w-8 h-8 text-lime-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Return Eligibility</h2>
+        
+        {/* Return Eligibility */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-500 px-6 py-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <Shield className="w-6 h-6" />
+              Return Eligibility
+            </h2>
           </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              Grabatoz offers ,<strong> 15 days return windows to the date of receipt </strong> of your order to <strong> initiate a return request.</strong>
+          <div className="p-6">
+            <p className="text-gray-700 mb-4">
+              Seenalif offers a <strong>15-day return window</strong> from the date of receipt to initiate a return request. To be eligible for a return:
             </p>
-
-            <div className="space-y-4 text-gray-700">
-              <p>Oooh plaining for a return, we are sorry to hear but anyways please ensure that:</p>
-              <ol className="list-decimal list-inside space-y-2 ml-4">
-                <li>The product is in original condition, including:</li>
-                <li>The item should be in its original condition, with all tags and labels attached.</li>
-                <li>It must be unused, undamaged, and free from any stains or odors</li>
-                <li>For all electronics and tech items, all accessories and manuals should be included.</li>
-                <li>Any protective seals or labels intact</li>
-                <li>The product has not been damaged due to misuse, mishandling, or unauthorized modification</li>
-                <li>Products that are customized, with cut cables/wires, or missing original components are not eligible for return or exchange.</li>
-              </ol>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                "Product must be in original condition with all tags attached",
+                "Item must be unused, undamaged, and free from stains",
+                "All accessories, manuals, and components must be included",
+                "Protective seals and labels must be intact",
+                "Product must not have been damaged due to misuse",
+                "Customized products or items with cut cables are not eligible"
+              ].map((item, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700 text-sm">{item}</span>
+                </div>
+              ))}
             </div>
-            {/* Image Section */}
-            {/* <div className="rounded-lg overflow-hidden shadow mt-6">
-              <img
-                src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                alt="15 Day Return Period"
-                className="w-full h-48 object-cover"
-              />
-            </div> */}
           </div>
-        </section>
+        </div>
 
-        {/* Eligibility */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <CheckCircle className="w-8 h-8 text-lime-500" />
+        {/* Return Methods */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+              <MapPin className="w-6 h-6 text-blue-500" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Return Methods</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>Grabatoz have two options for return and exchange product:</p>
-            <ol className="list-inside space-y-2 ml-4">
-              <li><b>1. In Store </b></li>
-              <li><b>2.	Pick-Up from Home</b></li>
-            </ol>
-          </div>
-        </section>
-
-        {/* Defective Items */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <MapPin className="w-8 h-8 text-lime-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">In-Store Return, Refund & Exchange</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              <strong>  Grabatozs </strong>  offers the convenience of <strong>in-store returns, refunds, and exchanges </strong> at any of our <strong> three physical locations</strong>  across the UAE.
+            <h3 className="text-xl font-bold text-gray-900 mb-3">In-Store Return</h3>
+            <p className="text-gray-600 mb-4">
+              Visit our store location to return, refund, or exchange your product. Bring the item and original invoice.
             </p>
-
-            {/* Image Section */}
-            {/* <div className="rounded-lg overflow-hidden shadow mt-6">
-              <img
-                src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                alt="Defective Laptop Repair and Warranty"
-                className="w-full h-48 object-cover"
-              />
-            </div> */}
-          </div>
-        </section>
-
-        {/* Refund Duration */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <Settings className="w-8 h-8 text-lime-500" />
+            <div className="bg-blue-50 rounded-lg p-4">
+              <p className="text-blue-800 text-sm font-medium">Our Location:</p>
+              <p className="text-blue-600 text-sm">Shop 11# Sultan Building, AL Raffa St., Burdubai, Dubai, UAE</p>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">How It Works:</h2>
           </div>
 
-          <div className="space-y-4 text-gray-700">
-            <p>
-              You may visit any of our Crown Excel experience center or branch and locations to request a return, refund, or product exchange. Please make sure sure the item is in the original packaging, unused, and sealed exactly as time of received.
-            </p>
-          </div>
-        </section>
-
-        {/* How to Initiate a Return */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <AlertTriangle className="w-8 h-8 text-lime-500" />
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+              <Truck className="w-6 h-6 text-blue-500" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Important note:</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              Items that are <strong> not in their original packaging </strong> or have <strong>broken seals</strong>  may be subject to rejection or handled according to the <strong> specific brand’s return policy.</strong> Grabatoz reserves the right to apply additional <strong> terms and conditions </strong> based on <strong> manufacturer or supplier guidelines. </strong>
-              Bring the item and the original tax invoice (received by email or phone). Our customer service team will assist you with the process.
-
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Home Pick-Up</h3>
+            <p className="text-gray-600 mb-4">
+              Our delivery team will contact you to schedule a convenient pickup time at your location.
             </p>
-          </div>
-        </section>
-
-        {/* Non-Eligible Items */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <Home className="w-8 h-8 text-lime-500" />
+            <div className="bg-indigo-50 rounded-lg p-4">
+              <p className="text-indigo-800 text-sm font-medium">Note:</p>
+              <p className="text-indigo-600 text-sm">Return delivery charges may apply based on location</p>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Pick-Up from Home – Return Service</h2>
           </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              At <strong>Grabatoz,</strong> our aim to provide a hassle-free return experience. For your convenience, we offer a <strong> Pick-Up from Home </strong>  return option.
-            </p>
-          </div>
-        </section>
+        </div>
 
         {/* Refund Process */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <Truck className="w-8 h-8 text-lime-500" />
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <CreditCard className="w-6 h-6" />
+              Refund Process
+            </h2>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+              {["Product Received", "Inspection", "Refund Initiated", "Amount Credited"].map((step, index) => (
+                <React.Fragment key={index}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <span className="text-gray-700 font-medium">{step}</span>
+                  </div>
+                  {index < 3 && <ArrowRight className="w-5 h-5 text-gray-300 hidden md:block" />}
+                </React.Fragment>
+              ))}
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">How It Works:</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              Our  <strong>dedicated grabian delivery team</strong> or an <strong>authorized delivery partner</strong> will contact you to schedule a suitable <strong> pickup time </strong>at your convenience.
-              The returned item will be <strong>transported to our store</strong>  for inspection and processing.
-
-            </p>
-          </div>
-        </section>
-
-        {/* Restocking Fee */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <Info className="w-8 h-8 text-lime-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Important:</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              Please ensure the product is in the <strong> original condition, unused,</strong> and securely packed in its <strong> original packaging,</strong>  along with the <strong> original invoice or proof of purchase.
-                Return delivery charges</strong>  will be <strong> borne by the customer</strong> and may vary based on location or product type.
-              Once the item is received and inspected, a  <strong>refund or exchange </strong> will be processed in accordance with our return policy.
-
-            </p>
-          </div>
-        </section>
-
-
-
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <CreditCard className="w-8 h-8 text-lime-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Refund Process</h2>
-          </div>
-
-          <div className="space-y-4 text-gray-700">
-            <p>
-              Once the returned product is <strong>received and verified</strong> by our <strong>product inspection team,</strong> a <strong>refund or exchange</strong> will be initiated with in <strong>15 days.</strong>
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Refunds will be issued to the <strong>original payment method</strong> used at the time of purchase.</li>
-              <li>Exchanges will be processed based on <strong>product availability</strong> and customer preference.</li>
-              <li>The process will begin <strong>immediately after successful inspection</strong> of the returned item.</li>
-              <li><strong>Important:</strong> the inspection ensures the product is in its <strong>original condition, unused,</strong> and in <strong>original packaging,</strong> as per our return policy.</li>
-              <li>Processing time may vary based on the payment service provider; it takes a minimum of 2 or in some cases up to 15 business days.</li>
-              <li>All refunds are processed in AED; international transactions are automatically converted to your local currency by your payment provider.</li>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500"></span>
+                Refunds are processed within <strong>15 business days</strong> after successful inspection
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500"></span>
+                Amount will be credited to the <strong>original payment method</strong>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500"></span>
+                All refunds are processed in AED; international cards may have currency conversion
+              </li>
             </ul>
           </div>
-        </section>
+        </div>
 
-
-
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <FileText className="w-8 h-8 text-lime-500" />
+        {/* Important Policy Notes */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-6 h-6 text-amber-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Important Policy Notes</h2>
-
-          </div>
-          <p className="text-red-400"><strong>Grabatoz reserves the right to:</strong> </p>
-          <div className="space-y-4 text-gray-700">
-            <ol>
-              <li>	Refuse returns that do not meet the conditions stated above.</li>
-              <li>	Take appropriate action against policy abuse, which may include warnings, return restrictions, or account suspension.</li>
-            </ol>
-          </div>
-        </section>
-        {/* Important Note */}
-        <section className="bg-white rounded-lg mt-5 p-1">
-          <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-            <div className="flex justify-center md:justify-start">
-              <AlertTriangle className="w-8 h-8 text-lime-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 text-center md:text-left">Defective (Damaged) & Non-Defective Items</h2>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center gap-6 text-gray-700">
-            <div className="flex-1 space-y-4">
-              <ul className="list-none space-y-3">
-                <li>
-                  <span className="font-semibold list-none">Defective Items:</span>
-                  <ul className="list-disc list-inside ml-5 space-y-1">
-                    <li>Report within 15 days of delivery with order details and photos.</li>
-                    <li>We will verify and arrange a replacement or refund.</li>
-                    <li>Return shipping for defective items will be covered by us.</li>
-                  </ul>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Important Policy Notes</h3>
+              <p className="text-gray-700 mb-3">Seenalif reserves the right to:</p>
+              <ul className="space-y-2 text-gray-600">
+                <li className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-1" />
+                  Refuse returns that do not meet the conditions stated above
                 </li>
-                <li>
-                  <span className="font-semibold list-none">Non-Defective Items:</span>
-                  <ul className="list-disc list-inside ml-5 space-y-1">
-                    <li>Returns accepted only if the item is unused and in original packaging.</li>
-                    <li>Must be requested within 15 days of delivery.</li>
-                    <li>Return shipping costs are the customer’s responsibility.</li>
-                  </ul>
+                <li className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-1" />
+                  Take action against policy abuse including warnings or account suspension
+                </li>
+                <li className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-1" />
+                  Apply additional terms based on manufacturer or supplier guidelines
                 </li>
               </ul>
             </div>
-
-            {/* Image Section - right on desktop, below on mobile */}
-            <div className="md:w-1/3">
-              <div className="rounded-lg overflow-hidden shadow md:mt-0 mt-6">
-                <img
-                  src="https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Defective device inspection and repair"
-                  className="w-full h-auto md:h-48 object-cover"
-                />
-              </div>
-            </div>
           </div>
-        </section>
+        </div>
 
+        {/* Defective vs Non-Defective */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <XCircle className="w-5 h-5 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Defective Items</h3>
+            </div>
+            <ul className="space-y-2 text-gray-600 text-sm">
+              <li> Report within 15 days with order details and photos</li>
+              <li> We will verify and arrange replacement or refund</li>
+              <li> Return shipping for defective items covered by us</li>
+            </ul>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Package className="w-5 h-5 text-blue-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Non-Defective Items</h3>
+            </div>
+            <ul className="space-y-2 text-gray-600 text-sm">
+              <li> Returns accepted only if unused and in original packaging</li>
+              <li> Must be requested within 15 days of delivery</li>
+              <li> Return shipping costs are customer responsibility</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      {/* Contact Information */}
-      <section className="bg-gray-50 text-black p-4">
-        <div className="max-w-4xl mx-auto">
+      {/* Contact Footer */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold mb-2">Contact Information</h2>
-            <p className="text-black">For questions or concerns regarding Return and Refunds terms please contact:</p>
+            <h2 className="text-2xl font-bold mb-2">Need Help with Returns?</h2>
+            <p className="text-blue-200">Our support team is here to assist you</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            <div className="text-center">
-              <div className="flex justify-center mb-2">
-                <Phone className="w-5 h-5 text-lime-500" />
-              </div>
-              <h3 className="font-medium mb-1">Phone</h3>
-              <a href="tel:+97143540566" className="text-black">
-                +971 4 354 0566
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+              <Mail className="w-8 h-8 mx-auto mb-3 text-blue-200" />
+              <h3 className="font-semibold mb-1">Email Us</h3>
+              <a href="mailto:Support@seenalif.com" className="text-blue-200 hover:text-white">
+                Support@seenalif.com
               </a>
             </div>
-
-            <div className="text-center">
-              <div className="flex justify-center mb-2">
-                <Mail className="w-5 h-5 text-lime-500" />
-              </div>
-              <h3 className="font-medium mb-1">Email</h3>
-              <a href="mailto:support@grabatoz.com" className="text-black">
-                customercare@grabatoz.ae
-              </a>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+              <Clock className="w-8 h-8 mx-auto mb-3 text-blue-200" />
+              <h3 className="font-semibold mb-1">Business Hours</h3>
+              <p className="text-blue-200">Daily 9:00 AM - 9:00 PM</p>
             </div>
-
-            <div className="text-center">
-              <div className="flex justify-center mb-2">
-                <Clock className="w-5 h-5 text-lime-500" />
-              </div>
-              <h3 className="font-medium mb-1">Hours</h3>
-              <p className="text-black">Daily 9:00 AM - 7:00 PM</p>
-            </div>
-
-            <div className="text-center">
-              <div className="flex justify-center mb-2">
-                <MapPin className="w-5 h-5 text-lime-500" />
-              </div>
-              <h3 className="font-medium mb-1">Address</h3>
-              <p className="text-black">P.O. Box 241975, Dubai, UAE</p>
+            
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+              <MapPin className="w-8 h-8 mx-auto mb-3 text-blue-200" />
+              <h3 className="font-semibold mb-1">Visit Us</h3>
+              <p className="text-blue-200 text-sm">Shop 11# Sultan Building, AL Raffa St., Burdubai, Dubai, UAE</p>
             </div>
           </div>
 
-          <div className="text-center pt-4 border-t border-gray-700">
-            <p className="text-black">
-              <strong>Grabatoz.ae</strong><br />
-              <b>Powered by Crown Excel General Trading LLC</b>
+          <div className="text-center mt-8 pt-6 border-t border-white/20">
+            <p className="text-blue-200">
+              <strong className="text-white">Seenalif</strong>  Powered by Super Boss Computers Trading LLC
             </p>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
-
-

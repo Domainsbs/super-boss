@@ -336,7 +336,7 @@ const Cart = () => {
                 </p>
               )}
               {isInBundle && (
-                <p className="mt-1 text-xs text-lime-600 font-medium">
+                <p className="mt-1 text-xs text-blue-600 font-medium">
                   {item.bundleDiscount ? "Bundle Item (25% OFF)" : "Bundle Item"}
                 </p>
               )}
@@ -438,7 +438,7 @@ const Cart = () => {
                   </p>
                 )}
                 {isInBundle && (
-                  <p className="text-xs text-lime-600 font-medium mb-2">
+                  <p className="text-xs text-blue-600 font-medium mb-2">
                     {item.bundleDiscount ? "Bundle Item (25% OFF)" : "Bundle Item"}
                   </p>
                 )}
@@ -526,7 +526,7 @@ const Cart = () => {
             <Gift size={16} className="mr-2" />
             Available Coupons
           </button>
-          <Link to="/" className="px-2 py-2 lg:px-5 lg:py-2 text-sm font-medium text-white bg-lime-600 rounded-md">
+          <Link to="/" className="px-2 py-2 lg:px-5 lg:py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors">
             Continue Shopping
           </Link>
         </div>
@@ -550,13 +550,13 @@ const Cart = () => {
               const bundleTotals = calculateBundleTotals(bundle.items)
               
               return (
-                <div key={bundle.bundleId} className="bg-white rounded-lg shadow-sm border-2 border-lime-200 mb-6">
+                <div key={bundle.bundleId} className="bg-white rounded-lg shadow-sm border-2 border-blue-200 mb-6">
                   {/* Bundle Header */}
-                  <div className="bg-lime-50 px-6 py-3 border-b border-lime-200">
+                  <div className="bg-blue-50 px-6 py-3 border-b border-blue-200">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <Package className="text-lime-600 mr-2" size={20} />
-                        <h3 className="text-lg font-semibold text-lime-800">Frequently Bought Together</h3>
+                        <Package className="text-blue-600 mr-2" size={20} />
+                        <h3 className="text-lg font-semibold text-blue-800">Frequently Bought Together</h3>
                       </div>
                       <button
                         onClick={() => removeBundleFromCart(bundle.bundleId)}
@@ -567,10 +567,10 @@ const Cart = () => {
                         Remove Bundle
                       </button>
                     </div>
-                    <div className="text-sm text-lime-600 mt-1">
+                    <div className="text-sm text-blue-600 mt-1">
                       Bundle Total: {formatPrice(bundleTotals.total)} | You Save: {formatPrice(bundleTotals.savings)}
                     </div>
-                    <div className="text-xs text-lime-700 mt-1">
+                    <div className="text-xs text-blue-700 mt-1">
                       ⓘ Removing any item will remove the entire bundle
                     </div>
                   </div>
@@ -600,7 +600,7 @@ const Cart = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md shadow-lime-500 p-6">
+            <div className="bg-white rounded-lg shadow-md shadow-blue-500/30 p-6 border border-blue-100">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
 
               <div className="space-y-4">
@@ -715,7 +715,7 @@ const Cart = () => {
                   />
                   {!coupon ? (
                     <button
-                      className="bg-lime-500 text-white px-3 py-1 rounded disabled:opacity-50"
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50 transition-colors"
                       onClick={handleApplyCoupon}
                       disabled={couponLoading || !couponInput}
                     >
@@ -744,7 +744,7 @@ const Cart = () => {
 
                 <div className="border-t pt-4 flex justify-between font-medium">
                   <span className="text-gray-900">Total Amount</span>
-                  <span className="text-black hover:text-lime-500">{formatPrice(totalWithDeliveryTaxCoupon)}</span>
+                  <span className="text-blue-600 font-bold">{formatPrice(totalWithDeliveryTaxCoupon)}</span>
                 </div>
               </div>
 
@@ -771,16 +771,16 @@ const Cart = () => {
                   <label className="flex items-start space-x-2 text-sm text-gray-600">
                     <input 
                       type="checkbox" 
-                      className="mt-1 rounded border-gray-300 text-lime-500 focus:ring-lime-500" 
+                      className="mt-1 rounded border-gray-300 text-blue-500 focus:ring-blue-500" 
                       defaultChecked 
                     />
                     <span>
                       I agree to our{' '}
-                      <Link to="/terms" className="text-lime-600 hover:text-lime-700 underline">
+                      <Link to="/terms" className="text-blue-600 hover:text-blue-700 underline">
                         Terms of use
                       </Link>
                       {' '}&{' '}
-                      <Link to="/privacy" className="text-lime-600 hover:text-lime-700 underline">
+                      <Link to="/privacy" className="text-blue-600 hover:text-blue-700 underline">
                         Privacy Policy
                       </Link>
                     </span>
@@ -789,7 +789,7 @@ const Cart = () => {
 
                 <Link
                   to="/checkout"
-                  className="w-full bg-lime-500 hover:bg-lime-600 text-white font-medium py-3 px-4 rounded-md flex items-center justify-center transition-colors"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center transition-colors shadow-lg shadow-blue-500/25"
                 >
                   Checkout
                 </Link>

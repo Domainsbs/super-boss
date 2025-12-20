@@ -24,7 +24,7 @@ import {
   ShoppingBag,
 } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
-import BannerSlider from "../components/BannerSlider"
+import HeroBannerSection from "../components/HeroBannerSection"
 import CategorySlider from "../components/CategorySlider"
 import CategorySliderUpdated from "../components/CategorySliderUpdated"
 import { useWishlist } from "../context/WishlistContext"
@@ -962,10 +962,9 @@ const Home = () => {
           </div>
         </div>
       )}
-      <BannerSlider
-        banners={heroBanners.filter(
-          (banner) => banner.deviceType && banner.deviceType.toLowerCase() === deviceType.toLowerCase(),
-        )}
+      <HeroBannerSection
+        banners={heroBanners}
+        deviceType={deviceType}
       />
       {/* Categories Section - Admin Controlled Slider */}
       <CategorySliderUpdated onCategoryClick={handleCategoryClick} />

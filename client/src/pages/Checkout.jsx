@@ -410,12 +410,12 @@ const Checkout = () => {
       },
       order_reference_id: `ORDER_${Date.now()}`,
       order_number: `ORD_${Date.now()}`,
-      description: `Order for ${cartItems.length} items from Graba2z`,
+      description: `Order for ${cartItems.length} items from Seenalif`,
       country_code: "AE",
       payment_type: "PAY_BY_INSTALMENTS",
       instalments: 3,
       locale: "en_US",
-      platform: "Graba2z Online Store",
+      platform: "Seenalif Online Store",
       is_mobile: window.innerWidth <= 768,
       consumer: {
         first_name: formData.name.split(" ")[0] || "Customer",
@@ -681,7 +681,7 @@ const Checkout = () => {
           event: "purchase",
           ecommerce: {
             transaction_id: orderId,
-            affiliation: "Graba2z Online Store",
+            affiliation: "Seenalif Online Store",
             currency: "AED",
             value: finalTotal,
             tax: 0, // VAT included in prices
@@ -735,12 +735,12 @@ const Checkout = () => {
           },
           order_reference_id: orderId,
           order_number: `ORD_${orderId}`,
-          description: `Order for ${cartItems.length} items from Graba2z`,
+          description: `Order for ${cartItems.length} items from Seenalif`,
           country_code: "AE",
           payment_type: "PAY_BY_INSTALMENTS",
           instalments: 3,
           locale: "en_US",
-          platform: "Graba2z Online Store",
+          platform: "Seenalif Online Store",
           is_mobile: window.innerWidth <= 768,
           consumer: {
             first_name: formData.name.split(" ")[0] || "Customer",
@@ -1221,7 +1221,7 @@ const Checkout = () => {
       <div className="max-w-5xl mx-auto px-4 py-10 text-center">
         <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
         <p className="text-gray-600 mb-6">Add some items to your cart before checkout.</p>
-        <button onClick={() => navigate("/")} className="bg-lime-500 hover:bg-lime-600 text-white rounded-lg px-8 py-3">
+        <button onClick={() => navigate("/")} className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-8 py-3 transition-colors">
           Continue Shopping
         </button>
       </div>
@@ -1245,7 +1245,7 @@ const Checkout = () => {
             <div className="flex flex-row items-center gap-2 sm:gap-4 md:gap-8 w-full overflow-x-auto mb-8">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span
-                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 1 ? "bg-lime-500" : "bg-gray-300"}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 1 ? "bg-blue-500" : "bg-gray-300"}`}
                 >
                   01
                 </span>
@@ -1254,7 +1254,7 @@ const Checkout = () => {
               <div className="h-0.5 w-4 sm:w-8 bg-gray-300" />
               <div className="flex items-center gap-1 sm:gap-2">
                 <span
-                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 2 ? "bg-lime-500" : "bg-gray-300"}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 2 ? "bg-blue-500" : "bg-gray-300"}`}
                 >
                   02
                 </span>
@@ -1271,7 +1271,7 @@ const Checkout = () => {
               <div className="h-0.5 w-4 sm:w-8 bg-gray-300" />
               <div className="flex items-center gap-1 sm:gap-2">
                 <span
-                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 3 ? "bg-lime-500" : "bg-gray-300"}`}
+                  className={`w-8 h-8 flex items-center justify-center rounded-full text-white font-bold ${step >= 3 ? "bg-blue-500" : "bg-gray-300"}`}
                 >
                   03
                 </span>
@@ -1301,7 +1301,7 @@ const Checkout = () => {
                     value="home"
                     checked={deliveryType === "home"}
                     onChange={() => setDeliveryType("home")}
-                    className="accent-lime-500 mr-2"
+                    className="accent-blue-500 mr-2"
                   />
                   <span className="font-semibold text-lg">Home Delivery</span>
                 </label>
@@ -1312,7 +1312,7 @@ const Checkout = () => {
                     value="pickup"
                     checked={deliveryType === "pickup"}
                     onChange={() => setDeliveryType("pickup")}
-                    className="accent-lime-500 mr-2"
+                    className="accent-blue-500 mr-2"
                   />
                   <span className="font-semibold text-lg">Pickup From Store</span>
                 </label>
@@ -1359,7 +1359,7 @@ const Checkout = () => {
                           <button
                             type="button"
                             onClick={() => setShowAddressModal(true)}
-                            className="text-lime-500 text-sm mt-2 mr-4"
+                            className="text-blue-500 text-sm mt-2 mr-4"
                           >
                             Edit Address
                           </button>
@@ -1392,7 +1392,7 @@ const Checkout = () => {
                         </button>
                         <button
                           type="submit"
-                          className="flex-1 bg-lime-500 hover:bg-lime-600 text-white font-semibold lg:py-3 lg:px-6 py-2 px-3 rounded-lg transition duration-300"
+                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold lg:py-3 lg:px-6 py-2 px-3 rounded-lg transition duration-300"
                         >
                           <span className="block lg:hidden">Continue Summary</span> {/* Mobile */}
                           <span className="hidden lg:block">Continue to Summary</span> {/* Desktop */}
@@ -1421,7 +1421,7 @@ const Checkout = () => {
 
                       <div className="mb-6">
                         <h4 className="font-semibold mb-4 flex items-center gap-2">
-                          <MapPin className="h-5 w-5 text-lime-500" />
+                          <MapPin className="h-5 w-5 text-blue-500" />
                           Select Store *
                         </h4>
 
@@ -1432,7 +1432,7 @@ const Checkout = () => {
                               <div
                                 key={store.storeId}
                                 className={`border rounded-lg p-4 cursor-pointer transition-all ${pickupDetails.storeId === store.storeId
-                                    ? "border-lime-500 bg-lime-50"
+                                    ? "border-blue-500 bg-blue-50"
                                     : "border-gray-200 hover:border-gray-300"
                                   }`}
                               >
@@ -1442,12 +1442,12 @@ const Checkout = () => {
                                     name="store"
                                     checked={pickupDetails.storeId === store.storeId}
                                     onChange={() => handleStoreSelection(store)}
-                                    className="mt-1 accent-lime-500"
+                                    className="mt-1 accent-blue-500"
                                   />
                                   <div className="flex-1">
                                     <div className="font-semibold text-gray-900">{store.name}</div>
                                     <div className="text-sm text-gray-600 mt-1 leading-relaxed">{store.address}</div>
-                                    <div className="text-sm text-lime-600 mt-2 font-medium">{store.phone}</div>
+                                    <div className="text-sm text-blue-600 mt-2 font-medium">{store.phone}</div>
                                   </div>
                                 </label>
                               </div>
@@ -1488,7 +1488,7 @@ const Checkout = () => {
 
                       <button
                         type="submit"
-                        className="bg-lime-500 hover:bg-lime-600 text-white rounded-lg px-8 py-3 disabled:opacity-50"
+                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-8 py-3 disabled:opacity-50 transition-colors"
                         disabled={!pickupDetails.phone || !pickupDetails.storeId}
                       >
                         Continue
@@ -1540,7 +1540,7 @@ const Checkout = () => {
                       <textarea
                         value={customerNotes}
                         onChange={(e) => setCustomerNotes(e.target.value)}
-                        className="w-full border rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                        className="w-full border rounded-lg px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         rows="3"
                         placeholder="Special delivery instructions, gift message, or any other notes..."
                         maxLength="500"
@@ -1558,7 +1558,7 @@ const Checkout = () => {
                     </button>
                     <button
                       onClick={handleContinueToPayment}
-                      className="bg-lime-500 hover:bg-lime-600 text-white rounded-lg px-8 py-3"
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-8 py-3 transition-colors"
                     >
                       Continue to Payment
                     </button>
@@ -1575,7 +1575,7 @@ const Checkout = () => {
                       <div
                         key={method.id}
                         className={` rounded-lg p-4 cursor-pointer transition-all relative ${selectedPaymentMethod === method.id
-                            ? "border-lime-500 bg-lime-50"
+                            ? "border-blue-500 bg-blue-50"
                             : "border-gray-200 hover:border-gray-300 bg-white"
                           }`}
                         onClick={() => handlePaymentMethodSelect(method.id)}
@@ -1587,7 +1587,7 @@ const Checkout = () => {
                           value={method.id}
                           checked={selectedPaymentMethod === method.id}
                           onChange={() => setSelectedPaymentMethod(method.id)}
-                          className="absolute top-20 left-16 accent-lime-500 w-4 h-4"
+                          className="absolute top-20 left-16 accent-blue-500 w-4 h-4"
                         />
 
                         {/* Image container centered */}
@@ -1598,7 +1598,7 @@ const Checkout = () => {
                                 key={idx}
                                 src={icon.src || "/placeholder.svg"}
                                 alt={method.name}
-                                className={`w-60 h-48 md:w-60 md:h-36 object-contain rounded-lg transition-all ${selectedPaymentMethod === method.id ? " border-lime-500" : " border-gray-200"
+                                className={`w-60 h-48 md:w-60 md:h-36 object-contain rounded-lg transition-all ${selectedPaymentMethod === method.id ? " border-blue-500" : " border-gray-200"
                                   }`}
                               />
                             ))}
@@ -1671,7 +1671,7 @@ const Checkout = () => {
                           : handleSubmit
                       }
                       disabled={loading || !selectedPaymentMethod}
-                      className="bg-lime-500 hover:bg-lime-600 text-white rounded-lg px-6 py-3 disabled:opacity-50 flex items-center gap-2"
+                      className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-6 py-3 disabled:opacity-50 flex items-center gap-2 transition-colors shadow-lg shadow-blue-500/25"
                     >
                       {loading ? (
                         <>
@@ -1694,10 +1694,10 @@ const Checkout = () => {
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-2 mt-4">
-            <div className="rounded-lg shadow-md shadow-lime-500 p-4 lg:mx-9 sticky top-4">
+            <div className="rounded-lg shadow-md shadow-blue-500/30 p-4 lg:mx-9 sticky top-4 border border-blue-100">
               <div className="flex items-center mb-6">
-                <div className="bg-lime-100 p-2 rounded-full">
-                  <Truck className="h-8 w-8 text-lime-600" />
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <Truck className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-3">
                   <h2 className="text-lg font-bold text-black">Order Summary</h2>
@@ -1846,7 +1846,7 @@ const Checkout = () => {
                     />
                     {!coupon ? (
                       <button
-                        className="bg-lime-500 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm disabled:opacity-50 transition-colors"
                         onClick={handleApplyCoupon}
                         disabled={couponLoading || !couponInput}
                       >
@@ -1900,7 +1900,7 @@ const Checkout = () => {
               <div className="mt-6 bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <Shield className="h-7 w-7 text-lime-500" />
+                    <Shield className="h-7 w-7 text-blue-500" />
                   </div>
                   <div className="ml-2">
                     <p className="text-xs text-gray-700">
@@ -1936,7 +1936,7 @@ const Checkout = () => {
                       value="home"
                       checked={addressType === "home"}
                       onChange={() => setAddressType("home")}
-                      className="accent-lime-500"
+                      className="accent-blue-500"
                     />
                     Home
                   </label>
@@ -1947,7 +1947,7 @@ const Checkout = () => {
                       value="office"
                       checked={addressType === "office"}
                       onChange={() => setAddressType("office")}
-                      className="accent-lime-500"
+                      className="accent-blue-500"
                     />
                     Office
                   </label>
@@ -2023,7 +2023,7 @@ const Checkout = () => {
                     type="checkbox"
                     checked={addressDetails.isDefault}
                     onChange={(e) => setAddressDetails({ ...addressDetails, isDefault: e.target.checked })}
-                    className="accent-lime-500"
+                    className="accent-blue-500"
                   />
                   <span>Default Address</span>
                 </div>
@@ -2036,7 +2036,7 @@ const Checkout = () => {
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="bg-lime-500 hover:bg-lime-600 text-white rounded-lg px-8 py-3">
+                  <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-8 py-3 transition-colors">
                     Save Address
                   </button>
                 </div>

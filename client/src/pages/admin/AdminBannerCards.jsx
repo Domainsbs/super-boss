@@ -249,6 +249,8 @@ const AdminBannerCards = () => {
 
   const getSectionLabel = (section) => {
     const labels = {
+      "hero-left": "Hero Banner – Left",
+      "hero-right": "Hero Banner – Right",
       "home-category-cards": "CategoryCards",
       "home-brands-cards": "BrandsCards",
       "home-products-cards": "ProductsCards",

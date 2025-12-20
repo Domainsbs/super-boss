@@ -47,6 +47,8 @@ const AddBannerCard = () => {
   const [isEdit, setIsEdit] = useState(false)
 
   const sectionOptions = [
+    { value: "hero-left", label: "Hero Banner – Left Side" },
+    { value: "hero-right", label: "Hero Banner – Right Side" },
     { value: "home-category-cards", label: "Home – CategoryCards Section" },
     { value: "home-brands-cards", label: "Home – BrandsCards Section" },
     { value: "home-products-cards", label: "Home – ProductsCards Section" },

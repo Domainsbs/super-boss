@@ -1,11 +1,10 @@
-"use client"
+﻿"use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useToast } from "../context/ToastContext"
-import { Eye, EyeOff, Mail, Lock } from "lucide-react"
-import { Fragment } from "react"
+import { Eye, EyeOff, Mail, Lock, LogIn, ShieldCheck } from "lucide-react"
 
 const Login = () => {
   const navigate = useNavigate()
@@ -13,7 +12,6 @@ const Login = () => {
   const { login } = useAuth()
   const { showToast } = useToast()
   
-  // Check if user is coming from checkout page
   const isFromCheckout = location.state?.from?.pathname === "/checkout"
 
   const [formData, setFormData] = useState({
@@ -44,9 +42,8 @@ const Login = () => {
       setLoading(true)
       setError("")
 
-      // Convert email to lowercase before sending to API
       const loginData = {
-        email: formData.email.trim().toLowerCase(), // Add this conversion
+        email: formData.email.trim().toLowerCase(),
         password: formData.password
       }
 
@@ -67,27 +64,37 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* Left: Login Form */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-10">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 md:p-12">
           <div className="max-w-md w-full space-y-8">
+            {/* Logo/Brand */}
             <div className="text-center">
-              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome back</h2>
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <LogIn className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+              <p className="mt-2 text-gray-500">Sign in to your Seenalif account</p>
             </div>
+
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100 animate-fade-in">
+              <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-3">
+                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-red-500 text-lg">!</span>
+                </div>
                 {error}
               </div>
             )}
+
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-5">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email address
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -98,18 +105,18 @@ const Login = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                      className="block w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your email"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -120,15 +127,15 @@ const Login = () => {
                       required
                       value={formData.password}
                       onChange={handleChange}
-                      className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                      className="block w-full pl-12 pr-12 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your password"
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                       onClick={togglePasswordVisibility}
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                 </div>
@@ -140,65 +147,94 @@ const Login = () => {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded transition-colors"
+                    className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600">
                     Remember me
                   </label>
                 </div>
-
-                <div className="text-sm">
-                  <Link to="/forgot-password" className="font-medium text-lime-600 hover:text-lime-800 transition-colors">
-                    Forgot password?
-                  </Link>
-                </div>
+                <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                  Forgot password?
+                </Link>
               </div>
 
-              <div>
+              <div className="space-y-4">
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-lime-500 hover:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
                   disabled={loading}
                 >
                   {loading ? (
-                    <div className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                       Signing in...
-                    </div>
+                    </>
                   ) : (
-                    "Sign in"
+                    <>
+                      <LogIn className="w-5 h-5" />
+                      Sign in
+                    </>
                   )}
                 </button>
-                {/* Guest Mode Button - Only show when coming from checkout */}
+
                 {isFromCheckout && (
                   <button
                     type="button"
-                    className="w-full flex justify-center py-3 px-4 mt-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 transition-all duration-200"
+                    className="w-full flex justify-center py-3 px-4 border border-gray-200 rounded-xl text-gray-700 bg-white hover:bg-gray-50 font-medium transition-all"
                     onClick={() => navigate("/guest")}
                   >
                     Continue as Guest
                   </button>
                 )}
-                <p className="mt-4 text-md text-gray-600">
-                  Don't have an account?{" "}
-                  <Link to="/register" className="font-semibold text-gray-900 hover:text-gray-700 transition-colors">
-                    Sign up
-                  </Link>
-                </p>
               </div>
+
+              <p className="text-center text-gray-600">
+                Do not have an account?{" "}
+                <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                  Sign up
+                </Link>
+              </p>
             </form>
           </div>
         </div>
-        {/* Right: Image */}
-        <div className="hidden md:block md:w-1/2 bg-white relative">
-          <img
-            src="/login1.png"
-            alt="Login Visual"
-            className="w-full h-full object-cover object-center"
-          />
+
+        {/* Right: Branding Panel */}
+        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 relative overflow-hidden">
+          <div className="absolute inset-0">
+            <div className="absolute top-20 right-20 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 left-20 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative flex flex-col items-center justify-center p-12 text-white text-center">
+            <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-8 border border-white/20">
+              <ShieldCheck className="w-10 h-10" />
+            </div>
+            <h3 className="text-3xl font-bold mb-4">Secure Login</h3>
+            <p className="text-blue-100 text-lg mb-8 max-w-sm">
+              Your account is protected with enterprise-grade security
+            </p>
+            
+            <div className="space-y-4 text-left w-full max-w-xs">
+              {[
+                "SSL encrypted connection",
+                "Two-factor authentication",
+                "Secure password storage"
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-xl">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-sm">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 pt-8 border-t border-white/20 w-full text-center">
+              <p className="text-blue-200 text-sm">Seenalif.com</p>
+              <p className="text-blue-300 text-xs mt-1">Powered by Super Boss Computers Trading LLC</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

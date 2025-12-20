@@ -159,6 +159,9 @@ const Navbar = () => {
   const mobileSearchInputRef = useRef(null)
   const mobileSearchDropdownRef = useRef(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false)
+  const [expandedDesktopCategory, setExpandedDesktopCategory] = useState(null)
+  const [expandedDesktopSubCategories, setExpandedDesktopSubCategories] = useState([])
   const [categories, setCategories] = useState([]) // now contains nested tree nodes: { _id, name, slug, children: [] }
   const [flatSubCategories, setFlatSubCategories] = useState([]) // keep for backward compatibility / other components
   const [hoveredCategory, setHoveredCategory] = useState(null)
@@ -646,6 +649,31 @@ const Navbar = () => {
     setExpandedMobileCategory(null)
   }
 
+  const toggleDesktopMenu = () => {
+    setIsDesktopMenuOpen(!isDesktopMenuOpen)
+    setExpandedDesktopCategory(null)
+    setExpandedDesktopSubCategories([])
+  }
+
+  const closeDesktopMenu = () => {
+    setIsDesktopMenuOpen(false)
+    setExpandedDesktopCategory(null)
+    setExpandedDesktopSubCategories([])
+  }
+
+  const toggleDesktopCategory = (categoryId) => {
+    setExpandedDesktopCategory(expandedDesktopCategory === categoryId ? null : categoryId)
+    setExpandedDesktopSubCategories([])
+  }
+
+  const toggleDesktopSubCategory = (subCategoryId) => {
+    setExpandedDesktopSubCategories(prev => 
+      prev.includes(subCategoryId) 
+        ? prev.filter(id => id !== subCategoryId)
+        : [...prev, subCategoryId]
+    )
+  }
+
   const handleMobileSearchOpen = () => {
     setIsMobileSearchOpen(true)
   }
@@ -676,105 +704,113 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop Navbar - Hidden on Mobile */}
-      <header className="hidden md:block bg-white shadow-sm sticky top-0 pt-4 z-50 w-full">
-        <div className="w-full max-w-[1920px] mx-auto space-y-4">
-          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 h-14 xl:h-18 2xl:h-20">
-            {/* Logo - Exact Grabatoz Style */}
+      <header className="hidden md:block bg-blue-500 sticky top-0 z-50 w-full">
+        <div className="w-full max-w-[1920px] mx-auto">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 h-16 xl:h-18 2xl:h-20">
+            {/* Logo Placeholder */}
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-40 xl:w-44 2xl:w-48 h-auto flex items-center justify-center">
-                <img src="/new-logo.webp" alt="Logo" className="w-full h-full" />
+              <div className="w-40 xl:w-44 2xl:w-48 h-12 flex items-center justify-center">
+                {/* Logo placeholder - add your logo image here */}
+                <img src="/seenalif.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
             </Link>
 
-            {/* Search Bar - Exact Grabatoz Style */}
-            <div className="flex-1 max-w-2xl xl:max-w-3xl justify-center items-center px-6 xl:px-20 2xl:px-28">
+            {/* Menu Button */}
+            <button
+              onClick={toggleDesktopMenu}
+              className="flex items-center gap-2 bg-white/10 text-white hover:bg-white/20 px-4 py-2 rounded-full transition-colors"
+            >
+              {isDesktopMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <span className="font-medium text-lg">Menu</span>
+            </button>
+
+            {/* Search Bar - White Style */}
+            <div className="flex-1 max-w-xl xl:max-w-2xl 2xl:max-w-3xl px-8">
               <form onSubmit={handleSearch} className="relative">
-                <div className="">
-                  <div className="flex items-center gap-2 m-1">
-                    <input
-                      type="text"
-                      placeholder="Search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-3 xl:pl-4 pr-3 xl:pr-4 py-2 xl:py-2.5 2xl:py-3 border border-gray-300 focus:outline-none focus:border-lime-500 w-[75%] xl:w-[78%] 2xl:w-[80%] text-sm xl:text-base"
-                      ref={searchInputRef}
-                      onFocus={() => {
-                        if (searchResults.length > 0) setShowSearchDropdown(true)
-                      }}
-                    />
-                    {/* Loading spinner */}
-                    {searchLoading && (
-                      <span className="absolute right-36 top-1/2 transform -translate-y-1/2">
-                        <svg
-                          className="animate-spin h-5 w-5 text-lime-500"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                          ></path>
-                        </svg>
-                      </span>
-                    )}
-                    <button type="submit" className="px-3 xl:px-3.5 2xl:px-4 py-3 xl:py-3.5 2xl:py-4 bg-lime-500 text-white hover:bg-green-600">
-                      <Search className="w-4 h-4 xl:w-[18px] xl:h-[18px] 2xl:w-5 2xl:h-5" />
-                    </button>
-                  </div>
-                  {/* Autocomplete Dropdown */}
-                  {showSearchDropdown && searchResults.length > 0 && (
-                    <div
-                      ref={searchDropdownRef}
-                      className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded z-50 mt-2 max-h-96 overflow-y-auto"
-                    >
-                      {searchResults.map((product) => (
-                        <Link
-                          key={product._id}
-                          to={`/product/${encodeURIComponent(product.slug || product._id)}`}
-                          className="flex items-start gap-4 px-4 py-3 hover:bg-gray-50 border-b last:border-b-0"
-                          onClick={() => setShowSearchDropdown(false)}
-                        >
-                          <img
-                            src={getFullImageUrl(product.image) || "/placeholder.svg"}
-                            alt={product.name}
-                            className="w-16 h-16 object-contain rounded"
-                          />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900 text-sm line-clamp-2">{product.name}</div>
-                            <div className="text-xs text-gray-500 line-clamp-2">{product.description}</div>
-                          </div>
-                        </Link>
-                      ))}
+                <div className="flex items-center bg-white rounded-full overflow-hidden">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 px-5 py-3 bg-white text-gray-900 placeholder-gray-500 focus:outline-none text-sm xl:text-base"
+                    ref={searchInputRef}
+                    onFocus={() => {
+                      if (searchResults.length > 0) setShowSearchDropdown(true)
+                    }}
+                  />
+                  {/* Loading spinner */}
+                  {searchLoading && (
+                    <span className="pr-2">
+                      <svg
+                        className="animate-spin h-5 w-5 text-gray-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                    </span>
+                  )}
+                  <button type="submit" className="px-5 py-3 bg-white text-gray-700 hover:bg-gray-100 transition-colors">
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+                {/* Autocomplete Dropdown */}
+                {showSearchDropdown && searchResults.length > 0 && (
+                  <div
+                    ref={searchDropdownRef}
+                    className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded-xl z-50 mt-2 max-h-96 overflow-y-auto"
+                  >
+                    {searchResults.map((product) => (
                       <Link
-                        to={`/shop?search=${encodeURIComponent(searchQuery.trim())}`}
-                        className="block text-center text-lime-600 hover:underline py-2 text-sm font-medium"
+                        key={product._id}
+                        to={`/product/${encodeURIComponent(product.slug || product._id)}`}
+                        className="flex items-start gap-4 px-4 py-3 hover:bg-gray-50 border-b last:border-b-0"
                         onClick={() => setShowSearchDropdown(false)}
                       >
-                        View all results
+                        <img
+                          src={getFullImageUrl(product.image) || "/placeholder.svg"}
+                          alt={product.name}
+                          className="w-16 h-16 object-contain rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 text-sm line-clamp-2">{product.name}</div>
+                          <div className="text-xs text-gray-500 line-clamp-2">{product.description}</div>
+                        </div>
                       </Link>
-                    </div>
-                  )}
-                </div>
+                    ))}
+                    <Link
+                      to={`/shop?search=${encodeURIComponent(searchQuery.trim())}`}
+                      className="block text-center text-[#1a4d3e] hover:underline py-2 text-sm font-medium"
+                      onClick={() => setShowSearchDropdown(false)}
+                    >
+                      View all results
+                    </Link>
+                  </div>
+                )}
               </form>
             </div>
 
-            {/* Right Side Icons - Exact Grabatoz Style */}
-            <div className="flex items-center space-x-2 xl:space-x-3 2xl:space-x-4">
+            {/* Right Side Icons - White Pill Container */}
+            <div className="flex items-center bg-white rounded-full px-4 py-2 gap-4">
               {/* Wishlist */}
-              <Link to="/wishlist" className="relative p-2 xl:p-2.5 2xl:p-3 border border-black" aria-label="Wishlist">
-                <Heart className="w-[18px] h-[18px] xl:w-[19px] xl:h-[19px] 2xl:w-5 2xl:h-5 text-gray-600" />
+              <Link to="/wishlist" className="relative p-1.5 hover:bg-gray-100 rounded-full transition-colors" aria-label="Wishlist">
+                <Heart className="w-5 h-5 xl:w-6 xl:h-6 text-gray-700" />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold text-[10px]">
                     {wishlist.length}
                   </span>
                 )}
@@ -784,16 +820,16 @@ const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="p-2 xl:p-2.5 2xl:p-3 border border-black"
+                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
                   ref={profileButtonRef}
                 >
-                  <User className="w-[18px] h-[18px] xl:w-[19px] xl:h-[19px] 2xl:w-5 2xl:h-5 text-gray-600" />
+                  <User className="w-5 h-5 xl:w-6 xl:h-6 text-gray-700" />
                 </button>
 
                 {isProfileOpen && (
                   <div
                     ref={profileRef}
-                    className="absolute right-0 w-48 py-2 mt-2 bg-white rounded-md shadow-xl z-20 border"
+                    className="absolute right-0 w-48 py-2 mt-2 bg-white rounded-xl shadow-xl z-20 border"
                   >
                     {isAuthenticated ? (
                       <>
@@ -856,25 +892,159 @@ const Navbar = () => {
               </div>
 
               {/* Cart */}
-              <Link to="/cart" className="relative p-2 xl:p-2.5 2xl:p-3">
-                <ShoppingCart className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-[30px] 2xl:h-[30px] text-gray-600" />
+              <Link to="/cart" className="relative p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+                <ShoppingCart className="w-5 h-5 xl:w-6 xl:h-6 text-gray-700" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold text-[10px]">
                     {cartCount}
                   </span>
                 )}
               </Link>
             </div>
           </div>
+        </div>
 
-          {/* Navigation Menu - Dynamic Categories with Dropdowns */}
-          <div className="bg-lime-500 mt-3 xl:mt-3.5 2xl:mt-4 flex relative">
+        {/* Desktop Menu Dropdown - All Categories with Subcategories */}
+        {isDesktopMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/30 z-40" 
+              onClick={closeDesktopMenu}
+            />
+            <div className="absolute top-full left-0 right-0 bg-white shadow-2xl z-50 border-t border-gray-200 max-h-[80vh] overflow-y-auto">
+              <div className="max-w-[1920px] mx-auto">
+                <div className="grid grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-0">
+                  {categories.map((parentCategory) => {
+                    const categorySubCategories = getSubCategoriesForCategory(parentCategory._id)
+                    const isExpanded = expandedDesktopCategory === parentCategory._id
+
+                    return (
+                      <div key={parentCategory._id} className="border-r border-b border-gray-100">
+                        {/* Parent Category */}
+                        <div 
+                          className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-[#1a4d3e] text-white' : 'text-gray-800'}`}
+                        onClick={() => toggleDesktopCategory(parentCategory._id)}
+                      >
+                        <Link
+                          to={generateShopURL({ parentCategory: parentCategory.name })}
+                          className="font-semibold text-sm hover:underline flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            closeDesktopMenu()
+                          }}
+                        >
+                          {parentCategory.name}
+                        </Link>
+                        {categorySubCategories.length > 0 && (
+                          <button className="ml-2">
+                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Level 2 Subcategories */}
+                      {isExpanded && categorySubCategories.length > 0 && (
+                        <div className="bg-gray-50 border-t border-gray-100">
+                          {categorySubCategories.map((subCat1) => {
+                            const subCat1Children = subCat1.children || []
+                            const isSubExpanded = expandedDesktopSubCategories.includes(subCat1._id)
+
+                            return (
+                              <div key={subCat1._id}>
+                                <div 
+                                  className={`flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors ${isSubExpanded ? 'bg-[#22ba85] text-white' : 'text-gray-700'}`}
+                                  onClick={() => toggleDesktopSubCategory(subCat1._id)}
+                                >
+                                  <Link
+                                    to={generateShopURL({ parentCategory: parentCategory.name, subCategory: subCat1.name })}
+                                    className="text-sm hover:underline flex-1 pl-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      closeDesktopMenu()
+                                    }}
+                                  >
+                                    {subCat1.name}
+                                  </Link>
+                                  {subCat1Children.length > 0 && (
+                                    <button className="ml-2">
+                                      {isSubExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Level 3 Subcategories */}
+                                {isSubExpanded && subCat1Children.length > 0 && (
+                                  <div className="bg-white border-t border-gray-100">
+                                    {subCat1Children.map((subCat2) => {
+                                      const subCat2Children = subCat2.children || []
+                                      const isSubSub2Expanded = expandedDesktopSubCategories.includes(subCat2._id)
+
+                                      return (
+                                        <div key={subCat2._id}>
+                                          <div 
+                                            className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${isSubSub2Expanded ? 'bg-emerald-100 text-emerald-800' : 'text-gray-600'}`}
+                                            onClick={() => toggleDesktopSubCategory(subCat2._id)}
+                                          >
+                                            <Link
+                                              to={generateShopURL({ parentCategory: parentCategory.name, subCategory: subCat1.name, level3: subCat2.name })}
+                                              className="text-sm hover:underline flex-1 pl-4"
+                                              onClick={(e) => {
+                                                e.stopPropagation()
+                                                closeDesktopMenu()
+                                              }}
+                                            >
+                                              {subCat2.name}
+                                            </Link>
+                                            {subCat2Children.length > 0 && (
+                                              <button className="ml-2">
+                                                {isSubSub2Expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                              </button>
+                                            )}
+                                          </div>
+
+                                          {/* Level 4 Subcategories */}
+                                          {isSubSub2Expanded && subCat2Children.length > 0 && (
+                                            <div className="bg-gray-50 border-t border-gray-50">
+                                              {subCat2Children.map((subCat3) => (
+                                                <Link
+                                                  key={subCat3._id}
+                                                  to={generateShopURL({ parentCategory: parentCategory.name, subCategory: subCat1.name, level3: subCat2.name, level4: subCat3.name })}
+                                                  className="block px-4 py-2 pl-8 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                                                  onClick={closeDesktopMenu}
+                                                >
+                                                  {subCat3.name}
+                                                </Link>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+          </>
+        )}
+
+        {/* Navigation Menu - Dynamic Categories with Dropdowns - HIDDEN FOR NOW */}
+        {false && <div className="bg-[#22ba85] flex relative">
           <div className="w-full">
             <div className="grid grid-cols-[auto,1fr,auto] items-center h-10 xl:h-11 2xl:h-12 px-4 xl:px-8 2xl:px-12 gap-2 xl:gap-2.5 2xl:gap-3">
               <button
                 type="button"
                 onClick={scrollPrev}
-                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-lime-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-[#22ba85] hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 disabled={!canScrollPrev}
                 aria-label="Previous categories"
               >
@@ -1214,7 +1384,7 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={scrollNext}
-                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-lime-500 hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                className="hidden md:inline-flex items-center justify-center w-8 h-8 xl:w-8.5 xl:h-8.5 2xl:w-9 2xl:h-9 rounded-full bg-white text-[#22ba85] hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 disabled={!canScrollNext}
                 aria-label="Next categories"
               >
@@ -1222,11 +1392,8 @@ const Navbar = () => {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      
-    </header>
+        </div>}
+      </header>
 
       {/* Mobile Navbar - Shown only on Mobile */}
       <header className="md:hidden bg-white shadow-sm sticky top-0 z-50">
@@ -1289,7 +1456,7 @@ const Navbar = () => {
                   {searchLoading && (
                     <span className="absolute right-16 top-1/2 transform -translate-y-1/2">
                       <svg
-                        className="animate-spin h-5 w-5 text-lime-500"
+                        className="animate-spin h-5 w-5 text-[#22ba85]"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -1514,22 +1681,22 @@ const Navbar = () => {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
         <div className="flex items-center justify-around py-2">
           {/* Home */}
-          <Link to="/" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500">
+          <Link to="/" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]">
             <Home size={20} />
             <span className="text-xs mt-1">Home</span>
           </Link>
 
           {/* Shop */}
-          <Link to="/shop" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500">
+          <Link to="/shop" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]">
             <Grid3X3 size={20} />
             <span className="text-xs mt-1">Shop</span>
           </Link>
 
           {/* Cart */}
-          <Link to="/cart" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500 relative">
+          <Link to="/cart" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85] relative">
             <ShoppingCart size={20} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold hover:text-lime-500">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                 {cartCount}
               </span>
             )}
@@ -1539,7 +1706,7 @@ const Navbar = () => {
           {/* Wishlist */}
           <Link
             to="/wishlist"
-            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500 relative"
+            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85] relative"
             aria-label="Wishlist"
           >
             <Heart size={20} className="" />
@@ -1554,7 +1721,7 @@ const Navbar = () => {
           {/* Account */}
           <Link
             to={isAuthenticated ? "/profile" : "/login"}
-            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-lime-500"
+            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]"
           >
             <UserCircle size={20} />
             <span className="text-xs mt-1">Account</span>
