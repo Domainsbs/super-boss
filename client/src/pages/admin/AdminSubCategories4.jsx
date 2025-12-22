@@ -324,7 +324,7 @@ const AdminSubCategories4 = () => {
               <p className="text-gray-600 mt-2">Manage your fourth level subcategories</p>
             </div>
             <Link
-              to="/admin/subcategories-4/add"
+              to="/superboss-admin/subcategories-4/add"
               className="bg-lime-500 hover:bg-lime-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors duration-200"
             >
               <Plus size={20} />

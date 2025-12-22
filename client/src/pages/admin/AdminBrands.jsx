@@ -217,7 +217,7 @@ const AdminBrands = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Manage Brands</h1>
           <Link
-            to="/admin/add-brand"
+            to="/superboss-admin/add-brand"
             className="bg-lime-500 hover:bg-lime-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
             Add New Brand

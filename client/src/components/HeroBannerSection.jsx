@@ -3,57 +3,73 @@
 import { Link } from "react-router-dom"
 import BannerSlider from "./BannerSlider"
 
-const HeroBannerSection = ({ banners, deviceType }) => {
+const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
   // Filter banners based on device type
   const filteredBanners = banners?.filter(
     (banner) => banner.deviceType && banner.deviceType.toLowerCase() === deviceType?.toLowerCase()
   ) || []
 
-  // Static banner images - update these paths as needed
-  const leftBannerImage = "/tabby.png"
-  const rightBannerImage = "/tamara.png"
+  // Get the first banner card for right side (or use default)
+  const rightBannerCard = bannerCards && bannerCards.length > 0 ? bannerCards[0] : null
   
-  // Optional: Add links for static banners (set to null or "" if no link needed)
-  const leftBannerLink = null
-  const rightBannerLink = null
+  // Default right banner image if no banner card
+  const defaultRightBannerImage = "/tamara.png"
+  
+  // Render right side static banner
+  const renderRightBanner = () => {
+    if (rightBannerCard) {
+      const imageSrc = rightBannerCard.image?.startsWith('http') 
+        ? rightBannerCard.image 
+        : `${import.meta.env.VITE_API_URL || ''}${rightBannerCard.image}`
+      
+      const content = (
+        <div className="w-full h-full overflow-hidden rounded-xl">
+          <img
+            src={imageSrc}
+            alt={rightBannerCard.title || "Promotional Banner"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )
 
-  // Render a side banner (left or right)
-  const renderSideBanner = (imageSrc, link, position) => {
-    const content = (
-      <div className="relative w-full h-full overflow-hidden rounded-lg group">
+      // Check if banner card has a valid link
+      if (rightBannerCard.link && rightBannerCard.link.trim() !== "") {
+        const link = rightBannerCard.link.trim()
+        const isExternal = link.startsWith("http://") || link.startsWith("https://")
+
+        if (isExternal) {
+          return (
+            <a 
+              href={link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block w-full h-full cursor-pointer hover:opacity-95 transition-opacity"
+            >
+              {content}
+            </a>
+          )
+        } else {
+          return (
+            <Link to={link} className="block w-full h-full cursor-pointer hover:opacity-95 transition-opacity">
+              {content}
+            </Link>
+          )
+        }
+      }
+
+      return content
+    }
+
+    // Default static banner
+    return (
+      <div className="w-full h-full overflow-hidden rounded-xl">
         <img
-          src={imageSrc}
-          alt={`${position} Banner`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          src={defaultRightBannerImage}
+          alt="Promotional Banner"
+          className="w-full h-full object-cover"
         />
       </div>
     )
-
-    // Check if banner has a valid link
-    if (link && link.trim() !== "") {
-      const isExternal = link.startsWith("http://") || link.startsWith("https://")
-
-      if (isExternal) {
-        return (
-          <a 
-            href={link} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block w-full h-full cursor-pointer"
-          >
-            {content}
-          </a>
-        )
-      } else {
-        return (
-          <Link to={link} className="block w-full h-full cursor-pointer">
-            {content}
-          </Link>
-        )
-      }
-    }
-
-    return content
   }
 
   // Mobile view - only show slider (no side banners)
@@ -63,23 +79,32 @@ const HeroBannerSection = ({ banners, deviceType }) => {
     )
   }
 
-  // Desktop view - show side banners + slider
+  // Desktop view - Left slider + Right static banner (fixed dimensions)
   return (
-    <section className="w-full">
-      <div className="flex gap-2 px-2 py-2 items-center">
-        {/* Left Static Banner */}
-        <div className="hidden lg:flex w-[220px] xl:w-[280px] flex-shrink-0 h-[200px] sm:h-[280px] md:h-[320px] lg:h-[350px]">
-          {renderSideBanner(leftBannerImage, leftBannerLink, "left")}
-        </div>
+    <section className="w-full py-4 px-4 lg:px-6">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex gap-4 items-stretch" style={{ height: '380px' }}>
+          {/* Left Banner Slider - Fixed width, takes remaining space */}
+          <div 
+            className="flex-1 min-w-0 overflow-hidden rounded-2xl"
+            style={{ 
+              minWidth: '0',
+              maxWidth: 'calc(100% - 340px)'
+            }}
+          >
+            <BannerSlider banners={filteredBanners} fixedHeight={380} />
+          </div>
 
-        {/* Middle Banner Slider */}
-        <div className="flex-1 min-w-0">
-          <BannerSlider banners={filteredBanners} />
-        </div>
-
-        {/* Right Static Banner */}
-        <div className="hidden lg:flex w-[220px] xl:w-[280px] flex-shrink-0 h-[200px] sm:h-[280px] md:h-[320px] lg:h-[350px]">
-          {renderSideBanner(rightBannerImage, rightBannerLink, "right")}
+          {/* Right Static Banner - Fixed 320px width */}
+          <div 
+            className="hidden lg:block flex-shrink-0 overflow-hidden"
+            style={{ 
+              width: '320px',
+              height: '380px'
+            }}
+          >
+            {renderRightBanner()}
+          </div>
         </div>
       </div>
     </section>

@@ -371,7 +371,7 @@ const OfferPages = () => {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-900">All Offer Pages</h1>
             <Link
-              to="/admin/offer-pages/add"
+              to="/superboss-admin/offer-pages/add"
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               <FaPlus /> Add Offer Page
@@ -400,7 +400,7 @@ const OfferPages = () => {
               <div className="text-center py-12">
                 <p className="text-gray-600">No offer pages found. Create your first offer page!</p>
                 <Link
-                  to="/admin/offer-pages/add"
+                  to="/superboss-admin/offer-pages/add"
                   className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   <FaPlus /> Add Offer Page

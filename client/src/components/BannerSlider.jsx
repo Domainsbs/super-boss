@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { getFullImageUrl } from "../utils/imageUtils"
 
-const BannerSlider = ({ banners }) => {
+const BannerSlider = ({ banners, fixedHeight }) => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
@@ -34,7 +34,10 @@ const BannerSlider = ({ banners }) => {
 
   if (!banners || banners.length === 0) {
     return (
-      <section className="relative bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 overflow-hidden h-[500px] flex items-center justify-center">
+      <section 
+        className="relative bg-gradient-to-r from-gray-900 via-purple-900 to-blue-900 overflow-hidden flex items-center justify-center rounded-2xl"
+        style={fixedHeight ? { height: `${fixedHeight}px` } : {}}
+      >
         <div className="text-white text-center">
           <h1 className="text-4xl font-bold mb-4">No Banners Available</h1>
           <p className="text-xl">Please add hero banners from admin panel</p>
@@ -52,10 +55,10 @@ const BannerSlider = ({ banners }) => {
         <img
           src={getFullImageUrl(currentBanner.image) || "/placeholder.svg"}
           alt={currentBanner.title || "Banner"}
-          className="w-full h-full cover"
+          className="w-full h-full object-cover"
         />
         {/* Optional subtle overlay for better navigation visibility */}
-        <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-5"></div>
       </>
     )
 
@@ -73,7 +76,7 @@ const BannerSlider = ({ banners }) => {
             href={link} 
             target="_blank" 
             rel="noopener noreferrer"
-            className="absolute inset-0 cover cursor-pointer"
+            className="absolute inset-0 cursor-pointer"
           >
             {content}
           </a>
@@ -82,7 +85,7 @@ const BannerSlider = ({ banners }) => {
         return (
           <Link 
             to={link} 
-            className="absolute inset-0 cover cursor-pointer"
+            className="absolute inset-0 cursor-pointer"
           >
             {content}
           </Link>
@@ -92,15 +95,24 @@ const BannerSlider = ({ banners }) => {
 
     // No link, just render the content
     return (
-      <div className="absolute inset-0 cover">
+      <div className="absolute inset-0">
         {content}
       </div>
     )
   }
 
+  // Determine height classes - use fixed height if provided, otherwise responsive
+  const heightStyle = fixedHeight 
+    ? { height: `${fixedHeight}px` } 
+    : {}
+  const heightClass = fixedHeight 
+    ? '' 
+    : 'h-[200px] sm:h-[280px] md:h-[320px] lg:h-[380px]'
+
   return (
     <section
-      className="relative w-full h-[200px] sm:h-[280px] md:h-[320px] lg:h-[350px] cover"
+      className={`relative w-full overflow-hidden rounded-2xl ${heightClass}`}
+      style={heightStyle}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -112,37 +124,35 @@ const BannerSlider = ({ banners }) => {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 p-3 bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full transition-all z-10 hidden sm:block"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-600 p-2 bg-white/80 hover:bg-white rounded-full transition-all z-10 shadow-lg"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 p-3 bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full transition-all z-10 hidden sm:block"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-600 p-2 bg-white/80 hover:bg-white rounded-full transition-all z-10 shadow-lg"
           >
             <ChevronRight size={24} />
           </button>
         </>
       )}
 
-
-
       {/* Slide Indicators */}
-      {/* {banners.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10 hidden sm:flex">
+      {banners.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
           {banners.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${index === currentSlide
-                ? "bg-white"
-                : "bg-white bg-opacity-50 hover:bg-opacity-75"
-                }`}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                index === currentSlide
+                  ? "bg-white w-6"
+                  : "bg-white/50 hover:bg-white/75"
+              }`}
             />
           ))}
         </div>
-      )} */}
-
+      )}
     </section>
   )
 }

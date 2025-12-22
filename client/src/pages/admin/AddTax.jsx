@@ -42,7 +42,7 @@ const AddTax = () => {
 
       if (response.ok) {
         showToast("Tax added successfully!", "success")
-        navigate("/admin/tax")
+        navigate("/superboss-admin/tax")
       } else {
         const error = await response.json()
         showToast(error.message || "Failed to add tax", "error")
@@ -63,7 +63,7 @@ const AddTax = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <button onClick={() => navigate("/admin/tax")} className="hover:text-blue-600">
+              <button onClick={() => navigate("/superboss-admin/tax")} className="hover:text-blue-600">
                 Tax
               </button>
               <span>/</span>
@@ -171,7 +171,7 @@ const AddTax = () => {
                 <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/tax")}
+                    onClick={() => navigate("/superboss-admin/tax")}
                     className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
                     Cancel

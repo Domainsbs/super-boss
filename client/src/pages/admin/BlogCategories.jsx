@@ -81,7 +81,7 @@ const BlogCategories = () => {
               <p className="text-gray-600 mt-2">Organize your blog posts with categories</p>
             </div>
             <Link
-              to="/admin/add-blog-category"
+              to="/superboss-admin/add-blog-category"
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus size={20} />
@@ -115,7 +115,7 @@ const BlogCategories = () => {
                   {searchTerm ? "Try adjusting your search terms" : "Get started by creating your first blog category"}
                 </p>
                 <Link
-                  to="/admin/add-blog-category"
+                  to="/superboss-admin/add-blog-category"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Plus size={16} />

@@ -251,7 +251,7 @@ const AdminDeliveryCharges = () => {
                         </div>
                         {!searchTerm && (
                           <Link
-                            to="/admin/delivery-charges/add"
+                            to="/superboss-admin/delivery-charges/add"
                             className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800"
                           >
                             <Plus size={16} className="mr-1" />

@@ -219,7 +219,7 @@ export default function CreateOrder() {
       const created = await adminAPI.createOrder(payload)
       // Success: navigate to new orders list
       alert(`Order created successfully. #${created?._id?.slice?.(-6) || ""}`)
-      navigate("/admin/orders/new")
+      navigate("/superboss-admin/orders/new")
     } catch (e) {
       console.error("[v0] create order error:", e)
       alert(e?.message || "Failed to create order")

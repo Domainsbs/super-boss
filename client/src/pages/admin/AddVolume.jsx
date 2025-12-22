@@ -41,7 +41,7 @@ const AddVolume = () => {
       })
 
       showToast("Volume added successfully!", "success")
-      navigate("/admin/volumes")
+      navigate("/superboss-admin/volumes")
     } catch (error) {
       console.error("Error adding volume:", error)
       showToast(error.response?.data?.message || "Failed to add volume", "error")
@@ -59,7 +59,7 @@ const AddVolume = () => {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <button
-                onClick={() => navigate("/admin/volumes")}
+                onClick={() => navigate("/superboss-admin/volumes")}
                 className="hover:text-blue-600 flex items-center gap-1"
               >
                 <ArrowLeft size={16} />
@@ -141,7 +141,7 @@ const AddVolume = () => {
               <div className="flex justify-end gap-4 pt-6">
                 <button
                   type="button"
-                  onClick={() => navigate("/admin/volumes")}
+                  onClick={() => navigate("/superboss-admin/volumes")}
                   className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel

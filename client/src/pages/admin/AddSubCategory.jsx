@@ -252,10 +252,10 @@ const AddSubCategory = () => {
       showToast("Sub Category added successfully!", "success")
       
       // Navigate to appropriate list page
-      if (level === 4) navigate("/admin/subcategories-4")
-      else if (level === 3) navigate("/admin/subcategories-3")
-      else if (level === 2) navigate("/admin/subcategories-2")
-      else navigate("/admin/subcategories")
+      if (level === 4) navigate("/superboss-admin/subcategories-4")
+      else if (level === 3) navigate("/superboss-admin/subcategories-3")
+      else if (level === 2) navigate("/superboss-admin/subcategories-2")
+      else navigate("/superboss-admin/subcategories")
     } catch (error) {
       console.error("Error adding subcategory:", error)
       showToast(error.response?.data?.message || "Failed to add subcategory", "error")
@@ -265,10 +265,10 @@ const AddSubCategory = () => {
   }
 
   const getBackPath = () => {
-    if (level === 4) return "/admin/subcategories-4"
-    if (level === 3) return "/admin/subcategories-3"
-    if (level === 2) return "/admin/subcategories-2"
-    return "/admin/subcategories"
+    if (level === 4) return "/superboss-admin/subcategories-4"
+    if (level === 3) return "/superboss-admin/subcategories-3"
+    if (level === 2) return "/superboss-admin/subcategories-2"
+    return "/superboss-admin/subcategories"
   }
 
   return (

@@ -704,8 +704,8 @@ const Navbar = () => {
   return (
     <>
       {/* Desktop Navbar - Hidden on Mobile */}
-      <header className="hidden md:block bg-blue-500 sticky top-0 z-50 w-full">
-        <div className="w-full max-w-[1920px] mx-auto">
+      <header className="hidden md:block  sticky top-0 z-50 ">
+        <div className="w-full bg-blue-500 max-w-[1920px] mx-auto">
           <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 h-16 xl:h-18 2xl:h-20">
             {/* Logo Placeholder */}
             <Link to="/" className="flex items-center space-x-2">

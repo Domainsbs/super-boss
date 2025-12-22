@@ -76,7 +76,7 @@ const AddOfferProduct = () => {
       })
     } catch (error) {
       showToast("Failed to load offer product for editing", "error")
-      navigate("/admin/offer-pages")
+      navigate("/superboss-admin/offer-pages")
     } finally {
       setLoading(false)
     }
@@ -147,7 +147,7 @@ const AddOfferProduct = () => {
           showToast(`${failCount} product(s) failed (may already exist)`, "warning")
         }
       }
-      navigate("/admin/offer-pages")
+      navigate("/superboss-admin/offer-pages")
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to save product",
@@ -166,7 +166,7 @@ const AddOfferProduct = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         showToast("Product removed successfully!", "success")
-        navigate("/admin/offer-pages")
+        navigate("/superboss-admin/offer-pages")
       } catch (error) {
         showToast("Failed to remove product", "error")
       }
@@ -185,7 +185,7 @@ const AddOfferProduct = () => {
         <div className="p-8">
           <div className="mb-6">
             <button
-              onClick={() => navigate("/admin/offer-pages")}
+              onClick={() => navigate("/superboss-admin/offer-pages")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
@@ -314,7 +314,7 @@ const AddOfferProduct = () => {
                 <div className="flex gap-4">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/offer-pages")}
+                    onClick={() => navigate("/superboss-admin/offer-pages")}
                     className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                     disabled={loading}
                   >

@@ -50,7 +50,7 @@ const AddOfferPage = () => {
       })
     } catch (error) {
       showToast("Failed to load offer page for editing", "error")
-      navigate("/admin/offer-pages")
+      navigate("/superboss-admin/offer-pages")
     } finally {
       setLoading(false)
     }
@@ -134,7 +134,7 @@ const AddOfferPage = () => {
         })
         showToast("Offer page created successfully!", "success")
       }
-      navigate("/admin/offer-pages")
+      navigate("/superboss-admin/offer-pages")
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to save offer page",
@@ -153,7 +153,7 @@ const AddOfferPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         showToast("Offer page deleted successfully!", "success")
-        navigate("/admin/offer-pages")
+        navigate("/superboss-admin/offer-pages")
       } catch (error) {
         showToast("Failed to delete offer page", "error")
       }
@@ -167,7 +167,7 @@ const AddOfferPage = () => {
         <div className="p-8">
           <div className="mb-6">
             <button
-              onClick={() => navigate("/admin/offer-pages")}
+              onClick={() => navigate("/superboss-admin/offer-pages")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
@@ -336,7 +336,7 @@ const AddOfferPage = () => {
                 <div className="flex gap-4">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/offer-pages")}
+                    onClick={() => navigate("/superboss-admin/offer-pages")}
                     className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                     disabled={loading}
                   >

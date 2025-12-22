@@ -55,7 +55,7 @@ const AddBrand = () => {
       })
     } catch (error) {
       showToast("Failed to load brand for editing", "error")
-      navigate("/admin/brands")
+      navigate("/superboss-admin/brands")
     } finally {
       setLoading(false)
     }
@@ -98,7 +98,7 @@ const AddBrand = () => {
         })
         showToast("Brand added successfully!", "success")
       }
-      navigate("/admin/brands")
+      navigate("/superboss-admin/brands")
     } catch (error) {
       showToast(error.response?.data?.message || "Failed to save brand", "error")
     } finally {
@@ -114,7 +114,7 @@ const AddBrand = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <button onClick={() => navigate("/admin/brands")} className="hover:text-blue-600 flex items-center gap-1">
+              <button onClick={() => navigate("/superboss-admin/brands")} className="hover:text-blue-600 flex items-center gap-1">
                 <ArrowLeft size={16} />
                 Brands
               </button>
@@ -178,7 +178,7 @@ const AddBrand = () => {
               <div className="flex justify-end gap-4 pt-6">
                 <button
                   type="button"
-                  onClick={() => navigate("/admin/brands")}
+                  onClick={() => navigate("/superboss-admin/brands")}
                   className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel

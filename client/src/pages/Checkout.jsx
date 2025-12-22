@@ -72,40 +72,39 @@ const STORES = [
 const PAYMENT_METHODS = [
   {
     id: "tamara",
-    name: "",
-    description: "",
-    iconUrls: [
-      { src: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764221/tamara_card_lh6vev.webp", size: "big" },
-    ],
-    color: "", // Remove background color
+    name: "Pay with Tamara",
+    description: "Split into 3 interest-free payments",
+    iconUrl: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764221/tamara_card_lh6vev.webp",
+    bgColor: "from-pink-100 via-purple-100 to-blue-100",
+    borderColor: "border-purple-200",
+    selectedBorder: "border-purple-500",
   },
   {
     id: "tabby",
-    name: "",
-    description: "",
-    iconUrls: [
-      { src: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764220/tabby_card_lpsmhh.webp", size: "big" },
-    ],
-    color: "", // Remove background color
+    name: "Pay with Tabby",
+    description: "Split into 4 interest-free payments",
+    iconUrl: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764220/tabby_card_lpsmhh.webp",
+    bgColor: "from-emerald-50 to-teal-100",
+    borderColor: "border-teal-200",
+    selectedBorder: "border-teal-500",
   },
   {
     id: "card",
-    name: "",
-    description: "",
-    iconUrls: [
-      {
-        src: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764222/master_visa_card_q9zo4b.webp",
-        size: "big",
-      },
-    ],
-    color: "", // Remove background color
+    name: "Pay by Card",
+    description: "Visa, Mastercard & more",
+    iconUrl: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764222/master_visa_card_q9zo4b.webp",
+    bgColor: "from-blue-900 to-blue-800",
+    borderColor: "border-blue-300",
+    selectedBorder: "border-blue-500",
   },
   {
     id: "cod",
-    name: "",
-    description: "",
-    iconUrls: [{ src: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764221/cash_qk1cws.webp", size: "big" }],
-    color: "", // Remove background color
+    name: "Cash on Delivery",
+    description: "Pay when you receive",
+    iconUrl: "https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757764221/cash_qk1cws.webp",
+    bgColor: "from-lime-300 to-green-400",
+    borderColor: "border-green-300",
+    selectedBorder: "border-green-500",
   },
 ]
 
@@ -1570,40 +1569,58 @@ const Checkout = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-6">Payment Method</h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+                  {/* Payment Methods List */}
+                  <div className="space-y-3 mb-6">
                     {PAYMENT_METHODS.map((method) => (
                       <div
                         key={method.id}
-                        className={` rounded-lg p-4 cursor-pointer transition-all relative ${selectedPaymentMethod === method.id
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300 bg-white"
-                          }`}
+                        className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                          selectedPaymentMethod === method.id
+                            ? `${method.selectedBorder} bg-gray-50 shadow-md`
+                            : `${method.borderColor} bg-white hover:border-gray-400 hover:shadow-sm`
+                        }`}
                         onClick={() => handlePaymentMethodSelect(method.id)}
                       >
-                        {/* Radio button positioned at top-left corner */}
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method.id}
-                          checked={selectedPaymentMethod === method.id}
-                          onChange={() => setSelectedPaymentMethod(method.id)}
-                          className="absolute top-20 left-16 accent-blue-500 w-4 h-4"
-                        />
-
-                        {/* Image container centered */}
-                        <div className="flex items-center justify-center pt-2">
-                          <div className="flex gap-2 flex-wrap justify-center">
-                            {method.iconUrls.map((icon, idx) => (
-                              <img
-                                key={idx}
-                                src={icon.src || "/placeholder.svg"}
-                                alt={method.name}
-                                className={`w-60 h-48 md:w-60 md:h-36 object-contain rounded-lg transition-all ${selectedPaymentMethod === method.id ? " border-blue-500" : " border-gray-200"
-                                  }`}
-                              />
-                            ))}
+                        {/* Radio Button */}
+                        <div className="flex-shrink-0">
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            selectedPaymentMethod === method.id
+                              ? 'border-blue-500 bg-blue-500'
+                              : 'border-gray-300'
+                          }`}>
+                            {selectedPaymentMethod === method.id && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
                           </div>
                         </div>
+
+                        {/* Small Icon */}
+                        <div className={`w-16 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br ${method.bgColor} flex items-center justify-center p-1`}>
+                          <img
+                            src={method.iconUrl || "/placeholder.svg"}
+                            alt={method.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-semibold text-gray-900 ${
+                            selectedPaymentMethod === method.id ? 'text-blue-600' : ''
+                          }`}>
+                            {method.name}
+                          </h4>
+                          <p className="text-sm text-gray-500">{method.description}</p>
+                        </div>
+
+                        {/* Checkmark for selected */}
+                        {selectedPaymentMethod === method.id && (
+                          <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

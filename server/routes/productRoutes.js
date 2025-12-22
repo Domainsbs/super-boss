@@ -785,7 +785,13 @@ router.post(
   protect,
   admin,
   asyncHandler(async (req, res) => {
-    const { parentCategory, category, subCategory2, subCategory3, subCategory4, ...productData } = req.body
+    const { parentCategory, category: rawCategory, subCategory2: rawSubCategory2, subCategory3: rawSubCategory3, subCategory4: rawSubCategory4, ...productData } = req.body
+
+    // Convert empty strings to undefined for ObjectId fields
+    const category = rawCategory && rawCategory.trim() !== "" ? rawCategory : undefined
+    const subCategory2 = rawSubCategory2 && rawSubCategory2.trim() !== "" ? rawSubCategory2 : undefined
+    const subCategory3 = rawSubCategory3 && rawSubCategory3.trim() !== "" ? rawSubCategory3 : undefined
+    const subCategory4 = rawSubCategory4 && rawSubCategory4.trim() !== "" ? rawSubCategory4 : undefined
 
     // Verify parentCategory exists
     if (parentCategory) {
@@ -970,7 +976,13 @@ router.put(
     const product = await Product.findById(req.params.id)
 
     if (product) {
-      const { parentCategory, category, subCategory2, subCategory3, subCategory4, slug, ...updateData } = req.body
+      const { parentCategory, category: rawCategory, subCategory2: rawSubCategory2, subCategory3: rawSubCategory3, subCategory4: rawSubCategory4, slug, ...updateData } = req.body
+
+      // Convert empty strings to undefined for ObjectId fields
+      const category = rawCategory && rawCategory.trim() !== "" ? rawCategory : undefined
+      const subCategory2 = rawSubCategory2 && rawSubCategory2.trim() !== "" ? rawSubCategory2 : undefined
+      const subCategory3 = rawSubCategory3 && rawSubCategory3.trim() !== "" ? rawSubCategory3 : undefined
+      const subCategory4 = rawSubCategory4 && rawSubCategory4.trim() !== "" ? rawSubCategory4 : undefined
 
       // Verify parentCategory exists if provided
       if (parentCategory) {

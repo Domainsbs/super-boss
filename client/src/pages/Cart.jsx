@@ -2,7 +2,11 @@
 
 import { Link } from "react-router-dom"
 import { useCart } from "../context/CartContext"
-import { Trash2, Minus, Plus, ShoppingBag, Package, X, Percent, Gift, Shield } from "lucide-react"
+import { 
+  Trash2, Minus, Plus, ShoppingBag, Package, X, Percent, Gift, Shield,
+  ShoppingCart, Sparkles, Truck, Tag, ArrowRight, Check, ChevronRight,
+  CreditCard, Lock, BadgePercent, Clock
+} from "lucide-react"
 import { useEffect, useState, useMemo } from "react"
 import axios from "axios"
 import { getFullImageUrl } from "../utils/imageUtils"
@@ -312,96 +316,88 @@ const Cart = () => {
     const itemTotal = getItemTotal(item)
     
     return (
-      <li key={`${item._id}-${bundleId || 'standalone'}`} className="p-3">
+      <li key={`${item._id}-${bundleId || 'standalone'}`} className="group">
         {/* Mobile Card */}
-        <div className="block sm:hidden">
-          <div className="flex flex-row items-center mb-3">
-            <div className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-md bg-white">
-              <img src={getFullImageUrl(item.image) || "/placeholder.svg"} alt={item.name} className="w-full h-full object-contain" />
-            </div>
-            <div className="flex-1 ml-4">
-              <h3 className="text-base font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                {item.name.length > 30 ? item.name.slice(0, 25) + "..." : item.name}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">{item.brand?.name || 'N/A'}</p>
-              {item.selectedColorData && (
-                <p className="mt-1 text-xs text-purple-600 font-medium flex items-center">
-                  <span className="inline-block w-3 h-3 rounded-full mr-1" style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}></span>
-                  Color: {item.selectedColorData.color}
-                </p>
-              )}
-              {item.selectedDosData && (
-                <p className="mt-1 text-xs text-blue-600 font-medium flex items-center">
-                  💻 OS: {item.selectedDosData.dosType}
-                </p>
-              )}
-              {isInBundle && (
-                <p className="mt-1 text-xs text-blue-600 font-medium">
-                  {item.bundleDiscount ? "Bundle Item (25% OFF)" : "Bundle Item"}
-                </p>
-              )}
-            </div>
-          </div>
-          
-          {/* Pricing Details */}
-          <div className="mb-3 p-2 bg-gray-50 rounded">
-            {pricingDetails.hasDiscount ? (
-              <>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Original Price:</span>
-                  <span className="line-through text-gray-500">{formatPrice(pricingDetails.basePrice)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Our Price:</span>
-                  <span className="text-red-600 font-medium">{formatPrice(pricingDetails.currentPrice)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-green-600">You Save:</span>
-                  <span className="text-green-600 font-medium">
-                    {formatPrice(pricingDetails.savings)} ({pricingDetails.discountPercentage}%)
-                    {pricingDetails.isBundleDiscount && " (Bundle Discount)"}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Price:</span>
-                <span className="text-red-600 font-medium">{formatPrice(pricingDetails.currentPrice)}</span>
+        <div className="block sm:hidden p-4">
+          <div className="flex gap-4">
+            {/* Product Image */}
+            <div className="relative w-24 h-24 flex-shrink-0">
+              <div className="w-full h-full bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                <img 
+                  src={getFullImageUrl(item.image) || "/placeholder.svg"} 
+                  alt={item.name} 
+                  className="w-full h-full object-contain p-2" 
+                />
               </div>
-            )}
+              {pricingDetails.hasDiscount && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
+                  -{pricingDetails.discountPercentage}%
+                </span>
+              )}
+            </div>
+
+            {/* Product Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
+                {item.name}
+              </h3>
+              <p className="text-xs text-gray-500 mb-2">{item.brand?.name || 'N/A'}</p>
+              
+              {item.selectedColorData && (
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span 
+                    className="w-3 h-3 rounded-full border border-gray-200" 
+                    style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}
+                  ></span>
+                  <span className="text-xs text-gray-600">{item.selectedColorData.color}</span>
+                </div>
+              )}
+              
+              {item.selectedDosData && (
+                <p className="text-xs text-blue-600 mb-1">💻 {item.selectedDosData.dosType}</p>
+              )}
+              
+              {isInBundle && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                  <Package size={10} />
+                  Bundle Item {item.bundleDiscount && "(25% OFF)"}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex items-center border rounded-md w-max">
+          {/* Price & Actions Row */}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            {/* Quantity */}
+            <div className="flex items-center bg-gray-100 rounded-lg">
               <button
                 onClick={() => handleQuantityChange(item._id, item.quantity - 1, bundleId)}
-                className="px-3 py-1 text-gray-600 hover:text-blue-600"
+                className="p-2 text-gray-600 hover:text-blue-600 disabled:opacity-40"
                 disabled={item.quantity === 1}
               >
-                <Minus size={16} />
+                <Minus size={14} />
               </button>
-              <span className="px-4 py-1 border-l border-r">{item.quantity}</span>
+              <span className="px-3 text-sm font-semibold">{item.quantity}</span>
               <button
                 onClick={() => handleQuantityChange(item._id, item.quantity + 1, bundleId)}
-                className="px-3 py-1 text-gray-600 hover:text-blue-600"
+                className="p-2 text-gray-600 hover:text-blue-600"
               >
-                <Plus size={16} />
+                <Plus size={14} />
               </button>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-gray-900">
-                {formatPrice(itemTotal)}
-              </p>
+
+            {/* Price */}
+            <div className="text-right">
+              <p className="text-lg font-bold text-gray-900">{formatPrice(itemTotal)}</p>
               {pricingDetails.hasDiscount && (
-                <p className="text-xs text-green-600">
-                  Save {formatPrice(pricingDetails.savings * item.quantity)}
-                </p>
+                <p className="text-xs text-gray-400 line-through">{formatPrice(pricingDetails.basePrice * item.quantity)}</p>
               )}
             </div>
+
+            {/* Delete */}
             <button
               onClick={() => isInBundle ? removeItemFromBundle(item._id, bundleId) : removeFromCart(item._id)}
-              className="text-red-500 hover:text-red-700 flex items-center justify-center"
-              title={isInBundle ? "Remove entire bundle" : "Remove from cart"}
+              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
             >
               <Trash2 size={18} />
             </button>
@@ -409,104 +405,114 @@ const Cart = () => {
         </div>
 
         {/* Desktop Card */}
-        <div className="hidden sm:flex flex-col sm:flex-row">
-          <div className="sm:w-40 sm:h-26 flex-shrink-0 overflow-hidden rounded-md mb-4 sm:mb-0">
-            <img
-              src={getFullImageUrl(item.image) || "/placeholder.svg"}
-              alt={item.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="sm:ml-8 flex-1">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="text-lg font-medium text-gray-900 mb-1">
-                  {item.name.length > 60 ? item.name.slice(0, 60) + "..." : item.name}
-                </h3>
-                <p className="text-sm text-gray-500 mb-1">{item.brand?.name || 'N/A'}</p>
-                {item.selectedColorData && (
-                  <p className="text-sm text-purple-600 font-medium mb-1 flex items-center">
-                    <span className="inline-block w-4 h-4 rounded-full mr-2 border border-gray-300" style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}></span>
-                    Color: {item.selectedColorData.color}
-                    {item.selectedColorData.sku && <span className="ml-2 text-xs text-gray-500">({item.selectedColorData.sku})</span>}
-                  </p>
-                )}
-                {item.selectedDosData && (
-                  <p className="text-sm text-blue-600 font-medium mb-1 flex items-center">
-                    💻 OS: {item.selectedDosData.dosType}
-                    {item.selectedDosData.sku && <span className="ml-2 text-xs text-gray-500">({item.selectedDosData.sku})</span>}
-                  </p>
-                )}
-                {isInBundle && (
-                  <p className="text-xs text-blue-600 font-medium mb-2">
-                    {item.bundleDiscount ? "Bundle Item (25% OFF)" : "Bundle Item"}
-                  </p>
-                )}
-                
-                {/* Pricing Details */}
-                <div className="bg-gray-50 p-3 rounded mb-3 max-w-xl">
-                  {pricingDetails.hasDiscount ? (
-                    <>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Original Price:</span>
-                        <span className="line-through text-gray-500">{formatPrice(pricingDetails.basePrice)}</span>
+        <div className="hidden sm:block p-5 hover:bg-gray-50/50 transition-colors">
+          <div className="flex gap-6">
+            {/* Product Image */}
+            <div className="relative flex-shrink-0">
+              <div className="w-28 h-28 bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm group-hover:shadow-md transition-shadow">
+                <img
+                  src={getFullImageUrl(item.image) || "/placeholder.svg"}
+                  alt={item.name}
+                  className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
+                />
+              </div>
+              {pricingDetails.hasDiscount && (
+                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                  -{pricingDetails.discountPercentage}%
+                </span>
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-2">{item.brand?.name || 'N/A'}</p>
+                  
+                  <div className="flex flex-wrap items-center gap-3">
+                    {item.selectedColorData && (
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 rounded-full">
+                        <span 
+                          className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm" 
+                          style={{backgroundColor: item.selectedColorData.color?.toLowerCase() || '#9333ea'}}
+                        ></span>
+                        <span className="text-xs font-medium text-gray-700">{item.selectedColorData.color}</span>
                       </div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Our Price:</span>
-                        <span className="text-red-600 font-medium">{formatPrice(pricingDetails.currentPrice)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-green-600">You Save:</span>
-                        <span className="text-green-600 font-medium">
-                          {formatPrice(pricingDetails.savings)} ({pricingDetails.discountPercentage}%)
-                          {pricingDetails.isBundleDiscount && " (Bundle Discount)"}
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Price:</span>
-                      <span className="text-red-600 font-medium">{formatPrice(pricingDetails.currentPrice)}</span>
-                    </div>
+                    )}
+                    
+                    {item.selectedDosData && (
+                      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                        💻 {item.selectedDosData.dosType}
+                      </span>
+                    )}
+                    
+                    {isInBundle && (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
+                        <Package size={12} />
+                        Bundle {item.bundleDiscount && "• 25% OFF"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => isInBundle ? removeItemFromBundle(item._id, bundleId) : removeFromCart(item._id)}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                  title={isInBundle ? "Remove bundle" : "Remove item"}
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+              
+              {/* Price, Quantity & Total Row */}
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                {/* Unit Price */}
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5">Unit Price</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-900">{formatPrice(pricingDetails.currentPrice)}</span>
+                    {pricingDetails.hasDiscount && (
+                      <span className="text-xs text-gray-400 line-through">{formatPrice(pricingDetails.basePrice)}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5 text-center">Quantity</p>
+                  <div className="flex items-center bg-gray-100 rounded-lg">
+                    <button
+                      onClick={() => handleQuantityChange(item._id, item.quantity - 1, bundleId)}
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-200 rounded-l-lg transition-colors disabled:opacity-40"
+                      disabled={item.quantity === 1}
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="px-4 text-sm font-bold">{item.quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(item._id, item.quantity + 1, bundleId)}
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-200 rounded-r-lg transition-colors"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                  <p className="text-lg font-bold text-gray-900">{formatPrice(itemTotal)}</p>
+                  {pricingDetails.hasDiscount && (
+                    <p className="text-xs text-green-600 font-medium">
+                      Save {formatPrice(pricingDetails.savings * item.quantity)}
+                    </p>
                   )}
                 </div>
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="flex items-center border rounded-md">
-                <button
-                  onClick={() => handleQuantityChange(item._id, item.quantity - 1, bundleId)}
-                  className="px-3 py-1 text-gray-600 hover:text-blue-600"
-                  disabled={item.quantity === 1}
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="px-4 py-1 border-l border-r">{item.quantity}</span>
-                <button
-                  onClick={() => handleQuantityChange(item._id, item.quantity + 1, bundleId)}
-                  className="px-3 py-1 text-gray-600 hover:text-blue-600"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              <div className="text-right ml-4">
-                <p className="text-xl font-bold text-gray-900">
-                  {formatPrice(itemTotal)}
-                </p>
-                {pricingDetails.hasDiscount && (
-                  <p className="text-sm text-green-600 font-medium">
-                    Total Save: {formatPrice(pricingDetails.savings * item.quantity)}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() => isInBundle ? removeItemFromBundle(item._id, bundleId) : removeFromCart(item._id)}
-                className="text-red-500 hover:text-red-700 flex items-center"
-                title={isInBundle ? "Remove entire bundle" : "Remove from cart"}
-              >
-                <Trash2 size={18} className="mr-2" />
-              </button>
             </div>
           </div>
         </div>
@@ -515,134 +521,235 @@ const Cart = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
-        <div className="flex space-x-3">
-          <button
-            onClick={handleOpenCouponsModal}
-            className="px-2 py-2 lg:px-5 lg:py-2 text-sm font-medium text-black bg-yellow-400 hover:bg-yellow-500 rounded-md transition-colors flex items-center"
-          >
-            <Gift size={16} className="mr-2" />
-            Available Coupons
-          </button>
-          <Link to="/" className="px-2 py-2 lg:px-5 lg:py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors">
-            Continue Shopping
-          </Link>
-        </div>
-      </div>
-      
-      {cartItems.length === 0 ? (
-        <div className="text-center py-12">
-          <ShoppingBag size={64} className="mx-auto text-gray-300 mb-4" />
-          <h2 className="text-xl font-medium text-gray-900 mb-2">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
-          <Link to="/" className="btn-primary">
-            Continue Shopping
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2">
-            {/* Render Bundles First */}
-            {Object.values(grouped).map((bundle) => {
-              const bundleTotals = calculateBundleTotals(bundle.items)
-              
-              return (
-                <div key={bundle.bundleId} className="bg-white rounded-lg shadow-sm border-2 border-blue-200 mb-6">
-                  {/* Bundle Header */}
-                  <div className="bg-blue-50 px-6 py-3 border-b border-blue-200">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <Package className="text-blue-600 mr-2" size={20} />
-                        <h3 className="text-lg font-semibold text-blue-800">Frequently Bought Together</h3>
-                      </div>
-                      <button
-                        onClick={() => removeBundleFromCart(bundle.bundleId)}
-                        className="text-red-500 hover:text-red-700 text-sm flex items-center"
-                        title="Remove entire bundle"
-                      >
-                        <Trash2 size={16} className="mr-1" />
-                        Remove Bundle
-                      </button>
-                    </div>
-                    <div className="text-sm text-blue-600 mt-1">
-                      Bundle Total: {formatPrice(bundleTotals.total)} | You Save: {formatPrice(bundleTotals.savings)}
-                    </div>
-                    <div className="text-xs text-blue-700 mt-1">
-                      ⓘ Removing any item will remove the entire bundle
-                    </div>
-                  </div>
-
-                  {/* Bundle Items */}
-                  <ul className="divide-y divide-gray-200">
-                    {bundle.items.map((item) => renderItem(item, true, bundle.bundleId))}
-                  </ul>
-                </div>
-              )
-            })}
-
-            {/* Render Standalone Items (excluding protections) */}
-            {filteredStandaloneItems.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {Object.keys(grouped).length > 0 && (
-                  <div className="bg-gray-50 px-6 py-3 border-b">
-                    <h3 className="text-lg font-semibold text-gray-800">Individual Items</h3>
-                  </div>
-                )}
-                <ul className="divide-y divide-gray-200">
-                  {filteredStandaloneItems.map((item) => renderItem(item, false, null))}
-                </ul>
-              </div>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      {/* Hero Header */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8">
+        <div className="relative bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 overflow-hidden rounded-2xl sm:rounded-3xl">
+          {/* Decorative Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-blue-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+            <div className="absolute bottom-0 left-0 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md shadow-blue-500/30 p-6 border border-blue-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
+          <div className="relative px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-white/10 backdrop-blur-xl rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/20">
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">Shopping Cart</h1>
+                  <p className="text-blue-100 text-xs sm:text-sm">
+                    {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+                <button
+                  onClick={handleOpenCouponsModal}
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  <Gift size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <span className="hidden xs:inline sm:hidden lg:inline">Available</span> Coupons
+                </button>
+                <Link 
+                  to="/" 
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/10 backdrop-blur hover:bg-white/20 text-white rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-all border border-white/20"
+                >
+                  <Sparkles size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <span className="hidden xs:inline">Continue</span> Shopping
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div className="space-y-4">
-                {/* Detailed Price Breakdown */}
-                {cartTotals.totalSavings > 0 && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Original Price</span>
-                      <span className="text-gray-500 line-through">{formatPrice(cartTotals.totalBasePrice)}</span>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        {cartItems.length === 0 ? (
+          /* Empty Cart State */
+          <div className="text-center py-16 sm:py-24">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
+            </p>
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              <Sparkles size={20} />
+              Start Shopping
+              <ArrowRight size={20} />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Cart Items Column */}
+            <div className="xl:col-span-2 space-y-6">
+              {/* Free Shipping Progress */}
+              {cartTotals.totalCurrentPrice < 500 && cartTotals.totalCurrentPrice > 0 && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <Truck className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Discounted Price</span>
-                      <span className="text-red-600 font-medium">{formatPrice(cartTotals.totalCurrentPrice)}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-900">
+                        Add {formatPrice(500 - cartTotals.totalCurrentPrice)} more for FREE shipping!
+                      </p>
+                      <p className="text-xs text-gray-500">Free express delivery on orders over AED 500</p>
                     </div>
-                    <div className="flex justify-between text-green-600">
-                      <span className="font-medium">Total Savings</span>
-                      <span className="font-medium">- {formatPrice(cartTotals.totalSavings)}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((cartTotals.totalCurrentPrice / 500) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
+              {cartTotals.totalCurrentPrice >= 500 && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                      <Check className="w-5 h-5 text-green-600" />
                     </div>
-                    <div className="border-t pt-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Subtotal</span>
-                        <span className="text-black font-medium">{formatPrice(cartTotals.totalCurrentPrice)}</span>
+                    <div>
+                      <p className="text-sm font-semibold text-green-800">🎉 You qualify for FREE shipping!</p>
+                      <p className="text-xs text-green-600">Enjoy free express delivery on this order</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bundles Section */}
+              {Object.values(grouped).map((bundle) => {
+                const bundleTotals = calculateBundleTotals(bundle.items)
+                
+                return (
+                  <div key={bundle.bundleId} className="bg-white rounded-2xl shadow-sm border border-blue-200 overflow-hidden">
+                    {/* Bundle Header */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-blue-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <Package className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Frequently Bought Together</h3>
+                            <p className="text-xs text-blue-600">
+                              Save {formatPrice(bundleTotals.savings)} on this bundle
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeBundleFromCart(bundle.bundleId)}
+                          className="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={14} />
+                          Remove Bundle
+                        </button>
                       </div>
                     </div>
-                  </>
-                )}
-                
-                {/* Simple subtotal when no discounts */}
-                {cartTotals.totalSavings <= 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="text-black">{formatPrice(cartTotals.totalCurrentPrice)}</span>
-                  </div>
-                )}
 
-                {/* Delivery Options */}
-                {cartTotals.totalCurrentPrice <= 500 && (
-                  <div className="mb-2">
-                    <span className="text-gray-600 block mb-1">Delivery Options</span>
-                    {deliveryOptions.length > 0 ? (
+                    {/* Bundle Items */}
+                    <ul className="divide-y divide-gray-100">
+                      {bundle.items.map((item) => renderItem(item, true, bundle.bundleId))}
+                    </ul>
+
+                    {/* Bundle Footer */}
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Bundle Total:</span>
+                        <div className="text-right">
+                          <span className="text-lg font-bold text-gray-900">{formatPrice(bundleTotals.total)}</span>
+                          {bundleTotals.savings > 0 && (
+                            <span className="ml-2 text-sm text-green-600 font-medium">
+                              (Save {formatPrice(bundleTotals.savings)})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Standalone Items */}
+              {filteredStandaloneItems.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {Object.keys(grouped).length > 0 && (
+                    <div className="px-6 py-4 border-b border-gray-100">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                        <ShoppingBag size={18} className="text-gray-400" />
+                        Individual Items
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full ml-2">
+                          {filteredStandaloneItems.length}
+                        </span>
+                      </h3>
+                    </div>
+                  )}
+                  <ul className="divide-y divide-gray-100">
+                    {filteredStandaloneItems.map((item) => renderItem(item, false, null))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Order Summary Column */}
+            <div className="xl:col-span-1">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-4">
+                {/* Summary Header */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <CreditCard size={20} className="text-gray-400" />
+                    Order Summary
+                  </h2>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  {/* Price Breakdown */}
+                  {cartTotals.totalSavings > 0 && (
+                    <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <BadgePercent size={18} className="text-green-600" />
+                        <span className="text-sm font-semibold text-green-800">Your Savings</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Original Price</span>
+                          <span className="text-gray-400 line-through">{formatPrice(cartTotals.totalBasePrice)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Discounted Price</span>
+                          <span className="text-gray-900 font-medium">{formatPrice(cartTotals.totalCurrentPrice)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm pt-2 border-t border-green-200">
+                          <span className="text-green-700 font-semibold">Total Saved</span>
+                          <span className="text-green-700 font-bold">-{formatPrice(cartTotals.totalSavings)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Subtotal */}
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(cartTotals.totalCurrentPrice)}</span>
+                  </div>
+
+                  {/* Delivery */}
+                  {cartTotals.totalCurrentPrice <= 500 && deliveryOptions.length > 0 && (
+                    <div className="py-3 border-b border-gray-100">
+                      <label className="text-sm text-gray-600 mb-2 block">Delivery Option</label>
                       <select
-                        className="w-full border rounded px-2 py-1"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         value={selectedDelivery?._id || ""}
                         onChange={e => {
                           const found = deliveryOptions.find(opt => opt._id === e.target.value)
@@ -655,272 +762,279 @@ const Cart = () => {
                           </option>
                         ))}
                       </select>
-                    ) : (
-                      <span className="text-gray-500">No delivery options</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-gray-600 flex items-center gap-2">
+                      <Truck size={16} />
+                      Shipping
+                    </span>
+                    <span className={`font-semibold ${deliveryCharge === 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                      {deliveryCharge === 0 ? 'FREE' : formatPrice(deliveryCharge)}
+                    </span>
+                  </div>
+
+                  {/* Protection Plans */}
+                  {protectionItems.length > 0 && (
+                    <div className="py-3 border-b border-gray-100">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Shield size={16} className="text-blue-600" />
+                        <span className="text-sm font-semibold text-gray-900">Protection Plans</span>
+                      </div>
+                      <div className="space-y-2">
+                        {protectionItems.map((item) => (
+                          <div key={item._id} className="flex items-center justify-between bg-blue-50 p-3 rounded-xl">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-900 truncate">{item.protectionData?.name || item.name}</p>
+                              <p className="text-[10px] text-gray-500">{item.protectionData?.duration}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-gray-900">{formatPrice(item.price)}</span>
+                              <button
+                                onClick={() => removeFromCart(item._id)}
+                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VAT Note */}
+                  <div className="flex justify-between items-center py-2 text-sm">
+                    <span className="text-gray-500">VAT Included</span>
+                    <Check size={16} className="text-green-500" />
+                  </div>
+
+                  {/* Coupon */}
+                  <div className="py-3 border-t border-gray-100">
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <Tag size={14} />
+                      Coupon Code
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Enter code"
+                        value={coupon ? coupon.code : couponInput}
+                        onChange={e => setCouponInput(e.target.value)}
+                        disabled={!!coupon}
+                      />
+                      {!coupon ? (
+                        <button
+                          className="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponInput}
+                        >
+                          {couponLoading ? "..." : "Apply"}
+                        </button>
+                      ) : (
+                        <button
+                          className="px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors"
+                          onClick={() => {
+                            setCoupon(null);
+                            setCouponDiscount(0);
+                            setCouponInput("");
+                          }}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    {couponError && <p className="text-red-500 text-xs mt-2">{couponError}</p>}
+                    {coupon && (
+                      <div className="flex justify-between items-center mt-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                        <span className="text-sm text-green-700 font-medium">Coupon: {coupon.code}</span>
+                        <span className="text-sm text-green-700 font-bold">-{formatPrice(couponDiscount)}</span>
+                      </div>
                     )}
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="text-gray-900">{deliveryCharge === 0 ? 'Free' : formatPrice(deliveryCharge)}</span>
-                </div>
 
-                {/* Protection Plans Section */}
-                {protectionItems.length > 0 && (
-                  <div className="border-t pt-4">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Protection Plans</h3>
-                    <div className="space-y-2">
-                      {protectionItems.map((item) => (
-                        <div key={item._id} className="flex items-start justify-between bg-blue-50 p-3 rounded-lg border border-blue-200">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Shield size={16} className="text-blue-600" />
-                              <p className="text-sm font-medium text-gray-900">{item.protectionData?.name || item.name}</p>
-                            </div>
-                            <p className="text-xs text-gray-600 ml-6">
-                              {item.protectionData?.duration} - For: {item.name.split(' for ')[1] || 'Product'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-semibold text-red-600">{formatPrice(item.price)}</span>
-                            <button
-                              onClick={() => removeFromCart(item._id)}
-                              className="text-red-500 hover:text-red-700 p-1"
-                              title="Remove protection"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                  {/* Total */}
+                  <div className="pt-4 border-t-2 border-dashed border-gray-200">
+                    <div className="flex justify-between items-center mb-6">
+                      <span className="text-lg font-bold text-gray-900">Total</span>
+                      <span className="text-2xl font-bold text-blue-600">{formatPrice(totalWithDeliveryTaxCoupon)}</span>
+                    </div>
+
+                    {/* Terms */}
+                    <label className="flex items-start gap-3 text-sm text-gray-600 mb-4 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500" 
+                        defaultChecked 
+                      />
+                      <span>
+                        I agree to the{' '}
+                        <Link to="/terms" className="text-blue-600 hover:underline">Terms of Use</Link>
+                        {' '}&{' '}
+                        <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+                      </span>
+                    </label>
+
+                    {/* Checkout Button */}
+                    <Link
+                      to="/checkout"
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                      <Lock size={18} />
+                      Secure Checkout
+                      <ChevronRight size={18} />
+                    </Link>
+
+                    {/* Trust Badges */}
+                    <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Lock size={12} />
+                        <span>Secure</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Shield size={12} />
+                        <span>Protected</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Truck size={12} />
+                        <span>Fast Delivery</span>
+                      </div>
                     </div>
                   </div>
-                )}
-
-                {/* VAT included note */}
-                <div className="flex justify-between">
-                  <span className="text-gray-600 text-sm">VAT Included</span>
-                  <span className="text-gray-600 text-sm">✓</span>
                 </div>
-
-                {/* Coupon */}
-                <div className="flex items-center gap-2 mt-2">
-                  <input
-                    type="text"
-                    className="border rounded px-2 py-1 flex-1"
-                    placeholder="Enter coupon code"
-                    value={coupon ? coupon.code : couponInput}
-                    onChange={e => setCouponInput(e.target.value)}
-                    disabled={!!coupon}
-                  />
-                  {!coupon ? (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50 transition-colors"
-                      onClick={handleApplyCoupon}
-                      disabled={couponLoading || !couponInput}
-                    >
-                      {couponLoading ? "Applying..." : "Apply"}
-                    </button>
-                  ) : (
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                      onClick={() => {
-                        setCoupon(null);
-                        setCouponDiscount(0);
-                        setCouponInput("");
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                {couponError && <div className="text-red-500 text-xs mt-1">{couponError}</div>}
-                {coupon && (
-                  <div className="flex justify-between text-green-600 text-sm">
-                    <span>Coupon: {coupon.code}</span>
-                    <span>-{formatPrice(couponDiscount)}</span>
-                  </div>
-                )}
-
-                <div className="border-t pt-4 flex justify-between font-medium">
-                  <span className="text-gray-900">Total Amount</span>
-                  <span className="text-blue-600 font-bold">{formatPrice(totalWithDeliveryTaxCoupon)}</span>
-                </div>
-              </div>
-
-              {/* Free shipping message */}
-              {cartTotals.totalCurrentPrice < 500 && cartTotals.totalCurrentPrice > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">
-                  You are just {formatPrice(500 - cartTotals.totalCurrentPrice)} away from free shipping. Shop more to get free and express delivery.
-                  </p>
-                </div>
-              )}
-
-              {cartTotals.totalCurrentPrice >= 500 && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-700 font-medium">
-                    🎉 You qualify for free shipping!
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-6">
-                {/* Terms and Privacy Policy */}
-                <div className="mb-4">
-                  <label className="flex items-start space-x-2 text-sm text-gray-600">
-                    <input 
-                      type="checkbox" 
-                      className="mt-1 rounded border-gray-300 text-blue-500 focus:ring-blue-500" 
-                      defaultChecked 
-                    />
-                    <span>
-                      I agree to our{' '}
-                      <Link to="/terms" className="text-blue-600 hover:text-blue-700 underline">
-                        Terms of use
-                      </Link>
-                      {' '}&{' '}
-                      <Link to="/privacy" className="text-blue-600 hover:text-blue-700 underline">
-                        Privacy Policy
-                      </Link>
-                    </span>
-                  </label>
-                </div>
-
-                <Link
-                  to="/checkout"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center transition-colors shadow-lg shadow-blue-500/25"
-                >
-                  Checkout
-                </Link>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Coupons Modal */}
       {showCouponsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto shadow-lg relative">
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-              onClick={handleCloseCouponsModal}
-            >
-              <X size={24} />
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">Available Coupons</h2>
-            {loadingCoupons ? (
-              <div className="flex justify-center items-center h-32">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-500"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl relative animate-fadeIn">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-5 relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <Gift className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Available Coupons</h2>
+                    <p className="text-yellow-100 text-sm">Save more on your purchase</p>
+                  </div>
+                </div>
+                <button
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition-colors"
+                  onClick={handleCloseCouponsModal}
+                >
+                  <X size={20} />
+                </button>
               </div>
-            ) : couponModalError ? (
-              <div className="text-red-500 text-center">{couponModalError}</div>
-            ) : publicCoupons.length === 0 ? (
-              <div className="text-gray-500 text-center">No coupons available at the moment.</div>
-            ) : (
-              <div className="space-y-4">
-                {publicCoupons.map((coupon, idx) => {
-                  console.log('Rendering coupon:', coupon); // Debug log
-                  const color = COUPON_COLORS[idx % COUPON_COLORS.length]
-                  const categories =
-                    coupon.categories && coupon.categories.length > 0
-                      ? coupon.categories.map((cat) => cat.name || cat).join(", ")
-                      : "All Categories"
-                  return (
-                    <div key={coupon._id || idx} className="relative flex items-center w-full">
-                      {/* Ticket Style - Horizontal Layout */}
-                      <div
-                        className={`w-full flex shadow-md relative overflow-visible transition-all duration-500 ease-out opacity-100 translate-y-0 ${color.border}`}
-                        style={{ minHeight: 100 }}
-                      >
-                        {/* Left stub - Compact */}
-                        <div
-                          className={`flex flex-col items-center justify-center py-2 px-2 ${color.stub} border-l-2 border-t-2 border-b-2 ${color.border} rounded-l-lg relative`}
-                          style={{ minWidth: 60 }}
-                        >
-                          <span
-                            className="text-[8px] font-bold tracking-widest text-gray-700 rotate-180"
-                            style={{ writingMode: "vertical-rl" }}
-                          >
-                            DISCOUNT
-                          </span>
-                          {/* Barcode effect - Smaller */}
-                          <div
-                            className={`w-4 h-6 mt-1 flex flex-col justify-between ${color.barcode}`}
-                            style={{ borderRadius: 2 }}
-                          >
-                            {[...Array(5)].map((_, i) => (
-                              <div
-                                key={i}
-                                className={`h-0.5 ${i % 2 === 0 ? "bg-gray-700" : "bg-gray-400"} w-full rounded`}
-                              ></div>
-                            ))}
-                          </div>
-                        </div>
-                        {/* Main ticket - Responsive Layout */}
-                        <div
-                          className={`flex-1 ${color.main} border-r-2 border-t-2 border-b-2 ${color.border} rounded-r-lg p-3 flex flex-col md:flex-row md:items-center relative overflow-hidden`}
-                        >
-                          {/* Cut edges */}
-                          <div
-                            className={`absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 ${color.border}`}
-                          ></div>
-                          <div
-                            className={`absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 ${color.border}`}
-                          ></div>
+            </div>
 
-                          {/* Mobile: Vertical Layout, Desktop: Horizontal Layout */}
-                          <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4 flex-1">
-                            {/* Discount Info */}
-                            <div className="flex items-center justify-between md:flex-col md:items-center md:justify-center">
-                              <span className="text-xs font-semibold text-gray-500 tracking-widest">GIFT COUPON</span>
-                              <span className={`text-xl font-bold flex items-center ${color.text}`}>
-                                {coupon.discountType === "percentage" && <Percent className="w-4 h-4 mr-1" />}
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(85vh-100px)]">
+              {loadingCoupons ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-12 h-12 border-4 border-yellow-200 border-t-yellow-500 rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-500">Loading coupons...</p>
+                </div>
+              ) : couponModalError ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <X className="w-8 h-8 text-red-500" />
+                  </div>
+                  <p className="text-red-600 font-medium">{couponModalError}</p>
+                </div>
+              ) : publicCoupons.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Tag className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500">No coupons available at the moment.</p>
+                  <p className="text-sm text-gray-400 mt-2">Check back later for new offers!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {publicCoupons.map((coupon, idx) => {
+                    console.log('Rendering coupon:', coupon);
+                    const color = COUPON_COLORS[idx % COUPON_COLORS.length]
+                    const categories =
+                      coupon.categories && coupon.categories.length > 0
+                        ? coupon.categories.map((cat) => cat.name || cat).join(", ")
+                        : "All Categories"
+                    return (
+                      <div key={coupon._id || idx} className="relative">
+                        {/* Modern Coupon Card */}
+                        <div className={`relative overflow-hidden rounded-2xl ${color.main} ${color.border} border-2 shadow-sm hover:shadow-md transition-all`}>
+                          {/* Decorative circles for ticket effect */}
+                          <div className={`absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 ${color.border}`}></div>
+                          <div className={`absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full border-2 ${color.border}`}></div>
+
+                          <div className="flex flex-col sm:flex-row">
+                            {/* Left Section - Discount Value */}
+                            <div className={`${color.stub} px-6 py-4 sm:py-6 flex flex-col items-center justify-center sm:min-w-[140px]`}>
+                              <span className="text-[10px] font-bold text-gray-700 tracking-widest mb-1">DISCOUNT</span>
+                              <span className={`text-2xl sm:text-3xl font-bold ${color.text} flex items-center`}>
+                                {coupon.discountType === "percentage" && <Percent className="w-5 h-5 sm:w-6 sm:h-6 mr-1" />}
                                 {coupon.discountType === "percentage"
                                   ? `${coupon.discountValue}%`
                                   : `AED ${coupon.discountValue}`}
                               </span>
+                              <span className="text-[10px] text-gray-600 mt-1">OFF</span>
                             </div>
 
-                            {/* Promo Code */}
-                            <div className="flex flex-col items-center flex-1">
-                              <span className="block text-sm font-bold text-gray-900 mb-2">PROMO CODE</span>
-                              <div className="flex items-center w-full justify-center">
-                                <span
-                                  className={`inline-block bg-white border ${color.border} rounded px-3 py-1 font-mono text-sm font-bold ${color.text} tracking-widest`}
-                                >
-                                  {coupon.code}
-                                </span>
-                                <button
-                                  className={`ml-2 px-2 py-1 text-xs ${color.stub} hover:brightness-110 text-black rounded transition-colors font-semibold border ${color.border} focus:outline-none focus:ring-2 focus:ring-yellow-300`}
-                                  onClick={() => handleCopyCoupon(coupon.code, coupon._id)}
-                                >
-                                  {couponCopied === coupon._id ? "Copied!" : "Copy"}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
+                            {/* Right Section - Details */}
+                            <div className="flex-1 p-4 sm:p-6 border-l-2 border-dashed border-gray-300/50">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-600 mb-2">{coupon.description}</p>
+                                  
+                                  {/* Coupon Code */}
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <span className={`inline-block bg-white border-2 ${color.border} rounded-lg px-4 py-2 font-mono text-sm font-bold ${color.text} tracking-widest`}>
+                                      {coupon.code}
+                                    </span>
+                                    <button
+                                      className={`px-4 py-2 ${color.stub} hover:brightness-95 text-gray-800 rounded-lg text-sm font-semibold transition-all`}
+                                      onClick={() => handleCopyCoupon(coupon.code, coupon._id)}
+                                    >
+                                      {couponCopied === coupon._id ? (
+                                        <span className="flex items-center gap-1">
+                                          <Check size={14} />
+                                          Copied!
+                                        </span>
+                                      ) : "Copy"}
+                                    </button>
+                                  </div>
 
-                          {/* Details - Mobile: Full width, Desktop: Right aligned */}
-                          <div className="flex flex-col md:items-end text-left md:text-right space-y-1 mt-3 md:mt-0">
-                            <div className="text-xs text-gray-600 md:max-w-xs">{coupon.description}</div>
-                            <div className="flex flex-col md:items-end space-y-1">
-                              <div className="text-xs text-gray-500">Min: AED {coupon.minOrderAmount || 0}</div>
-                              <div className="text-xs text-gray-500">
-                                Valid: {new Date(coupon.validFrom).toLocaleDateString()} -{" "}
-                                {new Date(coupon.validUntil).toLocaleDateString()}
+                                  {/* Meta Info */}
+                                  <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                                    <span className="bg-white/50 px-2 py-1 rounded-full">
+                                      Min: AED {coupon.minOrderAmount || 0}
+                                    </span>
+                                    <span className="bg-white/50 px-2 py-1 rounded-full flex items-center gap-1">
+                                      <Clock size={10} />
+                                      Valid until {new Date(coupon.validUntil).toLocaleDateString()}
+                                    </span>
+                                    <span className="bg-white/50 px-2 py-1 rounded-full">
+                                      {categories}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-xs font-semibold text-gray-700">{categories}</div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

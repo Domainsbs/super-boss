@@ -60,7 +60,7 @@ const AddBlogCategory = () => {
       })
 
       showToast("Blog category created successfully!", "success")
-      navigate("/admin/blog-categories")
+      navigate("/superboss-admin/blog-categories")
     } catch (error) {
       console.error("Error creating category:", error)
       showToast(error.response?.data?.message || "Failed to create category", "error")
@@ -78,7 +78,7 @@ const AddBlogCategory = () => {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <button
-                onClick={() => navigate("/admin/blog-categories")}
+                onClick={() => navigate("/superboss-admin/blog-categories")}
                 className="hover:text-blue-600 flex items-center gap-1"
               >
                 <ArrowLeft size={16} />
@@ -203,7 +203,7 @@ const AddBlogCategory = () => {
               <div className="flex justify-end gap-4 pt-6">
                 <button
                   type="button"
-                  onClick={() => navigate("/admin/blog-categories")}
+                  onClick={() => navigate("/superboss-admin/blog-categories")}
                   className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel

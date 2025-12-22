@@ -111,7 +111,7 @@ const TrashCategories = () => {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <button
-                onClick={() => navigate("/admin/categories")}
+                onClick={() => navigate("/superboss-admin/categories")}
                 className="hover:text-blue-600 flex items-center gap-1"
               >
                 <ArrowLeft size={16} />

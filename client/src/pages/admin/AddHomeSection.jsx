@@ -73,7 +73,7 @@ const AddHomeSection = () => {
       })
     } catch (error) {
       showToast("Failed to load section for editing", "error")
-      navigate("/admin/home-sections")
+      navigate("/superboss-admin/home-sections")
     } finally {
       setLoading(false)
     }
@@ -199,7 +199,7 @@ const AddHomeSection = () => {
         })
         showToast("Section created successfully!", "success")
       }
-      navigate("/admin/home-sections")
+      navigate("/superboss-admin/home-sections")
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to save section",
@@ -218,7 +218,7 @@ const AddHomeSection = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         showToast("Section deleted successfully!", "success")
-        navigate("/admin/home-sections")
+        navigate("/superboss-admin/home-sections")
       } catch (error) {
         showToast("Failed to delete section", "error")
       }
@@ -232,7 +232,7 @@ const AddHomeSection = () => {
         <div className="p-8">
           <div className="mb-6">
             <button
-              onClick={() => navigate("/admin/home-sections")}
+              onClick={() => navigate("/superboss-admin/home-sections")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
@@ -610,7 +610,7 @@ const AddHomeSection = () => {
                 <div className="flex gap-4">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/home-sections")}
+                    onClick={() => navigate("/superboss-admin/home-sections")}
                     className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
                     disabled={loading}
                   >

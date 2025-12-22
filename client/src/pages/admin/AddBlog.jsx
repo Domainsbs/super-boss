@@ -187,7 +187,7 @@ const AddBlog = () => {
       const token = localStorage.getItem("adminToken")
       if (!token) {
         showToast("Please login as admin first", "error")
-        navigate("/grabiansadmin/login")
+        navigate("/superboss-admin/login")
         return
       }
 
@@ -220,7 +220,7 @@ const AddBlog = () => {
       })
 
       showToast("Blog created successfully!", "success")
-      navigate("/admin/blogs")
+      navigate("/superboss-admin/blogs")
     } catch (error) {
       console.error("Error creating blog:", error)
       const errorMessage = error.response?.data?.message || error.message || "Failed to create blog"
@@ -238,7 +238,7 @@ const AddBlog = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <button onClick={() => navigate("/admin/blogs")} className="hover:text-blue-600 flex items-center gap-1">
+              <button onClick={() => navigate("/superboss-admin/blogs")} className="hover:text-blue-600 flex items-center gap-1">
                 <ArrowLeft size={16} />
                 Blogs
               </button>
@@ -565,7 +565,7 @@ const AddBlog = () => {
             <div className="flex justify-end gap-4 pt-6">
               <button
                 type="button"
-                onClick={() => navigate("/admin/blogs")}
+                onClick={() => navigate("/superboss-admin/blogs")}
                 className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel

@@ -53,6 +53,7 @@ const Home = () => {
   const [banners, setBanners] = useState([])
   const [heroBanners, setHeroBanners] = useState([])
   const [mobileBanners, setMobileBanners] = useState([])
+  const [bannerCards, setBannerCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -170,10 +171,11 @@ const Home = () => {
         // Get products from cache or API
         const products = await productCache.getProducts()
 
-        const [categoriesResponse, brandsResponse, bannersResponse, upgradeFeaturesResponse, settingsResponse, sectionsResponse] = await Promise.all([
+        const [categoriesResponse, brandsResponse, bannersResponse, bannerCardsResponse, upgradeFeaturesResponse, settingsResponse, sectionsResponse] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/categories`),
           axios.get(`${API_BASE_URL}/api/brands`),
           axios.get(`${API_BASE_URL}/api/banners?active=true`),
+          axios.get(`${API_BASE_URL}/api/banner-cards?active=true`).catch(() => ({ data: [] })),
           axios.get(`${API_BASE_URL}/api/upgrade-features?active=true`).catch(() => ({ data: [] })),
           axios.get(`${API_BASE_URL}/api/settings`).catch(() => ({ 
             data: { 
@@ -192,6 +194,7 @@ const Home = () => {
         const categoriesData = categoriesResponse.data
         const brandsData = brandsResponse.data
         const bannersData = bannersResponse.data
+        const bannerCardsData = bannerCardsResponse.data
         const upgradeFeaturesData = upgradeFeaturesResponse.data
         const settingsData = settingsResponse.data
         const sectionsData = sectionsResponse.data
@@ -634,9 +637,11 @@ const Home = () => {
         setBanners(promotionalBanners)
         setHeroBanners(heroData)
         setMobileBanners(mobileData)
+        setBannerCards(bannerCardsData)
         // Add log after setting hero banners
         console.log("[DEBUG] deviceType:", deviceType)
         console.log("[DEBUG] heroBanners:", heroData)
+        console.log("[DEBUG] bannerCards:", bannerCardsData)
         setBrands(validBrands)
         setHpProducts(hpData)
         setDellProducts(dellData)
@@ -964,6 +969,7 @@ const Home = () => {
       )}
       <HeroBannerSection
         banners={heroBanners}
+        bannerCards={bannerCards}
         deviceType={deviceType}
       />
       {/* Categories Section - Admin Controlled Slider */}

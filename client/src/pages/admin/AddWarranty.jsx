@@ -42,7 +42,7 @@ const AddWarranty = () => {
 
       if (response.ok) {
         showToast("Warranty added successfully!", "success")
-        navigate("/admin/warranty")
+        navigate("/superboss-admin/warranty")
       } else {
         const error = await response.json()
         showToast(error.message || "Failed to add warranty", "error")
@@ -63,7 +63,7 @@ const AddWarranty = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <button onClick={() => navigate("/admin/warranty")} className="hover:text-blue-600">
+              <button onClick={() => navigate("/superboss-admin/warranty")} className="hover:text-blue-600">
                 Warranty
               </button>
               <span>/</span>
@@ -149,7 +149,7 @@ const AddWarranty = () => {
                 <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/warranty")}
+                    onClick={() => navigate("/superboss-admin/warranty")}
                     className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
