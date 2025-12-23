@@ -233,7 +233,7 @@ const AdminOrders = () => {
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="ml-64 p-8">
+      <div className="ml-64 p-8 overflow-hidden">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
           <button
@@ -299,7 +299,7 @@ const AdminOrders = () => {
         ) : (
           <div className="bg-white rounded-lg shadow-sm" style={{ overflow: 'visible' }}>
             <div className="overflow-x-auto" style={{ overflow: 'visible' }}>
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -517,7 +517,7 @@ const AdminOrders = () => {
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Order Items</h3>
                 <div className="bg-gray-50 rounded-md overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="w-full divide-y divide-gray-200">
                     <thead className="bg-gray-100">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

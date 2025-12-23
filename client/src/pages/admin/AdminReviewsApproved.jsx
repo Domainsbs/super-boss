@@ -6,7 +6,7 @@ const AdminReviewsApproved = () => {
   return (
     <div className="flex bg-gray-100 min-h-screen">
       <AdminSidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-64 overflow-hidden">
         <ReviewManagement defaultFilter="approved" />
       </div>
     </div>

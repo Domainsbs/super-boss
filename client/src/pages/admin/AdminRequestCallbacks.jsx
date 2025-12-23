@@ -79,7 +79,7 @@
 //   return (
 //     <div className="min-h-screen bg-gray-100">
 //       <AdminSidebar />
-//       <div className="ml-64 p-8">
+//       <div className="ml-64 p-8 overflow-hidden">
 //         <div className="flex justify-between items-center mb-6">
 //           <h1 className="text-2xl font-bold">Request Callbacks</h1>
 //           <button
@@ -103,7 +103,7 @@
 //                 No callback requests yet.
 //               </div>
 //             ) : (
-//               <table className="min-w-full divide-y divide-gray-200">
+//               <table className="w-full divide-y divide-gray-200">
 //               <thead className="bg-gray-50">
 //                 <tr>
 //                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
@@ -386,7 +386,7 @@ const AdminRequestCallbacks = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
-      <div className="ml-64 p-8">
+      <div className="ml-64 p-8 overflow-hidden">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Request Callbacks</h1>
           <button
@@ -410,7 +410,7 @@ const AdminRequestCallbacks = () => {
                 No callback requests yet.
               </div>
             ) : (
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>

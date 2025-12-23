@@ -108,7 +108,7 @@ const AdminSettings = () => {
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="ml-64 p-8">
+      <div className="ml-64 p-8 overflow-hidden">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         </div>

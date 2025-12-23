@@ -1766,7 +1766,7 @@ const DeletedOrders = () => {
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="p-8 ml-64 ">
+      <div className="p-8 ml-64 overflow-hidden">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Deleted Orders</h1>
@@ -1858,7 +1858,7 @@ const DeletedOrders = () => {
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left">

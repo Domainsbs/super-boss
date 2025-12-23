@@ -86,7 +86,7 @@ const AdminEmailTemplates = () => {
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
-      <div className="flex-1 ml-64 p-6 max-w-5xl">
+      <div className="flex-1 ml-64 p-6 max-w-5xl overflow-hidden">
         <h1 className="text-2xl font-bold mb-4">Email Templates</h1>
         <button className="mb-4 px-4 py-2 bg-lime-500 text-white rounded" onClick={startNew}>
           New Template

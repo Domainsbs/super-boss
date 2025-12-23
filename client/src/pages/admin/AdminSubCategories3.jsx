@@ -296,7 +296,7 @@ const AdminSubCategories3 = () => {
         onMove={handleProductsMove}
       />
       
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-64 overflow-hidden">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <div>

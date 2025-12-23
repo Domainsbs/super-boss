@@ -293,7 +293,7 @@ const AddBannerCard = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-64 overflow-hidden">
         <div className="p-8">
           <div className="mb-6">
             <button

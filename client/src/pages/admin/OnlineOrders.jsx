@@ -643,7 +643,7 @@
 //       <AdminSidebar />
 
 
-//     <div className="ml-64 p-8">
+//     <div className="ml-64 p-8 overflow-hidden">
 //       <div className="flex justify-between items-center mb-8">
 //         <div>
 //           <h1 className="text-2xl font-bold text-gray-900">Online Orders</h1>
@@ -735,7 +735,7 @@
 //       ) : (
 //         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
 //           <div className="overflow-x-auto">
-//             <table className="min-w-full divide-y divide-gray-200">
+//             <table className="w-full divide-y divide-gray-200">
 //               <thead className="bg-gray-50">
 //                 <tr>
 //                   <th className="px-6 py-3 text-left">
@@ -2146,7 +2146,7 @@ const OnlineOrders = () => {
   }, [selectedOrders])
 
   return (
-    <div className="p-8 ml-64 ">
+    <div className="p-8 ml-64 overflow-hidden">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Online Orders</h1>
@@ -2238,7 +2238,7 @@ const OnlineOrders = () => {
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left">

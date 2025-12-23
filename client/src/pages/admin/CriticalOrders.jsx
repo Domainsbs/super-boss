@@ -808,7 +808,7 @@ const CriticalOrders = () => {
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="p-8 ml-64 ">
+      <div className="p-8 ml-64 overflow-hidden">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <AlertTriangle className="text-red-500" size={32} />
@@ -918,7 +918,7 @@ const CriticalOrders = () => {
         ) : (
           <div className="bg-white rounded-lg shadow-sm">
             <div className="overflow-visible min-h-[400px]">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left">

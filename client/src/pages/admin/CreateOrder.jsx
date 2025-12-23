@@ -227,7 +227,7 @@ export default function CreateOrder() {
   }
 
   return (
-    <div className="ml-64 p-6">
+    <div className="ml-64 p-6 overflow-hidden">
       <h1 className="text-2xl font-bold mb-4">Create Order</h1>
 
       {/* User selection and shipping info */}

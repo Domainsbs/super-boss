@@ -408,7 +408,7 @@ const AdminBannerCards = () => {
     return (
       <div className="flex min-h-screen bg-gray-50">
         <AdminSidebar />
-        <div className="flex-1 ml-64">
+        <div className="flex-1 ml-64 overflow-hidden">
           <div className="flex justify-center items-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
           </div>
@@ -597,7 +597,7 @@ const AdminBannerCards = () => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                    <table className="w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

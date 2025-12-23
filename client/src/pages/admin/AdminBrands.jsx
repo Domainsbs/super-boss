@@ -213,7 +213,7 @@ const AdminBrands = () => {
   return (
     <div className="flex">
       <AdminSidebar />
-      <div className="flex-1 ml-64 p-8">
+      <div className="flex-1 ml-64 p-8 overflow-hidden">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Manage Brands</h1>
           <Link
@@ -251,7 +251,7 @@ const AdminBrands = () => {
         {/* Brands Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

@@ -802,7 +802,7 @@ const orderStatusOptions = [
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="p-8 ml-64 ">
+      <div className="p-8 ml-64 overflow-hidden">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">New Orders</h1>

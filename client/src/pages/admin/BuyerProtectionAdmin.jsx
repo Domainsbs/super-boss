@@ -355,7 +355,7 @@ const BuyerProtectionAdmin = () => {
     <div className="flex bg-gray-50 min-h-screen">
       <AdminSidebar />
       <div className="flex-1 p-8">
-        <div className="max-w-7xl ml-64 ">
+        <div className="max-w-7xl ml-64 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>

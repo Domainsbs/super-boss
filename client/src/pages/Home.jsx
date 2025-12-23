@@ -882,86 +882,130 @@ const Home = () => {
       
       {/* Notification/Newsletter Popup */}
       {showNotifPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative animate-fadeInUp">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full relative overflow-hidden animate-fadeInUp">
             {notifStep === "ask" && (
               <>
-                <div className="flex items-center mb-4">
-                  <img src="/g.png" alt="Logo" className="w-16 h-18 rounded-full mr-4" />
-                  <div>
-                    <h2 className="text-lg font-bold text-black mb-1">
-                      This website would like to send you awesome updates and offers!
-                    </h2>
-                    <p className="text-gray-600 text-sm">
-                      Notifications can be turned off anytime from browser settings.
-                    </p>
+                {/* Header with gradient */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                  <div className="flex items-center gap-12">
+                    <div className=" flex items-center justify-center ">
+                      <img src="/seenalif.png" alt="Logo" className=" h-12 bg-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-white font-bold text-lg leading-tight">
+                        Stay Updated!
+                      </h2>
+                      <p className="text-blue-100 text-xs">Get exclusive deals & offers</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <button className="px-4 py-2 rounded bg-gray-200 text-black font-semibold" onClick={handleNotifDeny}>
-                    Don't Allow
+                {/* Content */}
+                <div className="px-6 py-5">
+                  <p className="text-slate-600 text-sm mb-1">
+                    We'd love to send you awesome updates and exclusive offers!
+                  </p>
+                  <p className="text-slate-400 text-xs">
+                    You can turn off notifications anytime from browser settings.
+                  </p>
+                </div>
+                {/* Actions */}
+                <div className="flex border-t border-slate-100">
+                  <button 
+                    className="flex-1 px-4 py-3.5 text-slate-500 font-medium hover:bg-slate-50 transition-colors text-sm" 
+                    onClick={handleNotifDeny}
+                  >
+                    Maybe Later
                   </button>
-                  <button className="px-4 py-2 rounded bg-lime-500 text-white font-semibold" onClick={handleNotifAllow}>
-                    Allow
+                  <button 
+                    className="flex-1 px-4 py-3.5 bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors text-sm" 
+                    onClick={handleNotifAllow}
+                  >
+                    Allow Notifications
                   </button>
                 </div>
               </>
             )}
             {notifStep === "email" && !notifSuccess && (
               <form onSubmit={handleNotifEmailSubmit}>
-                <div className="flex items-center  mb-4">
-                  <img src="/g.png" alt="Logo" className="w-14 h-14 rounded-full mr-4" />
-                  <div>
-                    <h2 className="text-lg font-bold text-black mb-1">Subscribe to our newsletter</h2>
-                    <p className="text-gray-600 text-sm">Enter your email to get the best offers and updates!</p>
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                  <div className="flex items-center gap-12">
+                    <div className="  flex items-center justify-center ">
+                      <img src="/seenalif.png" alt="Logo" className=" h-12 bg-cover" />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-white font-bold text-lg">Subscribe Now</h2>
+                      <p className="text-blue-100 text-xs">Join our newsletter</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="email"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded"
-                    placeholder="Enter your email"
-                    value={notifEmail}
-                    onChange={handleNotifEmailChange}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded bg-lime-500 text-white font-semibold"
-                    disabled={notifLoading}
-                  >
-                    {notifLoading ? "Subscribing..." : "Subscribe"}
-                  </button>
+                {/* Content */}
+                <div className="px-6 py-5">
+                  <p className="text-slate-600 text-sm mb-4">Enter your email to get the best offers and updates!</p>
+                  <div className="flex gap-2 mb-4">
+                    <input
+                      type="email"
+                      className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="your@email.com"
+                      value={notifEmail}
+                      onChange={handleNotifEmailChange}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm transition-colors disabled:opacity-50"
+                      disabled={notifLoading}
+                    >
+                      {notifLoading ? "..." : "Subscribe"}
+                    </button>
+                  </div>
+                  {/* Preferences */}
+                  <div className="flex flex-wrap gap-3 mb-3">
+                    {NEWSLETTER_OPTIONS.map((opt) => (
+                      <label key={opt.value} className="flex items-center gap-1.5 text-slate-600 text-sm cursor-pointer hover:text-blue-500 transition-colors">
+                        <input
+                          type="checkbox"
+                          value={opt.value}
+                          checked={notifPrefs.includes(opt.value)}
+                          onChange={() => handleNotifPrefChange(opt.value)}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500"
+                        />
+                        {opt.icon}
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  {notifError && <div className="text-red-500 text-sm mb-2 bg-red-50 px-3 py-2 rounded-lg">{notifError}</div>}
                 </div>
-                {/* Preferences checkboxes */}
-                <div className="flex flex-col md:flex-row gap-6 mb-2">
-                  {NEWSLETTER_OPTIONS.map((opt) => (
-                    <label key={opt.value} className="flex items-center text-black font-normal cursor-pointer">
-                      <input
-                        type="checkbox"
-                        value={opt.value}
-                        checked={notifPrefs.includes(opt.value)}
-                        onChange={() => handleNotifPrefChange(opt.value)}
-                        className="mr-2"
-                      />
-                      {opt.icon}
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-                {notifError && <div className="text-red-500 text-sm mb-2">{notifError}</div>}
-                <div className="flex justify-end">
-                  <button type="button" className="px-3 py-1 text-xs text-gray-500 underline" onClick={handleNotifDeny}>
+                {/* Cancel button */}
+                <div className="border-t border-slate-100 px-6 py-3 flex justify-end">
+                  <button type="button" className="text-sm text-slate-400 hover:text-slate-600 transition-colors" onClick={handleNotifDeny}>
                     Cancel
                   </button>
                 </div>
               </form>
             )}
             {notifSuccess && (
-              <div className="flex flex-col items-center justify-center py-6">
-                <img src="/logo.png" alt="Logo" className="w-14 h-14 rounded-full mb-3 border border-gray-200" />
-                <h2 className="text-lg font-bold text-black mb-2">Thank you for subscribing!</h2>
-                <p className="text-gray-600 text-sm">A confirmation email has been sent to {notifEmail}.</p>
+              <div className="text-center">
+                {/* Success Header */}
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-lg mb-3">
+                    <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-white">You're Subscribed!</h2>
+                </div>
+                <div className="px-6 py-5">
+                  <p className="text-slate-600 text-sm mb-4">A confirmation email has been sent to <span className="font-semibold text-slate-800">{notifEmail}</span></p>
+                  <button 
+                    onClick={handleNotifDeny}
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors"
+                  >
+                    Got it!
+                  </button>
+                </div>
               </div>
             )}
           </div>

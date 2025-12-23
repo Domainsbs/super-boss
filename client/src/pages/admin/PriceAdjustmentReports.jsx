@@ -129,7 +129,7 @@ const PriceAdjustmentReports = () => {
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
 
-      <div className="ml-64 min-h-screen">
+      <div className="ml-64 min-h-screen overflow-hidden">
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-gray-900">Price Adjustment Reports</h1>
@@ -187,7 +187,7 @@ const PriceAdjustmentReports = () => {
           ) : (
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th
@@ -455,7 +455,7 @@ const PriceAdjustmentReports = () => {
             <div>
               <h4 className="text-md font-medium text-gray-900 mb-3">Product Changes</h4>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>

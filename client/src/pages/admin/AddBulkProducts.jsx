@@ -236,7 +236,7 @@
 //   return (
 //     <div className="min-h-screen bg-gray-100">
 //       <AdminSidebar />
-//       <div className="ml-64 p-8">
+//       <div className="ml-64 p-8 overflow-hidden">
 //         <h1 className="text-2xl font-bold mb-6">Add Bulk Products</h1>
 
 //         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
@@ -980,7 +980,7 @@ const AddBulkProducts = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <AdminSidebar />
-      <div className="ml-64 p-8">
+      <div className="ml-64 p-8 overflow-hidden">
         <h1 className="text-2xl font-bold mb-6">Add Bulk Products</h1>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

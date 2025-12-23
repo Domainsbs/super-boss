@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
-import { User, Mail, Phone, LogOut, Trash2, Shield, Settings, Package, Heart, AlertTriangle } from "lucide-react"
+import { User, Mail, Phone, LogOut, Trash2, Shield, Package, Heart, AlertTriangle, ShoppingCart, ChevronRight, Calendar, Award, MapPin } from "lucide-react"
 import { useToast } from "../context/ToastContext"
 import axios from "axios"
 import config from "../config/config"
@@ -17,6 +17,7 @@ const Profile = () => {
   const [verificationCode, setVerificationCode] = useState("")
   const [isRequestingDelete, setIsRequestingDelete] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [activeTab, setActiveTab] = useState("overview")
 
   const handleLogout = () => {
     logout()
@@ -68,7 +69,6 @@ const Profile = () => {
         }
       )
       showToast(response.data.message, "success")
-      // Log out the user after successful deletion
       setTimeout(() => {
         logout()
         navigate("/")
@@ -89,188 +89,300 @@ const Profile = () => {
     setVerificationCode("")
   }
 
+  // Get user initials for avatar
+  const getInitials = (name) => {
+    if (!name) return "U"
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+  }
+
+  // Format join date
+  const formatDate = (date) => {
+    if (!date) return "N/A"
+    return new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  }
+
+  const menuItems = [
+    { id: "overview", label: "Overview", icon: User },
+    { id: "orders", label: "My Orders", icon: Package, action: () => navigate("/orders") },
+    { id: "wishlist", label: "Wishlist", icon: Heart, action: () => navigate("/wishlist") },
+    { id: "cart", label: "Shopping Cart", icon: ShoppingCart, action: () => navigate("/cart") },
+  ]
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Profile Header */}
-      <div className="bg-gradient-to-r from-lime-600 to-green-700 rounded-lg shadow-lg p-8 mb-8 text-white">
-        <div className="flex items-center space-x-6">
-          <div className="bg-white/20 backdrop-blur-sm p-5 rounded-full">
-            <User size={48} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold mb-1">{user?.name}</h1>
-            <p className="text-lime-100 flex items-center gap-2">
-              <Mail size={16} />
-              {user?.email}
-            </p>
-            {user?.isEmailVerified && (
-              <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-white/20 rounded-full text-sm">
-                <Shield size={14} />
-                Verified Account
-              </span>
-            )}
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Account Information */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800">Account Information</h2>
-            <Settings size={20} className="text-gray-400" />
-          </div>
-          
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-              <div className="bg-lime-100 p-3 rounded-full">
-                <User size={20} className="text-lime-700" />
+      <div className="relative max-w-6xl mx-auto px-4 py-8 sm:py-12">
+        {/* Top Section - Profile Card */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden">
+            {/* Banner with Pattern */}
+            <div className="h-32 sm:h-40 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 relative">
+              <div className="absolute inset-0 opacity-10">
+                <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <defs>
+                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                      <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.5"/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Full Name</p>
-                <p className="font-semibold text-gray-800">{user?.name}</p>
-              </div>
+              {/* Floating Shapes */}
+              <div className="absolute top-4 right-8 w-16 h-16 bg-white/10 rounded-full"></div>
+              <div className="absolute bottom-8 right-24 w-8 h-8 bg-white/10 rounded-full"></div>
+              <div className="absolute top-8 right-40 w-6 h-6 bg-white/10 rounded-full"></div>
             </div>
 
-            <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Mail size={20} className="text-blue-700" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Email Address</p>
-                <p className="font-semibold text-gray-800">{user?.email}</p>
-              </div>
-            </div>
-
-            {user?.phone && (
-              <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <Phone size={20} className="text-purple-700" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-500 mb-1">Phone Number</p>
-                  <p className="font-semibold text-gray-800">{user.phone}</p>
+            {/* Profile Info */}
+            <div className="relative px-6 sm:px-8 pb-6">
+              {/* Avatar */}
+              <div className="absolute -top-12 sm:-top-16 left-6 sm:left-8">
+                <div className="relative">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-400 flex items-center justify-center text-white text-3xl sm:text-4xl font-bold shadow-xl ring-4 ring-white">
+                    {getInitials(user?.name)}
+                  </div>
+                  {user?.isEmailVerified && (
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg">
+                      <Shield size={16} className="text-white" />
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
 
-            <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
-              <div className="bg-orange-100 p-3 rounded-full">
-                <Settings size={20} className="text-orange-700" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Account Type</p>
-                <p className="font-semibold text-gray-800">{user?.isAdmin ? "Administrator" : "Customer"}</p>
+              {/* User Details */}
+              <div className="pt-14 sm:pt-20 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">{user?.name}</h1>
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-slate-500">
+                    <span className="flex items-center gap-1.5 text-sm">
+                      <Mail size={14} />
+                      {user?.email}
+                    </span>
+                    {user?.phone && (
+                      <span className="flex items-center gap-1.5 text-sm">
+                        <Phone size={14} />
+                        {user.phone}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 mt-3">
+                    {user?.isEmailVerified && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                        <Shield size={12} />
+                        Verified
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+                      <Award size={12} />
+                      {user?.isAdmin ? "Administrator" : "Member"}
+                    </span>
+                    {user?.createdAt && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+                        <Calendar size={12} />
+                        Joined {formatDate(user.createdAt)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl transition-all duration-200 font-medium group"
+                >
+                  <LogOut size={18} className="group-hover:rotate-12 transition-transform" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <button
-                onClick={() => navigate("/orders")}
-                className="w-full flex items-center space-x-3 px-4 py-3 bg-gray-50 hover:bg-lime-50 hover:border-lime-300 border-2 border-transparent rounded-lg transition-all group"
-              >
-                <Package size={20} className="text-gray-600 group-hover:text-lime-700" />
-                <span className="text-gray-700 group-hover:text-lime-700 font-medium">My Orders</span>
-              </button>
-              
-              <button
-                onClick={() => navigate("/wishlist")}
-                className="w-full flex items-center space-x-3 px-4 py-3 bg-gray-50 hover:bg-pink-50 hover:border-pink-300 border-2 border-transparent rounded-lg transition-all group"
-              >
-                <Heart size={20} className="text-gray-600 group-hover:text-pink-700" />
-                <span className="text-gray-700 group-hover:text-pink-700 font-medium">Wishlist</span>
-              </button>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar Navigation */}
+          <div className="lg:col-span-4">
+            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-4 sticky top-24">
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-3">Navigation</h3>
+              <nav className="space-y-1">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={item.action || (() => setActiveTab(item.id))}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group ${
+                      activeTab === item.id && !item.action
+                        ? "bg-blue-50 text-blue-700"
+                        : "hover:bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon size={20} className={activeTab === item.id && !item.action ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"} />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                ))}
+              </nav>
 
-              <button
-                onClick={() => navigate("/cart")}
-                className="w-full flex items-center space-x-3 px-4 py-3 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 border-2 border-transparent rounded-lg transition-all group"
-              >
-                <Settings size={20} className="text-gray-600 group-hover:text-blue-700" />
-                <span className="text-gray-700 group-hover:text-blue-700 font-medium">Shopping Cart</span>
-              </button>
+              {/* Quick Stats */}
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-3">Quick Stats</h3>
+                <div className="grid grid-cols-2 gap-3 px-3">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl p-4 text-center">
+                    <Package size={24} className="mx-auto text-blue-600 mb-2" />
+                    <p className="text-xs text-slate-500">Orders</p>
+                  </div>
+                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-4 text-center">
+                    <Heart size={24} className="mx-auto text-pink-500 mb-2" />
+                    <p className="text-xs text-slate-500">Wishlist</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Logout Button */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-md"
-            >
-              <LogOut size={20} />
-              <span className="font-semibold">Logout</span>
-            </button>
-          </div>
-        </div>
-      </div>
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Account Details Card */}
+            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-100">
+                <h2 className="text-lg font-semibold text-slate-800">Account Details</h2>
+                <p className="text-sm text-slate-500 mt-1">Your personal information and preferences</p>
+              </div>
 
-      {/* Danger Zone */}
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6 border-2 border-red-200">
-        <div className="flex items-center space-x-3 mb-4">
-          <AlertTriangle size={24} className="text-red-600" />
-          <h2 className="text-xl font-bold text-gray-800">Danger Zone</h2>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-gray-700 mb-4">
-            Once you delete your account, there is no going back. Please be certain. All your data, orders, and preferences will be permanently deleted.
-          </p>
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="flex items-center space-x-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold"
-          >
-            <Trash2 size={20} />
-            <span>Delete My Account</span>
-          </button>
+              <div className="p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Full Name */}
+                  <div className="group bg-slate-50 hover:bg-blue-50/50 rounded-xl p-4 transition-colors duration-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <User size={18} className="text-blue-600" />
+                      </div>
+                      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Full Name</span>
+                    </div>
+                    <p className="text-slate-800 font-semibold pl-13">{user?.name}</p>
+                  </div>
+
+                  {/* Email */}
+                  <div className="group bg-slate-50 hover:bg-blue-50/50 rounded-xl p-4 transition-colors duration-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <Mail size={18} className="text-blue-600" />
+                      </div>
+                      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Email Address</span>
+                    </div>
+                    <p className="text-slate-800 font-semibold pl-13 break-all">{user?.email}</p>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="group bg-slate-50 hover:bg-purple-50/50 rounded-xl p-4 transition-colors duration-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                        <Phone size={18} className="text-purple-600" />
+                      </div>
+                      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Phone Number</span>
+                    </div>
+                    <p className="text-slate-800 font-semibold pl-13">{user?.phone || "Not provided"}</p>
+                  </div>
+
+                  {/* Account Type */}
+                  <div className="group bg-slate-50 hover:bg-amber-50/50 rounded-xl p-4 transition-colors duration-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                        <Award size={18} className="text-amber-600" />
+                      </div>
+                      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Account Type</span>
+                    </div>
+                    <p className="text-slate-800 font-semibold pl-13">{user?.isAdmin ? "Administrator" : "Customer"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 overflow-hidden border border-red-100">
+              <div className="px-6 py-5 bg-red-50/50 border-b border-red-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                    <AlertTriangle size={18} className="text-red-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-800">Danger Zone</h2>
+                    <p className="text-sm text-slate-500">Irreversible account actions</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-red-50/50 rounded-xl border border-red-100">
+                  <div>
+                    <h3 className="font-semibold text-slate-800">Delete Account</h3>
+                    <p className="text-sm text-slate-500 mt-1">Permanently remove your account and all associated data</p>
+                  </div>
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium whitespace-nowrap"
+                  >
+                    <Trash2 size={16} />
+                    <span>Delete Account</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-red-100 p-3 rounded-full">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                 <AlertTriangle size={24} className="text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Delete Account</h3>
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Delete Account</h3>
+                <p className="text-sm text-slate-500">This action is permanent</p>
+              </div>
             </div>
             
-            <p className="text-gray-700 mb-6">
-              Are you absolutely sure you want to delete your account? This action cannot be undone and will:
+            <p className="text-slate-600 mb-4">
+              Are you sure? This will permanently delete:
             </p>
             
-            <ul className="list-disc list-inside text-gray-600 mb-6 space-y-2">
-              <li>Permanently delete all your personal data</li>
-              <li>Remove your order history</li>
-              <li>Delete your wishlist and preferences</li>
-              <li>Close your account permanently</li>
+            <ul className="space-y-2 mb-5">
+              {["All personal data & preferences", "Complete order history", "Wishlist & saved items", "Account access forever"].map((item, i) => (
+                <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400"></div>
+                  {item}
+                </li>
+              ))}
             </ul>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-yellow-800">
-                <strong>⚠️ Warning:</strong> You will receive a 6-digit verification code via email. You must enter this code to complete the deletion.
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-amber-800">
+                <strong>⚠️ Note:</strong> A 6-digit code will be sent to verify this action.
               </p>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex gap-3">
               <button
                 onClick={handleCancelDeletion}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRequestDeletion}
                 disabled={isRequestingDelete}
-                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium disabled:opacity-50"
               >
-                {isRequestingDelete ? "Sending..." : "Send Verification Code"}
+                {isRequestingDelete ? "Sending..." : "Send Code"}
               </button>
             </div>
           </div>
@@ -279,58 +391,56 @@ const Profile = () => {
 
       {/* Verification Code Modal */}
       {showVerifyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-red-100 p-3 rounded-full">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                 <Mail size={24} className="text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Enter Verification Code</h3>
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Verify Deletion</h3>
+                <p className="text-sm text-slate-500">Enter the code sent to your email</p>
+              </div>
             </div>
             
-            <p className="text-gray-700 mb-4">
-              We've sent a 6-digit verification code to <strong>{user?.email}</strong>. Please enter it below to confirm account deletion.
+            <p className="text-slate-600 mb-4 text-sm">
+              We sent a 6-digit code to <strong className="text-slate-800">{user?.email}</strong>
             </p>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-800">
-                <strong>📧 Note:</strong> The email may take 5-6 minutes to arrive. Please check your spam/junk folder if you don't see it in your inbox.
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-5">
+              <p className="text-xs text-blue-700">
+                📧 Email may take 5-6 minutes. Check spam folder if needed.
               </p>
             </div>
 
             <form onSubmit={handleVerifyDeletion}>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Verification Code
-                </label>
+              <div className="mb-5">
                 <input
                   type="text"
                   maxLength={6}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-center text-2xl tracking-widest font-bold"
-                  placeholder="000000"
+                  className="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-center text-2xl tracking-[0.5em] font-bold text-slate-800"
+                  placeholder="••••••"
                   required
                 />
-                <p className="text-sm text-gray-500 mt-2">
-                  The code will expire in 10 minutes.
-                </p>
+                <p className="text-xs text-slate-400 mt-2 text-center">Code expires in 10 minutes</p>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={handleCancelDeletion}
-                  className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                  className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isDeleting || verificationCode.length !== 6}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors font-medium disabled:opacity-50"
                 >
-                  {isDeleting ? "Deleting..." : "Delete Account"}
+                  {isDeleting ? "Deleting..." : "Confirm Delete"}
                 </button>
               </div>
             </form>
@@ -340,7 +450,7 @@ const Profile = () => {
               disabled={isRequestingDelete}
               className="w-full mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
             >
-              {isRequestingDelete ? "Sending..." : "Resend Code"}
+              {isRequestingDelete ? "Sending..." : "Resend verification code"}
             </button>
           </div>
         </div>
