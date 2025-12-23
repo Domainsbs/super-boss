@@ -91,6 +91,31 @@ const MobileSubCategoryItem = ({
 
   const textSizeClass = level === 1 ? 'text-sm' : level === 2 ? 'text-xs' : 'text-xs'
   const textColorClass = level === 1 ? 'text-red-600' : 'text-gray-700'
+  
+  // Visual hierarchy for arrow buttons based on level
+  const getArrowButtonStyles = () => {
+    switch(level) {
+      case 1:
+        return 'w-7 h-7 bg-lime-500 hover:bg-lime-600 shadow-sm'
+      case 2:
+        return 'w-6 h-6 bg-lime-400 hover:bg-lime-500 shadow-sm'
+      case 3:
+        return 'w-5 h-5 bg-lime-300 hover:bg-lime-400'
+      default:
+        return 'w-5 h-5 bg-lime-200 hover:bg-lime-300'
+    }
+  }
+  
+  const getArrowIconSize = () => {
+    switch(level) {
+      case 1:
+        return 16
+      case 2:
+        return 14
+      default:
+        return 12
+    }
+  }
 
   return (
     <div className="space-y-1">
@@ -110,14 +135,14 @@ const MobileSubCategoryItem = ({
               e.stopPropagation()
               onToggle(subCategory._id)
             }}
-            className="ml-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-lime-500 text-white hover:bg-lime-600 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm active:scale-95 transition"
+            className={`ml-2 inline-flex items-center justify-center rounded-full text-white focus:outline-none focus:ring-2 focus:ring-lime-500 active:scale-95 transition ${getArrowButtonStyles()}`}
             aria-expanded={isExpanded}
             aria-controls={`mobile-subcat-${subCategory._id}`}
           >
             {isExpanded ? (
-              <ChevronDown size={16} />
+              <ChevronDown size={getArrowIconSize()} />
             ) : (
-              <ChevronRight size={16} />
+              <ChevronRight size={getArrowIconSize()} />
             )}
           </button>
         )}

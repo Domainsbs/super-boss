@@ -7,7 +7,7 @@ import ProductForm from "../../components/admin/ProductForm"
 import MoveProductsModal from "../../components/admin/MoveProductsModal"
 import ConfirmDialog from "../../components/admin/ConfirmDialog"
 import { useToast } from "../../context/ToastContext"
-import { Plus, Edit, Trash2, Search, Tag, Eye, EyeOff, Download, CheckSquare, Square, MoveRight, Copy, Upload, ChevronDown, Pause, Play, Columns, Check } from "lucide-react"
+import { Plus, Edit, Trash2, Search, Tag, Eye, EyeOff, Download, CheckSquare, Square, MoveRight, Copy, Upload, ChevronDown, Pause, Play, Columns, Check, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { getFullImageUrl } from "../../utils/imageUtils"
 
 import config from "../../config/config"
@@ -94,10 +94,45 @@ const AdminProducts = () => {
   })
   const columnDropdownRef = useRef(null)
 
+  // Table scroll states for horizontal navigation
+  const tableContainerRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
   // Save column visibility to localStorage
   useEffect(() => {
     localStorage.setItem('adminProductsColumns', JSON.stringify(visibleColumns))
   }, [visibleColumns])
+
+  // Check scroll position for horizontal navigation buttons
+  const checkScroll = () => {
+    if (tableContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableContainerRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
+    }
+  }
+
+  // Update scroll buttons when table loads or products change
+  useEffect(() => {
+    checkScroll()
+    const container = tableContainerRef.current
+    if (container) {
+      container.addEventListener('scroll', checkScroll)
+      return () => container.removeEventListener('scroll', checkScroll)
+    }
+  }, [products])
+
+  // Scroll table horizontally
+  const scrollTable = (direction) => {
+    if (tableContainerRef.current) {
+      const { scrollWidth, clientWidth } = tableContainerRef.current
+      tableContainerRef.current.scrollTo({
+        left: direction === 'left' ? 0 : scrollWidth - clientWidth,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   // Close column dropdown when clicking outside
   useEffect(() => {
@@ -1736,9 +1771,37 @@ const AdminProducts = () => {
                     <div className="text-sm text-gray-600">
                       Showing {products.length} of {categoryProductCount || products.length} products
                     </div>
+                    
+                    {/* Horizontal Scroll Navigation Arrows */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => scrollTable('left')}
+                        disabled={!canScrollLeft}
+                        className={`p-2 rounded-md transition-colors ${
+                          canScrollLeft 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        title="Scroll left"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        onClick={() => scrollTable('right')}
+                        disabled={!canScrollRight}
+                        className={`p-2 rounded-md transition-colors ${
+                          canScrollRight 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        title="Scroll right"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
                   </div>
                   
-                  <div className="overflow-x-auto max-w-full">
+                  <div ref={tableContainerRef} className="overflow-x-auto max-w-full">
                     <table className="w-full divide-y divide-gray-200 table-auto">
                       <thead className="bg-gray-50">
                         <tr>
@@ -1821,7 +1884,7 @@ const AdminProducts = () => {
                             scope="col"
                             className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                           >
-                            Price
+                           Base Price
                           </th>
                           )}
                           {isColumnVisible('sku') && (
@@ -2015,6 +2078,37 @@ const AdminProducts = () => {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                  
+                  {/* Bottom Horizontal Scroll Navigation Arrows */}
+                  <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-end bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 mr-2">Scroll table:</span>
+                      <button
+                        onClick={() => scrollTable('left')}
+                        disabled={!canScrollLeft}
+                        className={`p-2 rounded-md transition-colors ${
+                          canScrollLeft 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        title="Scroll left"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        onClick={() => scrollTable('right')}
+                        disabled={!canScrollRight}
+                        className={`p-2 rounded-md transition-colors ${
+                          canScrollRight 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                        title="Scroll right"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { ChevronDown, Minus, Plus, X } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, X } from "lucide-react"
 import axios from "axios"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
 import { useCart } from "../context/CartContext"
@@ -11,6 +11,7 @@ import SEO from "../components/SEO"
 import productCache from "../services/productCache"
 import { generateShopURL, parseShopURL, createSlug } from "../utils/urlUtils"
 import { createMetaDescription, generateSEOTitle } from "../utils/seoHelpers"
+import { getFullImageUrl } from "../utils/imageUtils"
 
 import config from "../config/config"
 import "rc-slider/assets/index.css"
@@ -250,12 +251,74 @@ const Shop = () => {
   const [expandedCategories, setExpandedCategories] = useState({})
   const [allSubcategories, setAllSubcategories] = useState([])
 
+  // Subcategory slider state
+  const subCategorySliderRef = useRef(null)
+  const [subCategoryScrollState, setSubCategoryScrollState] = useState({
+    canScrollPrev: false,
+    canScrollNext: false
+  })
+
+  // Brand slider state
+  const brandSliderRef = useRef(null)
+  const [brandScrollState, setBrandScrollState] = useState({
+    canScrollPrev: false,
+    canScrollNext: false
+  })
+
   const [productsToShow, setProductsToShow] = useState(20)
   const [delayedLoading, setDelayedLoading] = useState(false)
   const fetchTimeout = useRef()
   const loadingTimeout = useRef()
 
   // Progressive search function
+  // Subcategory slider handlers
+  const updateSubCategoryScrollState = () => {
+    const container = subCategorySliderRef.current
+    if (!container) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setSubCategoryScrollState({
+      canScrollPrev: scrollLeft > 0,
+      canScrollNext: scrollLeft < scrollWidth - clientWidth - 1
+    })
+  }
+
+  const scrollSubCategoryPrev = () => {
+    if (subCategorySliderRef.current) {
+      subCategorySliderRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollSubCategoryNext = () => {
+    if (subCategorySliderRef.current) {
+      subCategorySliderRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
+  // Brand slider handlers
+  const updateBrandScrollState = () => {
+    const container = brandSliderRef.current
+    if (!container) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = container
+    setBrandScrollState({
+      canScrollPrev: scrollLeft > 0,
+      canScrollNext: scrollLeft < scrollWidth - clientWidth - 1
+    })
+  }
+
+  const scrollBrandPrev = () => {
+    if (brandSliderRef.current) {
+      brandSliderRef.current.scrollBy({ left: -300, behavior: 'smooth' })
+    }
+  }
+
+  const scrollBrandNext = () => {
+    if (brandSliderRef.current) {
+      brandSliderRef.current.scrollBy({ left: 300, behavior: 'smooth' })
+    }
+  }
+
   const performProgressiveSearch = async (searchTerm) => {
     if (!searchTerm || searchTerm.trim() === "") {
       setActualSearchQuery("")
@@ -434,14 +497,20 @@ const Shop = () => {
         }
 
         console.log("🔍 Active Filters:", {
-          parentCategory: filters.parent_category ? "✅" : "❌",
-          level1: filters.category ? "✅" : "❌", 
-          level2: filters.subcategory2 ? "✅" : "❌",
-          level3: filters.subcategory3 ? "✅" : "❌",
-          level4: filters.subcategory4 ? "✅" : "❌",
+          parentCategory: filters.parent_category ? `✅ ${selectedCategory}` : "❌",
+          level1: filters.category ? `✅ ${selectedSubCategories[0]}` : "❌", 
+          level1Name: currentSubCategoryName || "none",
+          level2: filters.subcategory2 ? `✅ ${selectedSubCategory2}` : "❌",
+          level3: filters.subcategory3 ? `✅ ${selectedSubCategory3}` : "❌",
+          level4: filters.subcategory4 ? `✅ ${selectedSubCategory4}` : "❌",
           brands: filters.brand ? `✅ (${filters.brand.length})` : "❌",
           priceRange: `${filters.priceRange[0]} - ${filters.priceRange[1]}`,
           stockStatus: filters.stockStatus ? `✅ (${filters.stockStatus.join(", ")})` : "❌",
+        })
+        console.log("📌 Selected States:", {
+          selectedCategory,
+          selectedSubCategories,
+          allSubcategoriesLoaded: allSubcategories.length,
         })
         filteredProducts = productCache.filterProducts(allProducts, filters)
         console.log(`📊 Results: ${filteredProducts.length} products (from ${allProducts.length} total)`)
@@ -552,64 +621,79 @@ const Shop = () => {
   useEffect(() => {
     // Parse URL and set subcategories after allSubcategories are loaded
     if (allSubcategories.length === 0) return
+    if (categories.length === 0) return
     
     const urlParams = parseShopURL(location.pathname, location.search)
+    console.log("🔗 URL Parsing - Subcategories:", { 
+      pathname: location.pathname, 
+      urlParams, 
+      allSubcategoriesCount: allSubcategories.length 
+    })
 
+    const foundCategory = categories.find(
+      (cat) =>
+        cat._id === urlParams.parentCategory ||
+        cat.slug === urlParams.parentCategory ||
+        createSlug(cat.name) === urlParams.parentCategory,
+    )
+    const parentCategoryId = foundCategory ? foundCategory._id : null
+
+    const level1 = urlParams.subcategory
+      ? (parentCategoryId
+          ? findLevel1SubcategoryForCategory(parentCategoryId, urlParams.subcategory)
+          : findSubcategoryByUrlPart(urlParams.subcategory))
+      : null
     if (urlParams.subcategory) {
-      const foundSub = allSubcategories.find((sub) => sub.slug === urlParams.subcategory) ||
-        allSubcategories.find((sub) => sub._id === urlParams.subcategory) ||
-        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory)
-      if (foundSub) {
-        setCurrentSubCategoryName(foundSub.name)
-        setSelectedSubCategories([foundSub._id])
-      } else {
-        setSelectedSubCategories([])
-        setCurrentSubCategoryName(urlParams.subcategory)
-      }
-    } else {
-      setSelectedSubCategories([])
-      setCurrentSubCategoryName(null)
+      console.log("🔍 Looking for subcategory:", urlParams.subcategory, "Found:", level1?.name, "ID:", level1?._id)
     }
 
-    if (urlParams.subcategory2) {
-      const found2 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory2) ||
-        allSubcategories.find((sub) => sub._id === urlParams.subcategory2) ||
-        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory2)
-      setSelectedSubCategory2(found2 ? found2._id : urlParams.subcategory2)
-      setSubCategory2Data(found2 || null)
-      setCurrentSubCategory2Name(found2 ? found2.name : urlParams.subcategory2)
+    if (level1) {
+      setCurrentSubCategoryName(level1.name)
+      setSelectedSubCategories([level1._id])
+    } else {
+      setSelectedSubCategories([])
+      setCurrentSubCategoryName(urlParams.subcategory || null)
+    }
+
+    const level2 = urlParams.subcategory2
+      ? (level1?._id ? findChildSubcategoryByUrlPart(level1._id, urlParams.subcategory2) : findSubcategoryByUrlPart(urlParams.subcategory2))
+      : null
+    if (level2) {
+      setSelectedSubCategory2(level2._id)
+      setSubCategory2Data(level2)
+      setCurrentSubCategory2Name(level2.name)
     } else {
       setSelectedSubCategory2(null)
       setSubCategory2Data(null)
-      setCurrentSubCategory2Name(null)
+      setCurrentSubCategory2Name(urlParams.subcategory2 || null)
     }
 
-    if (urlParams.subcategory3) {
-      const found3 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory3) ||
-        allSubcategories.find((sub) => sub._id === urlParams.subcategory3) ||
-        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory3)
-      setSelectedSubCategory3(found3 ? found3._id : urlParams.subcategory3)
-      setSubCategory3Data(found3 || null)
-      setCurrentSubCategory3Name(found3 ? found3.name : urlParams.subcategory3)
+    const level3 = urlParams.subcategory3
+      ? (level2?._id ? findChildSubcategoryByUrlPart(level2._id, urlParams.subcategory3) : findSubcategoryByUrlPart(urlParams.subcategory3))
+      : null
+    if (level3) {
+      setSelectedSubCategory3(level3._id)
+      setSubCategory3Data(level3)
+      setCurrentSubCategory3Name(level3.name)
     } else {
       setSelectedSubCategory3(null)
       setSubCategory3Data(null)
-      setCurrentSubCategory3Name(null)
+      setCurrentSubCategory3Name(urlParams.subcategory3 || null)
     }
 
-    if (urlParams.subcategory4) {
-      const found4 = allSubcategories.find((sub) => sub.slug === urlParams.subcategory4) ||
-        allSubcategories.find((sub) => sub._id === urlParams.subcategory4) ||
-        allSubcategories.find((sub) => createSlug(sub.name) === urlParams.subcategory4)
-      setSelectedSubCategory4(found4 ? found4._id : urlParams.subcategory4)
-      setSubCategory4Data(found4 || null)
-      setCurrentSubCategory4Name(found4 ? found4.name : urlParams.subcategory4)
+    const level4 = urlParams.subcategory4
+      ? (level3?._id ? findChildSubcategoryByUrlPart(level3._id, urlParams.subcategory4) : findSubcategoryByUrlPart(urlParams.subcategory4))
+      : null
+    if (level4) {
+      setSelectedSubCategory4(level4._id)
+      setSubCategory4Data(level4)
+      setCurrentSubCategory4Name(level4.name)
     } else {
       setSelectedSubCategory4(null)
       setSubCategory4Data(null)
-      setCurrentSubCategory4Name(null)
+      setCurrentSubCategory4Name(urlParams.subcategory4 || null)
     }
-  }, [allSubcategories, location.pathname, location.search])
+  }, [allSubcategories, categories, location.pathname, location.search])
 
   useEffect(() => {
     // Parse URL when location changes or brands load
@@ -660,6 +744,44 @@ const Shop = () => {
   useEffect(() => {
     setProductsToShow(20)
   }, [selectedCategory, selectedBrands, searchQuery, priceRange, selectedSubCategories, stockFilters, products.length])
+
+  // Update subcategory slider scroll state on mount and when content changes
+  useEffect(() => {
+    const container = subCategorySliderRef.current
+    if (!container) return
+
+    // Initial update
+    updateSubCategoryScrollState()
+
+    // Update on resize
+    const resizeObserver = new ResizeObserver(() => {
+      updateSubCategoryScrollState()
+    })
+    resizeObserver.observe(container)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [selectedCategory, selectedSubCategories, selectedSubCategory2, selectedSubCategory3, selectedSubCategory4])
+
+  // Update brand slider scroll state when products change
+  useEffect(() => {
+    const container = brandSliderRef.current
+    if (!container) return
+
+    // Initial update
+    updateBrandScrollState()
+
+    // Update on resize
+    const resizeObserver = new ResizeObserver(() => {
+      updateBrandScrollState()
+    })
+    resizeObserver.observe(container)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [products])
 
   const fetchCategories = async () => {
     try {
@@ -770,9 +892,57 @@ const Shop = () => {
 
   const filteredBrands = brands.filter((brand) => brand.name.toLowerCase().includes(brandSearch.toLowerCase()))
 
+  const getSubcategoryCategoryId = (sub) => {
+    if (!sub) return null
+    return typeof sub.category === "object" ? sub.category?._id : sub.category
+  }
+
+  const getSubcategoryParentId = (sub) => {
+    if (!sub) return null
+    return typeof sub.parentSubCategory === "object" ? sub.parentSubCategory?._id : sub.parentSubCategory
+  }
+
+  const findLevel1SubcategoryForCategory = (categoryId, urlPart) => {
+    if (!categoryId || !urlPart) return null
+    const normalized = createSlug(String(urlPart))
+    return allSubcategories.find((sub) => {
+      const subCategoryId = getSubcategoryCategoryId(sub)
+      const parentId = getSubcategoryParentId(sub)
+      if (subCategoryId !== categoryId) return false
+      if (parentId) return false
+      return createSlug(sub.slug || "") === normalized || createSlug(sub.name || "") === normalized
+    })
+  }
+
+  const findSubcategoryByUrlPart = (urlPart) => {
+    if (!urlPart) return null
+    const normalized = createSlug(String(urlPart))
+    return (
+      allSubcategories.find((sub) => sub._id === urlPart) ||
+      allSubcategories.find((sub) => createSlug(sub.slug || "") === normalized) ||
+      allSubcategories.find((sub) => createSlug(sub.name || "") === normalized)
+    )
+  }
+
+  const findChildSubcategoryByUrlPart = (parentSubCategoryId, urlPart) => {
+    if (!parentSubCategoryId || !urlPart) return null
+    const normalized = createSlug(String(urlPart))
+    return allSubcategories.find((sub) => {
+      const parentId = typeof sub.parentSubCategory === "object" ? sub.parentSubCategory?._id : sub.parentSubCategory
+      if (!parentId || parentId !== parentSubCategoryId) return false
+      return createSlug(sub.slug || "") === normalized || createSlug(sub.name || "") === normalized
+    })
+  }
+
   // Helper function to get children of a category/subcategory
   const getChildren = (parentId, parentType = 'category') => {
+    if (!parentId || !allSubcategories || allSubcategories.length === 0) {
+      return []
+    }
+
     const children = allSubcategories.filter(sub => {
+      if (!sub) return false
+      
       const category = typeof sub.category === 'object' ? sub.category?._id : sub.category
       const parentSubCategory = typeof sub.parentSubCategory === 'object' ? sub.parentSubCategory?._id : sub.parentSubCategory
       
@@ -934,11 +1104,20 @@ const Shop = () => {
       setCurrentSubCategory4Name(null)
     }
 
-    // Update URL with correct hierarchy
+    // Update URL with full hierarchy (up to level 4) so deep links work consistently
     const categoryObj = categories.find((cat) => cat._id === hierarchy.parentCategory)
+    const level1Name = hierarchy.level1 ? allSubcategories.find((s) => s._id === hierarchy.level1)?.name : null
+    const level2Name = hierarchy.level2 ? allSubcategories.find((s) => s._id === hierarchy.level2)?.name : null
+    const level3Name = hierarchy.level3 ? allSubcategories.find((s) => s._id === hierarchy.level3)?.name : null
+    const level4Name = hierarchy.level4 ? allSubcategories.find((s) => s._id === hierarchy.level4)?.name : null
+
     const url = generateShopURL({
-      parentCategory: hierarchy.parentCategory && hierarchy.parentCategory !== 'all' ? categoryObj?.name || hierarchy.parentCategory : null,
-      subcategory: hierarchy.level1 ? allSubcategories.find(s => s._id === hierarchy.level1)?.name : null,
+      parentCategory:
+        hierarchy.parentCategory && hierarchy.parentCategory !== "all" ? categoryObj?.name || hierarchy.parentCategory : null,
+      subcategory: level1Name,
+      subcategory2: level2Name,
+      subcategory3: level3Name,
+      subcategory4: level4Name,
       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
       search: searchQuery || null,
     })
@@ -983,10 +1162,18 @@ const Shop = () => {
     const categoryObj = categories.find((cat) => cat._id === selectedCategory)
     const subcategoryObj =
       selectedSubCategories.length > 0 ? subCategories.find((sub) => sub._id === selectedSubCategories[0]) : null
+    
+    // Preserve deeper subcategory levels
+    const subcategory2Obj = selectedSubCategory2 ? allSubcategories.find((sub) => sub._id === selectedSubCategory2) : null
+    const subcategory3Obj = selectedSubCategory3 ? allSubcategories.find((sub) => sub._id === selectedSubCategory3) : null
+    const subcategory4Obj = selectedSubCategory4 ? allSubcategories.find((sub) => sub._id === selectedSubCategory4) : null
 
     const url = generateShopURL({
       parentCategory: selectedCategory !== "all" ? categoryObj?.name || selectedCategory : null,
       subcategory: subcategoryObj?.name || selectedSubCategories[0] || null,
+      subcategory2: subcategory2Obj?.name || null,
+      subcategory3: subcategory3Obj?.name || null,
+      subcategory4: subcategory4Obj?.name || null,
       brand: newSelectedBrands.length > 0 ? brands.find((b) => b._id === newSelectedBrands[0])?.name : null,
       search: searchQuery || null,
     })
@@ -1009,10 +1196,18 @@ const Shop = () => {
     const categoryObj = categories.find((cat) => cat._id === selectedCategory)
     const subcategoryObj =
       selectedSubCategories.length > 0 ? subCategories.find((sub) => sub._id === selectedSubCategories[0]) : null
+    
+    // Preserve deeper subcategory levels
+    const subcategory2Obj = selectedSubCategory2 ? allSubcategories.find((sub) => sub._id === selectedSubCategory2) : null
+    const subcategory3Obj = selectedSubCategory3 ? allSubcategories.find((sub) => sub._id === selectedSubCategory3) : null
+    const subcategory4Obj = selectedSubCategory4 ? allSubcategories.find((sub) => sub._id === selectedSubCategory4) : null
 
     const url = generateShopURL({
       parentCategory: selectedCategory !== "all" ? categoryObj?.name || selectedCategory : null,
       subcategory: subcategoryObj?.name || selectedSubCategories[0] || null,
+      subcategory2: subcategory2Obj?.name || null,
+      subcategory3: subcategory3Obj?.name || null,
+      subcategory4: subcategory4Obj?.name || null,
       brand: selectedBrands.length > 0 ? brands.find((b) => b._id === selectedBrands[0])?.name : null,
       search: newSearchQuery || null,
     })
@@ -1858,7 +2053,7 @@ const Shop = () => {
                     {(priceRange[0] !== minPrice || priceRange[1] !== maxPrice) && (
                       <div className="flex items-center justify-between bg-white rounded px-3 py-2 text-sm">
                         <span className="text-gray-700">
-                          <span className="font-semibold">Price:</span> ₹{priceRange[0]} - ₹{priceRange[1]}
+                          <span className="font-semibold">Price:</span> AED {priceRange[0]} - AED {priceRange[1]}
                         </span>
                         <button
                           onClick={() => setPriceRange([minPrice, maxPrice])}
@@ -2395,6 +2590,182 @@ const Shop = () => {
                 <SortDropdown value={sortBy} onChange={handleSortChange} />
               </div>
             </div>
+
+            {/* Child Categories Section - Shows children of the deepest selected level */}
+            {!searchQuery.trim() && (() => {
+              // Determine the deepest selected level and its type
+              let currentLevelId = null
+              let currentLevelType = null
+              let nextLevel = 1
+              
+              if (selectedSubCategory4) {
+                currentLevelId = selectedSubCategory4
+                currentLevelType = 'subcategory'
+                nextLevel = 5
+              } else if (selectedSubCategory3) {
+                currentLevelId = selectedSubCategory3
+                currentLevelType = 'subcategory'
+                nextLevel = 4
+              } else if (selectedSubCategory2) {
+                currentLevelId = selectedSubCategory2
+                currentLevelType = 'subcategory'
+                nextLevel = 3
+              } else if (selectedSubCategories.length > 0) {
+                currentLevelId = selectedSubCategories[0]
+                currentLevelType = 'subcategory'
+                nextLevel = 2
+              } else if (selectedCategory && selectedCategory !== "all") {
+                currentLevelId = selectedCategory
+                currentLevelType = 'category'
+                nextLevel = 1
+              }
+              
+              // If no category is selected, don't show anything
+              if (!currentLevelId) return null
+              
+              // Get children of the current deepest level
+              const childCategories = getChildren(currentLevelId, currentLevelType)
+              if (childCategories.length === 0) return null
+              
+              return (
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Sub Categories...</h2>
+                  <div className="relative">
+                    <button
+                      onClick={scrollSubCategoryPrev}
+                      className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-lime-500 hover:text-white transition-colors"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+
+                    <div
+                      ref={subCategorySliderRef}
+                      onScroll={updateSubCategoryScrollState}
+                      className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-12"
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                      {childCategories.map((child) => (
+                        <button
+                          key={child._id}
+                          onClick={() => handleSubcategorySelect(child._id, nextLevel)}
+                          className="flex-shrink-0 w-32 h-24 rounded-lg transition-all flex items-center justify-center p-4"
+                        >
+                          {child?.image ? (
+                            <img
+                              src={getFullImageUrl(child.image)}
+                              alt={child.name || "Subcategory"}
+                              className="max-h-full max-w-full object-contain"
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none"
+                                const btn = e.currentTarget.closest("button")
+                                const fallback = btn?.querySelector("[data-fallback-name]")
+                                if (fallback) fallback.classList.remove("hidden")
+                              }}
+                            />
+                          ) : null}
+                          <span data-fallback-name className={child?.image ? "hidden" : "text-sm font-semibold text-gray-700 text-center"}>
+                            {child.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={scrollSubCategoryNext}
+                      className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-lime-500 hover:text-white transition-colors"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </div>
+                </section>
+              )
+            })()}
+
+            {/* Brand Slider - Shows brands from currently displayed products */}
+            {!searchQuery.trim() && products.length > 0 && (() => {
+              // Extract unique brand IDs from current products
+              // Products may have brand as object or ID string
+              const productBrandIds = [...new Set(
+                products
+                  .map(p => {
+                    // Handle both populated brand object and brand ID string
+                    if (typeof p.brand === 'object' && p.brand !== null) {
+                      return p.brand._id
+                    }
+                    return p.brand
+                  })
+                  .filter(Boolean)
+              )]
+              
+              const availableBrands = brands.filter(brand => productBrandIds.includes(brand._id))
+              
+              console.log('Products count:', products.length)
+              console.log('Sample product brands:', products.slice(0, 3).map(p => p.brand))
+              console.log('Product brand IDs:', productBrandIds)
+              console.log('All brands:', brands.length)
+              console.log('Available brands:', availableBrands)
+              
+              if (availableBrands.length === 0) return null
+
+              return (
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Brand...</h2>
+                  <div className="relative">
+                    <button
+                      onClick={scrollBrandPrev}
+                      className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-lime-500 hover:text-white transition-colors"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+
+                    <div
+                      ref={brandSliderRef}
+                      onScroll={updateBrandScrollState}
+                      className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-12"
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                      {availableBrands.map((brand) => (
+                        <button
+                          key={brand._id}
+                          onClick={() => handleBrandChange(brand._id)}
+                          className={`flex-shrink-0 w-32 h-24 rounded-lg transition-all flex items-center justify-center p-4 ${
+                            selectedBrands.includes(brand._id)
+                              ? 'bg-lime-100 border-2 border-lime-600'
+                              : ''
+                          }`}
+                        >
+                          {brand.logo ? (
+                            <img
+                              src={getFullImageUrl(brand.logo)}
+                              alt={brand.name || "Brand"}
+                              className="max-h-full max-w-full object-contain"
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none"
+                                const btn = e.currentTarget.closest("button")
+                                const fallback = btn?.querySelector("[data-brand-fallback]")
+                                if (fallback) fallback.classList.remove("hidden")
+                              }}
+                            />
+                          ) : null}
+                          <span data-brand-fallback className={brand.logo ? "hidden" : "text-sm font-semibold text-gray-700 text-center"}>
+                            {brand.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={scrollBrandNext}
+                      className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-lime-500 hover:text-white transition-colors"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </div>
+                </section>
+              )
+            })()}
 
             {products.length > 0 ? (
               <>

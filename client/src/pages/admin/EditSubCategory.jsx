@@ -91,19 +91,28 @@ const EditSubCategory = () => {
   const fetchCategories = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await axios.get(`${config.API_URL}/api/categories`, {
+      // Use admin endpoint so inactive parent categories still appear (required for auto-select on edit)
+      const response = await axios.get(`${config.API_URL}/api/categories/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCategories(response.data);
+      setCategories(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      showToast("Failed to load categories", "error");
+      try {
+        const token = localStorage.getItem("adminToken");
+        const response = await axios.get(`${config.API_URL}/api/categories`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCategories(Array.isArray(response.data) ? response.data : []);
+      } catch (fallbackError) {
+        showToast("Failed to load categories", "error");
+      }
     }
   };
 
   const fetchSubCategories1 = async (categoryId) => {
     try {
       const token = localStorage.getItem("adminToken")
-      const response = await axios.get(`${config.API_URL}/api/subcategories/category/${categoryId}`, {
+      const response = await axios.get(`${config.API_URL}/api/subcategories/category/${categoryId}/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       // Filter to only show Level 1 subcategories (or those without level for backward compatibility)
@@ -119,7 +128,7 @@ const EditSubCategory = () => {
   const fetchSubCategories2 = async (subCategory1Id) => {
     try {
       const token = localStorage.getItem("adminToken")
-      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory1Id}`, {
+      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory1Id}/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setSubCategories2(response.data)
@@ -134,7 +143,7 @@ const EditSubCategory = () => {
     try {
       const token = localStorage.getItem("adminToken")
       // For level 2, fetch subcategories of the selected category (level 1)
-      const response = await axios.get(`${config.API_URL}/api/subcategories/category/${categoryId}`, {
+      const response = await axios.get(`${config.API_URL}/api/subcategories/category/${categoryId}/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       // Filter to only show Level 1 subcategories
@@ -151,7 +160,7 @@ const EditSubCategory = () => {
     try {
       const token = localStorage.getItem("adminToken")
       // For level 3, fetch children of level 1 subcategory (level 2 subcategories)
-      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory1Id}`, {
+      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory1Id}/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setParentSubCategories(response.data)
@@ -166,7 +175,7 @@ const EditSubCategory = () => {
     try {
       const token = localStorage.getItem("adminToken")
       // For level 4, fetch children of level 2 subcategory (level 3 subcategories)
-      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory2Id}`, {
+      const response = await axios.get(`${config.API_URL}/api/subcategories/children/${subCategory2Id}/admin`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setParentSubCategories(response.data)
@@ -185,6 +194,13 @@ const EditSubCategory = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const subCategoryData = response.data;
+
+      const normalizeId = (value) => {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        if (typeof value === "object") return value._id || value.id || "";
+        return "";
+      };
       
       // For Level 3 and 4, we need to traverse up to find intermediate parents
       let subCat1 = "";
@@ -228,10 +244,10 @@ const EditSubCategory = () => {
         metaDescription: subCategoryData.metaDescription || "",
         redirectUrl: subCategoryData.redirectUrl || "",
         image: subCategoryData.image || "",
-        category: subCategoryData.category?._id || subCategoryData.category || "",
+        category: normalizeId(subCategoryData.category),
         subCategory1: subCat1,
         subCategory2: subCat2,
-        parentSubCategory: subCategoryData.parentSubCategory?._id || subCategoryData.parentSubCategory || "",
+        parentSubCategory: normalizeId(subCategoryData.parentSubCategory),
         level: subCategoryData.level || level,
         isActive: subCategoryData.isActive !== undefined ? subCategoryData.isActive : true,
         sortOrder: subCategoryData.sortOrder || 0,
@@ -317,10 +333,10 @@ const EditSubCategory = () => {
       showToast("Subcategory updated successfully!", "success");
       
       // Navigate to appropriate list page
-      if (level === 4) navigate("/superboss-admin/subcategories-4")
-      else if (level === 3) navigate("/superboss-admin/subcategories-3")
-      else if (level === 2) navigate("/superboss-admin/subcategories-2")
-      else navigate("/superboss-admin/subcategories")
+      if (level === 4) navigate("/admin/subcategories-4")
+      else if (level === 3) navigate("/admin/subcategories-3")
+      else if (level === 2) navigate("/admin/subcategories-2")
+      else navigate("/admin/subcategories")
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to update subcategory", "error"
@@ -331,10 +347,10 @@ const EditSubCategory = () => {
   };
 
   const getBackPath = () => {
-    if (level === 4) return "/superboss-admin/subcategories-4"
-    if (level === 3) return "/superboss-admin/subcategories-3"
-    if (level === 2) return "/superboss-admin/subcategories-2"
-    return "/superboss-admin/subcategories"
+    if (level === 4) return "/admin/subcategories-4"
+    if (level === 3) return "/admin/subcategories-3"
+    if (level === 2) return "/admin/subcategories-2"
+    return "/admin/subcategories"
   }
 
   return (

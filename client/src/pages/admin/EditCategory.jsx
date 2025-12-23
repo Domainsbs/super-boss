@@ -29,7 +29,7 @@ const EditCategory = () => {
     if (id) {
       setLoading(true);
       const token = localStorage.getItem("adminToken");
-      fetch(`${config.API_URL}/api/categories/${id}`, {
+      fetch(`${config.API_URL}/api/categories/${id}/admin`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -90,7 +90,7 @@ const EditCategory = () => {
         },
       });
       showToast("Category updated successfully!", "success");
-      navigate("/superboss-admin/categories");
+      navigate("/admin/categories");
     } catch (error) {
       showToast(
         error.response?.data?.message || "Failed to update category", "error"
@@ -109,7 +109,7 @@ const EditCategory = () => {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
               <button
-                onClick={() => navigate("/superboss-admin/categories")}
+                onClick={() => navigate("/admin/categories")}
                 className="hover:text-blue-600 flex items-center gap-1"
               >
                 <ArrowLeft size={16} />
@@ -246,7 +246,7 @@ const EditCategory = () => {
               <div className="flex justify-end gap-4 pt-6">
                 <button
                   type="button"
-                  onClick={() => navigate("/superboss-admin/categories")}
+                  onClick={() => navigate("/admin/categories")}
                   className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
