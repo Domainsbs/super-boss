@@ -55,7 +55,7 @@ const BannerSlider = ({ banners, fixedHeight }) => {
         <img
           src={getFullImageUrl(currentBanner.image) || "/placeholder.svg"}
           alt={currentBanner.title || "Banner"}
-          className="w-full h-full object-cover"
+          className="w-full h-full bg-cover"
         />
         {/* Optional subtle overlay for better navigation visibility */}
         <div className="absolute inset-0 bg-black bg-opacity-5"></div>
