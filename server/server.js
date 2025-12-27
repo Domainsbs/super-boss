@@ -72,9 +72,12 @@ const app = express()
 // CORS configuration
 app.use(cors({
   origin: [
+    'https://www.seenalif.com',
+    'https://seenalif.com',
     'https://www.graba2z.ae',
     'https://www.grabatoz.ae',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:5173'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin'],
