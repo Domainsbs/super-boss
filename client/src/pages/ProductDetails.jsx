@@ -2492,7 +2492,7 @@ const ProductDetails = () => {
                 <span className="inline-flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
                   <span className="text-gray-500">Category:</span>
                   <span className="font-medium text-blue-600">
-                    {product.category?.name || product.category || "N/A"}
+                    {product.parentCategory?.name || product.category?.name || product.subCategory?.name || "N/A"}
                   </span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
@@ -3206,35 +3206,44 @@ const ProductDetails = () => {
 
               {/* Payment Methods */}
               <div className="border-t border-gray-100 pt-5">
-                <h4 className="font-semibold text-gray-900 text-sm mb-4 flex items-center gap-2">
-                  <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h4 className="font-semibold text-gray-900 text-base mb-4 flex items-center gap-3">
+                  <span className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                   </span>
                   Payment Methods
                 </h4>
-                <div className="flex flex-wrap gap-3 justify-center bg-gray-50 rounded-xl p-4">
-                  <div className="px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <img
-                      src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757919726/1st_logo_v8x2hc.webp"
-                      alt="master"
-                      className="h-8 w-auto object-contain"
-                    />
+                <div className="flex flex-col gap-4 bg-gray-50 rounded-2xl p-5">
+                  {/* Row 1 - VISA, tabby, tamara */}
+                  <div className="flex justify-center">
+                    <div className="px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <img
+                        src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757919726/1st_logo_v8x2hc.webp"
+                        alt="VISA tabby tamara"
+                        className="h-16 w-auto object-contain"
+                      />
+                    </div>
                   </div>
-                  <div className="px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <img
-                      src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757937381/2nd_logo_x6jzhz.webp"
-                      alt="visa"
-                      className="h-8 w-auto object-contain"
-                    />
+                  {/* Row 2 - Google Pay, Samsung Pay, Mastercard */}
+                  <div className="flex justify-center">
+                    <div className="px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <img
+                        src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757937381/2nd_logo_x6jzhz.webp"
+                        alt="Google Pay Samsung Pay Mastercard"
+                        className="h-16 w-auto object-contain"
+                      />
+                    </div>
                   </div>
-                  <div className="px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-100">
-                    <img
-                      src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757937401/3rd_logo_fmwdkp.webp"
-                      alt="tamara"
-                      className="h-8 w-auto object-contain"
-                    />
+                  {/* Row 3 - COD, Apple Pay */}
+                  <div className="flex justify-center">
+                    <div className="px-6 py-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <img
+                        src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757937401/3rd_logo_fmwdkp.webp"
+                        alt="COD Apple Pay"
+                        className="h-16 w-auto object-contain"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3312,7 +3321,7 @@ const ProductDetails = () => {
                       <tr className="bg-white">
                         <td className="border border-gray-200 px-4 py-3 font-medium text-gray-900 w-1/4">Category</td>
                         <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                          {product.category?.name || product.category || "N/A"}
+                          {product.parentCategory?.name || product.category?.name || product.subCategory?.name || "N/A"}
                         </td>
                       </tr>
                       {product.warranty && (
@@ -3426,7 +3435,7 @@ const ProductDetails = () => {
               <tr className="bg-gray-50">
                 <td className="border-b border-gray-200 px-5 py-3.5 font-medium text-gray-900 w-1/4">Category</td>
                 <td className="border-b border-gray-200 px-5 py-3.5 text-gray-700">
-                  {product.category?.name || product.category || "N/A"}
+                  {product.parentCategory?.name || product.category?.name || product.subCategory?.name || "N/A"}
                 </td>
               </tr>
               {product.warranty && (

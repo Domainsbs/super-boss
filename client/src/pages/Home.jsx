@@ -1651,52 +1651,124 @@ const Home = () => {
       {/* Dynamic Section Position 10 */}
       {/* {renderDynamicSection(10)} */}
 
-      {/* Core Service Section - Responsive: Desktop(4 in row), Mobile(2x2 grid) */}
-      <section className="py-8 md:py-10 bg-white mt-2">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-          <h2 className="text-lg lg:text-xl xl:text-2xl font-bold text-center text-gray-900 mb-6 lg:mb-8 xl:mb-12">
-            Core Service Aspects
-          </h2>
+      {/* Core Service Section - New Modern Layout */}
+      <section className="py-12 md:py-16 lg:py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 lg:mb-16">
+            <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full uppercase tracking-wider mb-4">
+              Why Choose Us
+            </span>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+              Core Service Aspects
+            </h2>
+            <p className="mt-4 text-gray-500 max-w-2xl mx-auto">
+              We provide the best services to ensure your shopping experience is seamless and satisfying
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-6 xl:gap-8 2xl:gap-10">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
-                <CreditCard className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+          {/* Desktop Layout - Horizontal Cards */}
+          <div className="hidden md:grid md:grid-cols-4 gap-6 lg:gap-8">
+            {/* Secure Payment */}
+            <div className="relative bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative">
+                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                  <CreditCard className="w-7 h-7 lg:w-8 lg:h-8 text-white" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-2">
+                  Secure Payment
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Multiple secure payment methods available for your convenience
+                </p>
               </div>
-              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Secure Payment Method</h3>
-              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
-                Available Different secure Payment Methods
-              </p>
             </div>
 
-            <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
-                <Truck className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+            {/* Fast Delivery */}
+            <div className="relative bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative">
+                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                  <Truck className="w-7 h-7 lg:w-8 lg:h-8 text-white" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-2">
+                  Fast Delivery
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Quick door-to-door delivery with real-time tracking
+                </p>
               </div>
-              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Extreme Fast Delivery</h3>
-              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
-                Fast and convenient From door to door delivery
-              </p>
             </div>
 
-            <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
-                <Heart className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+            {/* Quality & Savings */}
+            <div className="relative bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative">
+                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                  <Heart className="w-7 h-7 lg:w-8 lg:h-8 text-white" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-2">
+                  Quality & Savings
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Premium quality products at affordable prices
+                </p>
               </div>
-              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Quality & Savings</h3>
-              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
-                Comprehensive quality control and affordable price
-              </p>
             </div>
 
-            <div className="flex flex-col items-center text-center">
-              <div className="w-10 h-10 lg:w-14 lg:h-14 xl:w-16 xl:h-16 rounded-lg flex items-center justify-center mb-2 lg:mb-3 xl:mb-4">
-                <Headphones className="w-6 h-6 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-lime-500" />
+            {/* Professional Support */}
+            <div className="relative bg-white rounded-2xl p-6 lg:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 group overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-500"></div>
+              <div className="relative">
+                <div className="w-14 h-14 lg:w-16 lg:h-16 bg-blue-500 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                  <Headphones className="w-7 h-7 lg:w-8 lg:h-8 text-white" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-2">
+                  24/7 Support
+                </h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Expert customer support from our passionate team
+                </p>
               </div>
-              <h3 className="text-xs lg:text-sm xl:text-base 2xl:text-lg font-semibold text-gray-900 mb-1 lg:mb-2">Professional Support</h3>
-              <p className="text-[10px] lg:text-xs xl:text-sm text-gray-600 leading-relaxed">
-                Efficient customer support from passionate team
-              </p>
+            </div>
+          </div>
+
+          {/* Mobile Layout - 2x2 Grid with Different Style */}
+          <div className="grid grid-cols-2 gap-4 md:hidden">
+            {/* Secure Payment */}
+            <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md shadow-blue-500/25">
+                <CreditCard className="w-6 h-6 text-white" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1">Secure Payment</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">Multiple secure methods</p>
+            </div>
+
+            {/* Fast Delivery */}
+            <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md shadow-blue-500/25">
+                <Truck className="w-6 h-6 text-white" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1">Fast Delivery</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">Door-to-door service</p>
+            </div>
+
+            {/* Quality & Savings */}
+            <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md shadow-blue-500/25">
+                <Heart className="w-6 h-6 text-white" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1">Quality & Savings</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">Premium at best price</p>
+            </div>
+
+            {/* Professional Support */}
+            <div className="bg-white rounded-xl p-4 shadow-md border border-gray-100 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md shadow-blue-500/25">
+                <Headphones className="w-6 h-6 text-white" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1">24/7 Support</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">Expert assistance</p>
             </div>
           </div>
         </div>
