@@ -13,7 +13,7 @@ const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
   const rightBannerCard = bannerCards && bannerCards.length > 0 ? bannerCards[0] : null
   
   // Default right banner image if no banner card
-  const defaultRightBannerImage = "/tamara.png"
+  const defaultRightBannerImage = "https://i.pinimg.com/564x/9f/25/7d/9f257dd357b5697e99274f5a7410f3a0.jpg"
   
   // Render right side static banner
   const renderRightBanner = () => {
