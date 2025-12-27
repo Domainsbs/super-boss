@@ -27,7 +27,7 @@ const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
           <img
             src={imageSrc}
             alt={rightBannerCard.title || "Promotional Banner"}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-fill"
           />
         </div>
       )
@@ -66,7 +66,7 @@ const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
         <img
           src={defaultRightBannerImage}
           alt="Promotional Banner"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-fill"
         />
       </div>
     )
