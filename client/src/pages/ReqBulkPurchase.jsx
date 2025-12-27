@@ -1,10 +1,9 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { X, Building2, FileText, Globe } from 'lucide-react';
+import { X, Building2, FileText, User, Mail, Phone, CheckCircle, Package, TrendingUp, Shield, Users, Truck, Headphones, ArrowRight, Sparkles, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import config from '../config/config';
-import { User, Mail, Phone } from "lucide-react";
 import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import '../styles/phoneInput.css'
@@ -27,213 +26,6 @@ export default function ReqBulkPurchase() {
   const [tempId, setTempId] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
-  const [countries] = useState([
-    { code: '+93', cc: 'AF' },
-    { code: '+355', cc: 'AL' },
-    { code: '+213', cc: 'DZ' },
-    { code: '+1', cc: 'AS' },
-    { code: '+376', cc: 'AD' },
-    { code: '+244', cc: 'AO' },
-    { code: '+1', cc: 'AG' },
-    { code: '+54', cc: 'AR' },
-    { code: '+374', cc: 'AM' },
-    { code: '+61', cc: 'AU' },
-    { code: '+43', cc: 'AT' },
-    { code: '+994', cc: 'AZ' },
-    { code: '+1', cc: 'BS' },
-    { code: '+973', cc: 'BH' },
-    { code: '+880', cc: 'BD' },
-    { code: '+1', cc: 'BB' },
-    { code: '+375', cc: 'BY' },
-    { code: '+32', cc: 'BE' },
-    { code: '+501', cc: 'BZ' },
-    { code: '+229', cc: 'BJ' },
-    { code: '+1', cc: 'BM' },
-    { code: '+975', cc: 'BT' },
-    { code: '+591', cc: 'BO' },
-    { code: '+387', cc: 'BA' },
-    { code: '+267', cc: 'BW' },
-    { code: '+55', cc: 'BR' },
-    { code: '+673', cc: 'BN' },
-    { code: '+359', cc: 'BG' },
-    { code: '+226', cc: 'BF' },
-    { code: '+257', cc: 'BI' },
-    { code: '+855', cc: 'KH' },
-    { code: '+237', cc: 'CM' },
-    { code: '+1', cc: 'CA' },
-    { code: '+238', cc: 'CV' },
-    { code: '+1', cc: 'KY' },
-    { code: '+236', cc: 'CF' },
-    { code: '+235', cc: 'TD' },
-    { code: '+56', cc: 'CL' },
-    { code: '+86', cc: 'CN' },
-    { code: '+57', cc: 'CO' },
-    { code: '+269', cc: 'KM' },
-    { code: '+242', cc: 'CG' },
-    { code: '+682', cc: 'CK' },
-    { code: '+506', cc: 'CR' },
-    { code: '+385', cc: 'HR' },
-    { code: '+53', cc: 'CU' },
-    { code: '+357', cc: 'CY' },
-    { code: '+420', cc: 'CZ' },
-    { code: '+45', cc: 'DK' },
-    { code: '+253', cc: 'DJ' },
-    { code: '+1', cc: 'DM' },
-    { code: '+1', cc: 'DO' },
-    { code: '+670', cc: 'TL' },
-    { code: '+593', cc: 'EC' },
-    { code: '+20', cc: 'EG' },
-    { code: '+503', cc: 'SV' },
-    { code: '+240', cc: 'GQ' },
-    { code: '+291', cc: 'ER' },
-    { code: '+372', cc: 'EE' },
-    { code: '+251', cc: 'ET' },
-    { code: '+679', cc: 'FJ' },
-    { code: '+358', cc: 'FI' },
-    { code: '+33', cc: 'FR' },
-    { code: '+241', cc: 'GA' },
-    { code: '+220', cc: 'GM' },
-    { code: '+995', cc: 'GE' },
-    { code: '+49', cc: 'DE' },
-    { code: '+233', cc: 'GH' },
-    { code: '+350', cc: 'GI' },
-    { code: '+30', cc: 'GR' },
-    { code: '+299', cc: 'GL' },
-    { code: '+1', cc: 'GD' },
-    { code: '+590', cc: 'GP' },
-    { code: '+1', cc: 'GU' },
-    { code: '+502', cc: 'GT' },
-    { code: '+224', cc: 'GN' },
-    { code: '+245', cc: 'GW' },
-    { code: '+592', cc: 'GY' },
-    { code: '+509', cc: 'HT' },
-    { code: '+504', cc: 'HN' },
-    { code: '+36', cc: 'HU' },
-    { code: '+354', cc: 'IS' },
-    { code: '+91', cc: 'IN' },
-    { code: '+62', cc: 'ID' },
-    { code: '+98', cc: 'IR' },
-    { code: '+964', cc: 'IQ' },
-    { code: '+353', cc: 'IE' },
-    { code: '+972', cc: 'IL' },
-    { code: '+39', cc: 'IT' },
-    { code: '+225', cc: 'CI' },
-    { code: '+1', cc: 'JM' },
-    { code: '+81', cc: 'JP' },
-    { code: '+962', cc: 'JO' },
-    { code: '+7', cc: 'KZ' },
-    { code: '+254', cc: 'KE' },
-    { code: '+686', cc: 'KI' },
-    { code: '+850', cc: 'KP' },
-    { code: '+82', cc: 'KR' },
-    { code: '+965', cc: 'KW' },
-    { code: '+996', cc: 'KG' },
-    { code: '+856', cc: 'LA' },
-    { code: '+371', cc: 'LV' },
-    { code: '+961', cc: 'LB' },
-    { code: '+266', cc: 'LS' },
-    { code: '+231', cc: 'LR' },
-    { code: '+218', cc: 'LY' },
-    { code: '+423', cc: 'LI' },
-    { code: '+370', cc: 'LT' },
-    { code: '+352', cc: 'LU' },
-    { code: '+261', cc: 'MG' },
-    { code: '+265', cc: 'MW' },
-    { code: '+60', cc: 'MY' },
-    { code: '+960', cc: 'MV' },
-    { code: '+223', cc: 'ML' },
-    { code: '+356', cc: 'MT' },
-    { code: '+692', cc: 'MH' },
-    { code: '+596', cc: 'MQ' },
-    { code: '+222', cc: 'MR' },
-    { code: '+230', cc: 'MU' },
-    { code: '+52', cc: 'MX' },
-    { code: '+691', cc: 'FM' },
-    { code: '+373', cc: 'MD' },
-    { code: '+377', cc: 'MC' },
-    { code: '+976', cc: 'MN' },
-    { code: '+382', cc: 'ME' },
-    { code: '+212', cc: 'MA' },
-    { code: '+258', cc: 'MZ' },
-    { code: '+95', cc: 'MM' },
-    { code: '+264', cc: 'NA' },
-    { code: '+674', cc: 'NR' },
-    { code: '+977', cc: 'NP' },
-    { code: '+31', cc: 'NL' },
-    { code: '+599', cc: 'AN' },
-    { code: '+687', cc: 'NC' },
-    { code: '+64', cc: 'NZ' },
-    { code: '+505', cc: 'NI' },
-    { code: '+227', cc: 'NE' },
-    { code: '+234', cc: 'NG' },
-    { code: '+683', cc: 'NU' },
-    { code: '+47', cc: 'NO' },
-    { code: '+968', cc: 'OM' },
-    { code: '+92', cc: 'PK' },
-    { code: '+680', cc: 'PW' },
-    { code: '+507', cc: 'PA' },
-    { code: '+675', cc: 'PG' },
-    { code: '+595', cc: 'PY' },
-    { code: '+51', cc: 'PE' },
-    { code: '+63', cc: 'PH' },
-    { code: '+48', cc: 'PL' },
-    { code: '+351', cc: 'PT' },
-    { code: '+1', cc: 'PR' },
-    { code: '+974', cc: 'QA' },
-    { code: '+40', cc: 'RO' },
-    { code: '+7', cc: 'RU' },
-    { code: '+250', cc: 'RW' },
-    { code: '+685', cc: 'WS' },
-    { code: '+378', cc: 'SM' },
-    { code: '+239', cc: 'ST' },
-    { code: '+966', cc: 'SA' },
-    { code: '+221', cc: 'SN' },
-    { code: '+381', cc: 'RS' },
-    { code: '+248', cc: 'SC' },
-    { code: '+232', cc: 'SL' },
-    { code: '+65', cc: 'SG' },
-    { code: '+421', cc: 'SK' },
-    { code: '+386', cc: 'SI' },
-    { code: '+677', cc: 'SB' },
-    { code: '+252', cc: 'SO' },
-    { code: '+27', cc: 'ZA' },
-    { code: '+34', cc: 'ES' },
-    { code: '+94', cc: 'LK' },
-    { code: '+249', cc: 'SD' },
-    { code: '+597', cc: 'SR' },
-    { code: '+268', cc: 'SZ' },
-    { code: '+46', cc: 'SE' },
-    { code: '+41', cc: 'CH' },
-    { code: '+963', cc: 'SY' },
-    { code: '+886', cc: 'TW' },
-    { code: '+992', cc: 'TJ' },
-    { code: '+255', cc: 'TZ' },
-    { code: '+66', cc: 'TH' },
-    { code: '+228', cc: 'TG' },
-    { code: '+690', cc: 'TK' },
-    { code: '+676', cc: 'TO' },
-    { code: '+1', cc: 'TT' },
-    { code: '+216', cc: 'TN' },
-    { code: '+90', cc: 'TR' },
-    { code: '+993', cc: 'TM' },
-    { code: '+688', cc: 'TV' },
-    { code: '+256', cc: 'UG' },
-    { code: '+380', cc: 'UA' },
-    { code: '+971', cc: 'AE' },
-    { code: '+44', cc: 'UK' },
-    { code: '+1', cc: 'US' },
-    { code: '+598', cc: 'UY' },
-    { code: '+998', cc: 'UZ' },
-    { code: '+678', cc: 'VU' },
-    { code: '+379', cc: 'VA' },
-    { code: '+58', cc: 'VE' },
-    { code: '+84', cc: 'VN' },
-    { code: '+1', cc: 'VG' },
-    { code: '+1', cc: 'VI' },
-    { code: '+967', cc: 'YE' },
-    { code: '+260', cc: 'ZM' },
-    { code: '+263', cc: 'ZW' }
-  ]);
 
   const handleCallbackChange = (e) => {
     const { name, value } = e.target;
@@ -271,10 +63,8 @@ export default function ReqBulkPurchase() {
         userId: user?._id || null,
       };
 
-      // Remove countryCode from payload as it's no longer used
       delete payload.countryCode;
 
-      // If user is not logged in, include OTP verification
       if (!user) {
         if (!otpSent) {
           alert('Please verify your email first');
@@ -309,289 +99,440 @@ export default function ReqBulkPurchase() {
     }
   };
 
+  const benefits = [
+    {
+      icon: Shield,
+      title: 'Trusted Platform',
+      desc: 'Dedicated to serving SMBs in the UAE with trust and reliability as our priority.',
+      color: 'blue'
+    },
+    {
+      icon: Users,
+      title: 'Authorized Sellers',
+      desc: 'Over 100 authorized sellers ready to serve with competitive prices.',
+      color: 'green'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Learn About Trends',
+      desc: 'Join webinars by global brands to stay ahead and grow your business.',
+      color: 'purple'
+    },
+    {
+      icon: Package,
+      title: 'Wide Product Range',
+      desc: 'Access products with accurate info from over 200 global brands.',
+      color: 'orange'
+    },
+    {
+      icon: Sparkles,
+      title: 'Quantity Discounts',
+      desc: 'Get better prices for larger quantities or request quotes from sellers.',
+      color: 'pink'
+    },
+    {
+      icon: Headphones,
+      title: 'Dedicated Support',
+      desc: 'Add team members and set roles for a seamless buying experience.',
+      color: 'cyan'
+    },
+  ];
+
+  const steps = [
+    { step: 1, title: 'Bulk Requirement', desc: 'Submit your requirements' },
+    { step: 2, title: 'Request Quote', desc: 'Get personalized quotes' },
+    { step: 3, title: 'Best Price', desc: 'Compare & choose' },
+    { step: 4, title: 'Proposals', desc: 'Review offers' },
+    { step: 5, title: 'Invoice', desc: 'Confirm order' },
+    { step: 6, title: 'Delivery', desc: 'Receive products' },
+  ];
+
+  const getColorClasses = (color) => {
+    const colors = {
+      blue: 'bg-blue-100 text-blue-600',
+      green: 'bg-green-100 text-green-600',
+      purple: 'bg-purple-100 text-purple-600',
+      orange: 'bg-orange-100 text-orange-600',
+      pink: 'bg-pink-100 text-pink-600',
+      cyan: 'bg-cyan-100 text-cyan-600',
+    };
+    return colors[color] || colors.blue;
+  };
+
   return (
-    <div className="font-sans text-gray-800">
-      {/* Header */}
-      <header className="bg-white shadow-md py-4 px-6 text-center">
-        <p className="text-sm text-green-700 font-semibold">Your One-Stop Solution for B2B Business Needs in UAE</p>
-      </header>
-
+    <div className="font-sans text-gray-800 bg-gray-50 min-h-screen">
       {/* Hero Section */}
-      <section className="bg-green-100 py-6 px-4 text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-green-800">Grabatoz - B2B Dedicated Wholesale Place</h1>
-        <p className="mt-2 text-sm md:text-base max-w-3xl mx-auto text-gray-700">
-          Our trusted B2B wholesale palace will cater to all your business needs
-        </p>
-      </section>
-
-      {/* Intro Section */}
-      <section className="py-8 px-4 md:px-16 text-center">
-        <p className="max-w-3xl mx-auto text-gray-700">
-          Welcome to Grabatoz.com your one-stop sourcing platform for all your business needs.
-          Grabatoz.com, the omnichannel retailer that was established in Dubai, UAE. We are a business
-          focused marketplace where small and medium businesses (SMBs) discover, interact, and buy
-          products and services by engaging with brands and authorized sellers.
-        </p>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="bg-gray-100 py-10 px-4 md:px-16">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <img
-            src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg"
-            alt="Business Meeting"
-            className="w-full md:w-1/2 rounded-md"
-          />
-          <div className="md:w-1/2">
-            <h2 className="text-xl font-bold mb-2">Benefits of being on Grabatoz.com</h2>
-            <p className="text-gray-700 mb-4">
-              As a customer and as a business buyer, the platform offers great benefits and opportunities
-              for small and medium businesses.
-            </p>
-            <button className="bg-lime-500 text-white px-4 py-2 rounded hover:bg-green-700" onClick={() => setShowCallbackModal(true)}>
-              Contact Sales
-            </button>
+      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-72 h-72 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-white">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <Zap size={16} />
+                Your B2B Partner in UAE
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Bulk Purchase
+                <span className="block text-blue-200">Made Simple</span>
+              </h1>
+              <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-xl">
+                Your one-stop sourcing platform for all business needs. Connect with authorized sellers and get the best deals on bulk orders.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button 
+                  onClick={() => setShowCallbackModal(true)}
+                  className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  Contact Sales
+                  <ArrowRight size={20} />
+                </button>
+                <a 
+                  href="#benefits" 
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/20"
+                >
+                  Learn More
+                </a>
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <img
+                src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg"
+                alt="Business Meeting"
+                className="rounded-2xl shadow-2xl"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Buying Journey */}
-      <section className="py-10 px-4 md:px-16 text-center">
-        <h2 className="text-xl font-bold mb-6">Online BUYING journey</h2>
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {[
-            'Bulk Requirement',
-            'Request For Quote',
-            'Best Price Quoted',
-            'Proposals Evaluated',
-            'Invoice',
-            'Delivery & Payment',
-          ].map((step, i) => (
-            <div key={i} className="bg-white border-lime-500 border-2 shadow-md p-4 rounded-md text-sm font-medium">
-              <p className="mb-2 font-bold">Step {i + 1}</p>
-              <p>{step}</p>
-            </div>
-          ))}
+      {/* Stats Section */}
+      <section className="relative -mt-12 z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">200+</div>
+            <div className="text-gray-500 text-sm">Global Brands</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">100+</div>
+            <div className="text-gray-500 text-sm">Authorized Sellers</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">10K+</div>
+            <div className="text-gray-500 text-sm">Products Available</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">24/7</div>
+            <div className="text-gray-500 text-sm">Support Available</div>
+          </div>
         </div>
       </section>
 
-      {/* Why Bulk Purchase */}
-      <section className="bg-gray-50 py-12 px-4 md:px-16">
-        <h2 className="text-xl font-bold text-center mb-10">
-          Why Bulk Purchase from Grabatoz.com?
-        </h2>
-        <div className="grid gap-6  md:grid-cols-3">
-          {[
-            {
-              title: 'Trusted Platform',
-              desc: 'Dedicated to serving SMBs in the UAE. Trust and reliability are our priority.',
-            },
-            {
-              title: 'Authorized Sellers',
-              desc: 'Over 100 authorized sellers ready to serve with better prices and availability.',
-            },
-            {
-              title: 'Learn About Trends',
-              desc: 'Join webinars by global brands to stay ahead and grow your business.',
-            },
-            {
-              title: 'Better Range and Information',
-              desc: 'Access a wide range of products with accurate info from over 200 global brands.',
-            },
-            {
-              title: 'Quantity Discounts & RFQ',
-              desc: 'Get better prices for larger quantities or request quotes from multiple sellers.',
-            },
-            {
-              title: 'Create Users & Manage Purchases',
-              desc: 'Add team members and set buyer/approver roles for a seamless experience.',
-            },
-          ].map((item, i) => (
-            <div key={i} className="bg-white p-6 border-lime-500 border-2 shadow-md rounded-md">
-              <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-              <p className="text-gray-700 text-sm">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="text-center mt-10">
-          <button className="bg-lime-500 text-white px-6 py-3 rounded hover:bg-green-700" onClick={() => setShowCallbackModal(true)}>
-            Contact Sales
-          </button>
+      {/* About Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Welcome to Our B2B Platform
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Your one-stop sourcing platform for all your business needs. We are a business-focused marketplace 
+            where small and medium businesses discover, interact, and buy products and services by engaging 
+            with brands and authorized sellers. Experience seamless procurement with competitive pricing 
+            and dedicated support.
+          </p>
         </div>
       </section>
 
-      {showCallbackModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-lg relative max-h-[90vh] overflow-y-auto">
-            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-600" onClick={() => setShowCallbackModal(false)}>
-              <X size={24} />
-            </button>
-            <div className="flex flex-col gap-6">
-              <div className="flex-1 w-full">
-                <h2 className="text-2xl font-bold mb-2">Contact Sales</h2>
-                <p className="text-gray-600 text-sm mb-6">Submit your bulk purchase inquiry and we'll get back to you soon.</p>
+      {/* Benefits Section */}
+      <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-600 text-sm font-semibold rounded-full mb-4">
+              Why Choose Us
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Benefits of Bulk Purchase
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              As a business buyer, our platform offers great benefits and opportunities for small and medium businesses.
+            </p>
+          </div>
 
-                {callbackSuccess ? (
-                  <div className="text-green-600 font-medium text-center py-8">
-                    ✓ Request submitted successfully! We'll contact you soon.
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {benefits.map((item, i) => (
+              <div 
+                key={i} 
+                className="bg-gray-50 rounded-2xl p-6 hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-gray-100 group"
+              >
+                <div className={`w-14 h-14 ${getColorClasses(item.color)} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform`}>
+                  <item.icon size={24} />
+                </div>
+                <h3 className="font-bold text-lg text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Process Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-600 text-sm font-semibold rounded-full mb-4">
+              How It Works
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Your Buying Journey
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Simple and streamlined process to get your bulk orders delivered
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {steps.map((item, i) => (
+              <div key={i} className="relative">
+                <div className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all text-center group hover:-translate-y-1">
+                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-lg group-hover:scale-110 transition-transform">
+                    {item.step}
                   </div>
-                ) : (
-                  <form onSubmit={handleCallbackSubmit} className="space-y-4">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">{item.title}</h3>
+                  <p className="text-gray-500 text-xs">{item.desc}</p>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-2 transform -translate-y-1/2 text-blue-300">
+                    <ArrowRight size={16} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                    {/* Name Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <User size={20} />
-                        </div>
-                        <input
-                          type="text"
-                          name="name"
-                          value={callbackForm.name}
-                          onChange={handleCallbackChange}
-                          className="flex-1 w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-transparent"
-                          required
-                          disabled={!!user}
-                        />
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-10 md:p-16 text-center relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Ready to Get Started?
+              </h2>
+              <p className="text-blue-100 text-lg mb-8 max-w-xl mx-auto">
+                Contact our sales team today and discover how we can help your business grow with bulk purchasing solutions.
+              </p>
+              <button 
+                onClick={() => setShowCallbackModal(true)}
+                className="inline-flex items-center justify-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl"
+              >
+                Contact Sales Team
+                <ArrowRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Modal */}
+      {showCallbackModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 rounded-t-2xl">
+              <button
+                className="absolute top-4 right-4 text-white/80 hover:text-white bg-white/20 hover:bg-white/30 rounded-full p-1.5 transition-all"
+                onClick={() => {
+                  setShowCallbackModal(false);
+                  setOtpSent(false);
+                  setOtp('');
+                }}
+              >
+                <X size={18} />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Building2 size={24} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Contact Sales</h2>
+                  <p className="text-white/80 text-sm">Submit your bulk purchase inquiry</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {callbackSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={32} className="text-green-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Request Submitted!</h3>
+                  <p className="text-gray-500">We'll contact you shortly.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleCallbackSubmit} className="space-y-5">
+                  {/* Name Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <User size={18} />
                       </div>
+                      <input
+                        type="text"
+                        name="name"
+                        value={callbackForm.name}
+                        onChange={handleCallbackChange}
+                        className="w-full py-2.5 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors disabled:bg-gray-100 disabled:text-gray-500"
+                        required
+                        disabled={!!user}
+                        placeholder="Enter your full name"
+                      />
                     </div>
+                  </div>
 
-                    {/* Email Field with OTP */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <Mail size={20} />
+                  {/* Email Field with OTP */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address *</label>
+                    <div className="relative flex gap-2">
+                      <div className="relative flex-1">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Mail size={18} />
                         </div>
                         <input
                           type="email"
                           name="email"
                           value={callbackForm.email}
                           onChange={handleCallbackChange}
-                          className="flex-1 w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-transparent"
+                          className="w-full py-2.5 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors disabled:bg-gray-100 disabled:text-gray-500"
                           required
                           disabled={!!user || otpSent}
+                          placeholder="Enter your email"
                         />
-                        {!user && !otpSent && (
-                          <button
-                            type="button"
-                            onClick={handleSendOTP}
-                            disabled={otpLoading || !callbackForm.email}
-                            className="px-4 py-2 bg-lime-500 text-white rounded-md hover:bg-lime-600 disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap text-sm"
-                          >
-                            {otpLoading ? 'Sending...' : 'Send OTP'}
-                          </button>
+                      </div>
+                      {!user && !otpSent && (
+                        <button
+                          type="button"
+                          onClick={handleSendOTP}
+                          disabled={otpLoading || !callbackForm.email}
+                          className="px-4 py-2.5 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap text-sm font-medium transition-colors"
+                        >
+                          {otpLoading ? 'Sending...' : 'Send OTP'}
+                        </button>
+                      )}
+                    </div>
+                    {!user && (
+                      <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                        {otpSent ? (
+                          <>
+                            <CheckCircle size={12} className="text-green-500" />
+                            <span className="text-green-600">OTP sent to your email</span>
+                          </>
+                        ) : (
+                          'Click "Send OTP" to verify your email'
                         )}
-                      </div>
-                      {!user && (
-                        <p className="text-xs text-gray-500 mt-1 ml-8">
-                          {otpSent ? '✓ OTP sent to your email' : 'Click "Send OTP" to verify your email'}
-                        </p>
-                      )}
-                      {user && (
-                        <p className="text-xs text-green-600 mt-1 ml-8">
-                          ✓ Verified (logged in user)
-                        </p>
-                      )}
-                    </div>
-
-                    {/* OTP Field - Only for non-logged-in users */}
-                    {!user && otpSent && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Enter OTP *</label>
-                        <div className="flex items-center gap-3">
-                          <div className="text-lime-600">
-                            <Mail size={20} />
-                          </div>
-                          <input
-                            type="text"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            placeholder="Enter 6-digit OTP"
-                            maxLength={6}
-                            className="flex-1 w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-transparent"
-                            required
-                          />
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1 ml-8">
-                          Enter the 6-digit code sent to your email
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Phone Number with Country Code */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <Phone size={24} />
-                        </div>
-                        <PhoneInput
-                          international
-                          defaultCountry="AE"
-                          value={phoneValue}
-                          onChange={setPhoneValue}
-                          className="flex-1"
-                          placeholder="Enter phone number"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Company Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Company Name *</label>
-                      <div className="flex items-center gap-3">
-                        <div className="text-lime-600">
-                          <Building2 size={20} />
-                        </div>
-                        <input
-                          type="text"
-                          name="company"
-                          value={callbackForm.company}
-                          onChange={handleCallbackChange}
-                          className="flex-1 w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Note Field */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Notes <span className="text-gray-400 text-xs">(Optional)</span>
-                      </label>
-                      <div className="flex items-start gap-3">
-                        <div className="text-lime-600 mt-2">
-                          <FileText size={20} />
-                        </div>
-                        <textarea
-                          name="note"
-                          value={callbackForm.note}
-                          onChange={handleCallbackChange}
-                          rows={3}
-                          placeholder="Tell us about your bulk purchase requirements, quantity needed, or any special requests..."
-                          className="flex-1 w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-lime-500 focus:border-transparent resize-none"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1 ml-8">
-                        Share any additional details about your bulk purchase needs
                       </p>
+                    )}
+                    {user && (
+                      <p className="text-xs text-green-600 mt-1.5 flex items-center gap-1">
+                        <CheckCircle size={12} />
+                        Verified (logged in user)
+                      </p>
+                    )}
+                  </div>
+
+                  {/* OTP Field */}
+                  {!user && otpSent && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Enter OTP *</label>
+                      <input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Enter 6-digit OTP"
+                        maxLength={6}
+                        className="w-full py-2.5 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors text-center font-mono tracking-widest"
+                        required
+                      />
                     </div>
+                  )}
 
-                    <button
-                      type="submit"
-                      className="w-full bg-lime-500 text-white py-3 rounded-md font-medium hover:bg-lime-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                      disabled={callbackLoading || (!user && !otpSent)}
-                    >
-                      {callbackLoading ? 'Submitting...' : 'Submit Request'}
-                    </button>
-                  </form>
-                )}
-              </div>
+                  {/* Phone Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                    <PhoneInput
+                      international
+                      defaultCountry="AE"
+                      value={phoneValue}
+                      onChange={setPhoneValue}
+                      className="phone-input-modern"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
 
+                  {/* Company Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Company Name *</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <Building2 size={18} />
+                      </div>
+                      <input
+                        type="text"
+                        name="company"
+                        value={callbackForm.company}
+                        onChange={handleCallbackChange}
+                        className="w-full py-2.5 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
+                        required
+                        placeholder="Enter company name"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Note Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Additional Notes <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                    <textarea
+                      name="note"
+                      value={callbackForm.note}
+                      onChange={handleCallbackChange}
+                      rows={3}
+                      placeholder="Tell us about your bulk purchase requirements..."
+                      className="w-full py-2.5 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all"
+                    disabled={callbackLoading || (!user && !otpSent)}
+                  >
+                    {callbackLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : (
+                      'Submit Request'
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>

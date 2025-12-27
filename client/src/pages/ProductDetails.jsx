@@ -2966,7 +2966,7 @@ const ProductDetails = () => {
                     <button
                       onClick={handleAddToCart}
                       disabled={product.stockStatus === "Out of Stock"}
-                      className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-3.5 px-8 rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex items-center justify-center"
+                      className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-3.5 px-5 rounded-xl font-medium transition-all shadow-sm hover:shadow-md flex items-center justify-center flex-shrink-0"
                     >
                       <ShoppingCart size={20} />
                     </button>
@@ -2975,7 +2975,7 @@ const ProductDetails = () => {
                       onClick={() =>
                         isInWishlist(product._id) ? removeFromWishlist(product._id) : addToWishlist(product)
                       }
-                      className={`flex items-center px-8 py-3.5 rounded-xl border-2 transition-all shadow-sm hover:shadow-md ${
+                      className={`flex items-center justify-center px-5 py-3.5 rounded-xl border-2 transition-all shadow-sm hover:shadow-md flex-shrink-0 ${
                         isInWishlist(product._id)
                           ? "bg-red-500 border-red-500 hover:bg-red-600 text-white"
                           : "bg-white border-gray-200 hover:border-red-300 hover:bg-red-50"
@@ -2989,10 +2989,10 @@ const ProductDetails = () => {
                     </button>
                     <button
                       disabled={product.stockStatus === "Out of Stock"}
-                      className="hidden sm:flex flex-1 items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white px-6 py-3.5 rounded-xl font-semibold transition-all shadow-sm hover:shadow-md"
+                      className="hidden sm:flex items-center justify-center gap-1.5 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all shadow-sm hover:shadow-md"
                       onClick={handleBuyNow}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       Buy Now
@@ -3013,10 +3013,10 @@ const ProductDetails = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
+              <div className="flex gap-3 pt-4 border-t border-gray-100">
                 {/* WhatsApp Chat */}
                 <button
-                  className="flex flex-col items-center p-3 bg-gray-50 hover:bg-green-50 rounded-xl transition-all group border border-transparent hover:border-green-200"
+                  className="flex-1 flex flex-col items-center justify-center p-3 bg-gray-50 hover:bg-green-50 rounded-xl transition-all group border border-transparent hover:border-green-200 h-full w-full"
                   onClick={() =>
                     window.open(
                       `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C%20I%20need%20help%20with%20this%20product%3A%20${encodeURIComponent(product.name)}`,
@@ -3034,7 +3034,7 @@ const ProductDetails = () => {
 
                 {/* Callback Request */}
                 <button
-                  className="flex flex-col items-center p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-all group border border-transparent hover:border-blue-200"
+                  className="flex-1 flex flex-col items-center justify-center p-3 bg-gray-50 hover:bg-blue-50 rounded-xl transition-all group border border-transparent hover:border-blue-200 h-full w-full"
                   onClick={() => setShowCallbackModal(true)}
                 >
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
@@ -3042,19 +3042,6 @@ const ProductDetails = () => {
                   </div>
                   <span className="text-xs text-gray-700 font-medium text-center leading-tight">
                     Get Callback
-                  </span>
-                </button>
-
-                {/* Bulk Purchase */}
-                <button
-                  className="flex flex-col items-center p-3 bg-gray-50 hover:bg-purple-50 rounded-xl transition-all group border border-transparent hover:border-purple-200"
-                  onClick={() => navigate("/bulk-purchase")}
-                >
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                    <Shield size={20} className="text-purple-600" />
-                  </div>
-                  <span className="text-xs text-gray-700 font-medium text-center leading-tight">
-                    Bulk Order
                   </span>
                 </button>
               </div>
@@ -3849,43 +3836,58 @@ const ProductDetails = () => {
       </div> */}
 
       {showCallbackModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative max-h-[90vh] overflow-y-auto">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={() => {
-                setShowCallbackModal(false)
-                setEmailChanged(false)
-                setVerificationCode("")
-                setVerificationSent(false)
-                setVerificationVerified(false)
-              }}
-            >
-              <X size={24} />
-            </button>
-            <div className="flex flex-col gap-4">
-              <h2 className="text-xl text-center font-bold mb-2">Request a Callback</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 rounded-t-2xl">
+              <button
+                className="absolute top-4 right-4 text-white/80 hover:text-white bg-white/20 hover:bg-white/30 rounded-full p-1.5 transition-all"
+                onClick={() => {
+                  setShowCallbackModal(false)
+                  setEmailChanged(false)
+                  setVerificationCode("")
+                  setVerificationSent(false)
+                  setVerificationVerified(false)
+                }}
+              >
+                <X size={18} />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Phone size={24} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Request a Callback</h2>
+                  <p className="text-white/80 text-sm">We'll get back to you shortly</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
               {callbackSuccess ? (
-                <div className="text-green-600 font-medium text-center py-8 flex flex-col items-center gap-2">
-                  <CheckCircle size={48} className="text-green-500" />
-                  <p>Request submitted successfully!</p>
-                  <p className="text-sm text-gray-600">We will contact you soon.</p>
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={32} className="text-green-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Request Submitted!</h3>
+                  <p className="text-gray-500">We will contact you soon.</p>
                 </div>
               ) : (
-                <form onSubmit={handleCallbackSubmit} className="space-y-4">
+                <form onSubmit={handleCallbackSubmit} className="space-y-5">
                   {/* Full Name Field */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                    <div className="flex items-center gap-3">
-                      <div className="text-lime-600">
-                        <User size={24} />
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <User size={18} />
                       </div>
                       <input
                         type="text"
                         name="name"
                         value={callbackForm.name}
                         onChange={handleCallbackChange}
-                        className="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                        className="w-full py-2.5 pl-10 pr-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
                         placeholder="Enter your full name"
                         required
                       />
@@ -3894,56 +3896,56 @@ const ProductDetails = () => {
 
                   {/* Email Field with Verification */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <div className="flex items-center gap-3">
-                      <div className="text-lime-600">
-                        <Mail size={24} />
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <Mail size={18} />
                       </div>
-                      <div className="flex-1">
-                        <input
-                          type="email"
-                          name="email"
-                          value={callbackForm.email}
-                          onChange={handleCallbackChange}
-                          className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
-                          placeholder="Enter your email"
-                          required
-                        />
-                      </div>
+                      <input
+                        type="email"
+                        name="email"
+                        value={callbackForm.email}
+                        onChange={handleCallbackChange}
+                        className="w-full py-2.5 pl-10 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
+                        placeholder="Enter your email"
+                        required
+                      />
                       {verificationVerified && (
-                        <CheckCircle size={24} className="text-green-500" />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <CheckCircle size={18} className="text-green-500" />
+                        </div>
                       )}
                     </div>
                     
                     {/* Email Verification Section */}
                     {emailChanged && !verificationVerified && (
-                      <div className="mt-3 ml-9 space-y-3">
+                      <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
                         {!verificationSent ? (
                           <button
                             type="button"
                             onClick={handleSendVerificationCode}
                             disabled={verificationLoading}
-                            className="text-sm bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                            className="w-full text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors font-medium"
                           >
                             {verificationLoading ? "Sending..." : "Send Verification Code"}
                           </button>
                         ) : (
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Enter the verification code sent to your email:</p>
+                          <div className="space-y-3">
+                            <p className="text-sm text-gray-600">Enter the code sent to your email:</p>
                             <div className="flex gap-2">
                               <input
                                 type="text"
                                 value={verificationCode}
                                 onChange={(e) => setVerificationCode(e.target.value)}
-                                className="flex-1 py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
-                                placeholder="Enter 6-digit code"
+                                className="flex-1 py-2 px-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center font-mono tracking-widest"
+                                placeholder="000000"
                                 maxLength={6}
                               />
                               <button
                                 type="button"
                                 onClick={handleVerifyCode}
                                 disabled={verificationLoading || verificationCode.length !== 6}
-                                className="bg-lime-500 text-white px-4 py-2 rounded-md hover:bg-lime-600 disabled:opacity-50"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors font-medium"
                               >
                                 {verificationLoading ? "..." : "Verify"}
                               </button>
@@ -3952,7 +3954,7 @@ const ProductDetails = () => {
                               type="button"
                               onClick={handleSendVerificationCode}
                               disabled={verificationLoading}
-                              className="text-sm text-blue-500 hover:underline"
+                              className="text-sm text-blue-500 hover:text-blue-600 font-medium"
                             >
                               Resend Code
                             </button>
@@ -3964,17 +3966,14 @@ const ProductDetails = () => {
 
                   {/* Phone Number with Country Code */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                    <div className="flex items-center gap-3">
-                      <div className="text-lime-600">
-                        <Phone size={24} />
-                      </div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                    <div className="relative">
                       <PhoneInput
                         international
                         defaultCountry="AE"
                         value={phoneValue}
                         onChange={setPhoneValue}
-                        className="flex-1"
+                        className="phone-input-modern"
                         placeholder="Enter phone number"
                         required
                       />
@@ -3983,30 +3982,45 @@ const ProductDetails = () => {
 
                   {/* Customer Note */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Customer Note (Optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Message <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
                     <textarea
                       name="customerNote"
                       value={callbackForm.customerNote}
                       onChange={handleCallbackChange}
-                      rows={4}
-                      className="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-500"
+                      rows={3}
+                      className="w-full py-2.5 px-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors resize-none"
                       placeholder="Any specific requirements or questions..."
                     />
                   </div>
 
+                  {emailChanged && !verificationVerified && (
+                    <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                      <svg className="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <p className="text-sm text-amber-700">Please verify your email to continue</p>
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full bg-lime-500 text-white py-3 rounded-md font-medium hover:bg-lime-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all"
                     disabled={callbackLoading || (emailChanged && !verificationVerified)}
                   >
-                    {callbackLoading ? "Submitting..." : "Submit Request"}
+                    {callbackLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : (
+                      "Submit Request"
+                    )}
                   </button>
-                  
-                  {emailChanged && !verificationVerified && (
-                    <p className="text-sm text-red-500 text-center">
-                      Please verify your email before submitting
-                    </p>
-                  )}
                 </form>
               )}
             </div>

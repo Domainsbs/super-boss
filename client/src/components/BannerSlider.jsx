@@ -124,13 +124,13 @@ const BannerSlider = ({ banners, fixedHeight }) => {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-600 p-2 bg-white/80 hover:bg-white rounded-full transition-all z-10 shadow-lg"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white p-2.5 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all z-10 shadow-lg"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-800 hover:text-gray-600 p-2 bg-white/80 hover:bg-white rounded-full transition-all z-10 shadow-lg"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white p-2.5 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all z-10 shadow-lg"
           >
             <ChevronRight size={24} />
           </button>
