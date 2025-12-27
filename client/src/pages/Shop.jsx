@@ -100,8 +100,26 @@ const SortDropdown = ({ value, onChange }) => {
 
 const PriceFilter = ({ min, max, onApply, initialRange }) => {
   const [range, setRange] = useState(initialRange || [min, max])
-  const [inputMin, setInputMin] = useState(range[0])
-  const [inputMax, setInputMax] = useState(range[1])
+  const [inputMin, setInputMin] = useState(initialRange ? initialRange[0] : min)
+  const [inputMax, setInputMax] = useState(initialRange ? initialRange[1] : max)
+
+  // Sync with initialRange changes
+  useEffect(() => {
+    if (initialRange) {
+      setRange(initialRange)
+      setInputMin(initialRange[0])
+      setInputMax(initialRange[1])
+    }
+  }, [initialRange])
+
+  // Sync with min/max prop changes
+  useEffect(() => {
+    if (!initialRange) {
+      setRange([min, max])
+      setInputMin(min)
+      setInputMax(max)
+    }
+  }, [min, max, initialRange])
 
   const handleSliderChange = (values) => {
     setRange(values)
@@ -114,7 +132,7 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
     if (value === "") {
       setInputMin("")
     } else if (!isNaN(value)) {
-      const numericValue = Number(value)
+      const numericValue = Math.max(min, Math.min(Number(value), range[1]))
       setInputMin(numericValue)
       setRange([numericValue, range[1]])
     }
@@ -125,7 +143,7 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
     if (value === "") {
       setInputMax("")
     } else if (!isNaN(value)) {
-      const numericValue = Number(value)
+      const numericValue = Math.min(max, Math.max(Number(value), range[0]))
       setInputMax(numericValue)
       setRange([range[0], numericValue])
     }
@@ -154,10 +172,10 @@ const PriceFilter = ({ min, max, onApply, initialRange }) => {
         max={max}
         value={range}
         onChange={handleSliderChange}
-        trackStyle={[{ backgroundColor: "#84cc16" }]}
+        trackStyle={[{ backgroundColor: "#3b82f6" }]}
         handleStyle={[
-          { backgroundColor: "#84cc16", borderColor: "#84cc16" },
-          { backgroundColor: "#84cc16", borderColor: "#84cc16" },
+          { backgroundColor: "#3b82f6", borderColor: "#3b82f6" },
+          { backgroundColor: "#3b82f6", borderColor: "#3b82f6" },
         ]}
         railStyle={{ backgroundColor: "#e5e7eb" }}
       />
