@@ -1014,6 +1014,7 @@ const Home = () => {
       <HeroBannerSection
         banners={heroBanners}
         bannerCards={bannerCards}
+        mobileBanners={mobileBanners}
         deviceType={deviceType}
       />
       {/* Categories Section - Admin Controlled Slider */}
@@ -1021,33 +1022,33 @@ const Home = () => {
 
      
       {/* Three Cards Section - Simple Mobile Grid */}
-      <div className="m-3">
+      <div className="max-w-[1600px] mx-auto px-3">
         {/* Desktop & Tablet - Grid Layout */}
-        <div className="hidden md:flex justify-between gap-4">
-          <div className="w-1/3 lg:w-1/3">
-            <Link to="product-category/laptops" aria-label="Browse Lenovo products">
+        <div className="hidden md:grid md:grid-cols-3 gap-4">
+          <div className="aspect-[16/9] overflow-hidden rounded-lg">
+            <Link to="product-category/laptops" aria-label="Browse Lenovo products" className="block w-full h-full">
               <img
                 src="https://posmea.com/cdn/shop/files/Session3-Banners-Year-EndArtboard-1.jpg?v=1766477484&width=1500"
                 alt="Lenovo Banner"
-                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               />
             </Link>
           </div>
-          <div className="w-1/3 lg:w-1/3">
-            <Link to="/product-category/electronics" aria-label="Browse Acer products">
+          <div className="aspect-[16/9] overflow-hidden rounded-lg">
+            <Link to="/product-category/electronics" aria-label="Browse Acer products" className="block w-full h-full">
               <img
                 src="http://posmea.com/cdn/shop/files/Session3-Banners-Year-EndArtboard-1-copy-2.jpg?v=1766477474&width=1500"
                 alt="Acer Banner"
-                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               />
             </Link>
           </div>
-          <div className="w-1/3 lg:w-1/3">
-            <Link to="/product-category/camera" aria-label="Browse Asus products">
+          <div className="aspect-[16/9] overflow-hidden rounded-lg">
+            <Link to="/product-category/camera" aria-label="Browse Asus products" className="block w-full h-full">
               <img
                 src="https://posmea.com/cdn/shop/files/Session3-Banners-Year-EndArtboard-1-copy.jpg?v=1766477484&width=1500"
                 alt="Asus Banner"
-                className="w-full h-auto rounded-lg cover hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
               />
             </Link>
           </div>
@@ -1086,10 +1087,10 @@ const Home = () => {
       <BigSaleSection products={featuredProducts} />
 
       {/* Featured Products Section - Mobile Grid */}
-      <section className="py-6 mx-3 md:hidden">
+      <section className="py-6 max-w-[1600px] mx-auto px-3 md:hidden">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900">Featured Products</h2>
-          <button className="text-green-600 hover:text-green-800 font-medium text-sm">View All</button>
+          <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">View All</button>
         </div>
          
         <div className="grid grid-cols-2 gap-3">
@@ -1100,56 +1101,57 @@ const Home = () => {
       </section>
 
       {/* Mobile Banner (now clickable linking to HP brand page) */}
-      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
-  <Link to={brandUrls.HP} aria-label="Browse HP products">
-          <img
-          //  src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939738/hp_ntmpcm.png"
-           src="11.png" 
-          alt="HP Products Banner Mobile"
-            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
-          />
-        </Link>
+      <div className="md:hidden max-w-[1600px] mx-auto px-3">
+        <div className="aspect-[21/9] overflow-hidden rounded-lg shadow-lg">
+          <Link to={brandUrls.HP} aria-label="Browse HP products" className="block w-full h-full">
+            <img
+              src="11.png" 
+              alt="HP Products Banner Mobile"
+              className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
+            />
+          </Link>
+        </div>
       </div>
 
       {/* Dynamic Section Position 2 */}
       {/* {renderDynamicSection(2)} */}
 
       {/* Desktop Banner - Two separate images side by side */}
-      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
-        <div className="w-1/2">
-          <Link to={brandUrls.HP}>
-            <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854476/hp_half_side_1_iqvlks.png"
-             src="https://posmea.com/cdn/shop/files/Barcode-Scanner-803x297.jpg?v=1758179827&width=1500"
-             alt="HP Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            />
-          </Link>
-        </div>
-        <div className="w-1/2">
-          <Link to={brandUrls.Dell}>
-            <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/dell_half_side_6_igop3u.png"
-             src="https://posmea.com/cdn/shop/files/Label-Printers-803x297.jpg?v=1758179827&width=1500"
-             alt="Dell Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            />
-          </Link>
+      <div className="hidden md:block max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.HP} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/Barcode-Scanner-803x297.jpg?v=1758179827&width=1500"
+                alt="HP Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.Dell} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/Label-Printers-803x297.jpg?v=1758179827&width=1500"
+                alt="Dell Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* HP and Dell Section - Mobile shows only HP */}
-      <section className="py-8 mx-3">
-        <div className="flex flex-col md:flex-row gap-6">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* HP Products */}
-          <div className="w-full md:w-1/2">
+          <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg md:text-xl font-bold text-gray-900">HP Products</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("HP")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 View All HP
                 <ChevronRight className="ml-1" size={14} />
@@ -1172,14 +1174,14 @@ const Home = () => {
           </div>
 
           {/* Dell Products - Hidden on Mobile */}
-          <div className="w-full md:w-1/2 hidden md:block">
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900">Dell Products</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("Dell")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 View All Dell
                 <ChevronRight className="ml-1" size={14} />
@@ -1207,28 +1209,30 @@ const Home = () => {
       {/* {renderDynamicSection(3)} */}
 
       {/* Accessories Banner - Desktop/Mobile Responsive */}
-      <div className="mx-3 my-4 h-[160px] lg:h-[300px]">
-        <Link to="/product-category/accessories-components">
-          <img
-            src="12.png"
-            alt="Accessories Promotion Banner Mobile"
-            className="w-full h-full cover rounded-lg lg:hidden"
-          />
-          <img
-            src="https://posmea.com/cdn/shop/files/Barcode-Printers_1025x250jpg.png?v=1758180531&width=1500"
-            alt="Accessories Promotion Banner Desktop"
-            className="w-full h-full cover rounded-lg hidden lg:block"
-          />
+      <div className="max-w-[1600px] mx-auto px-3 my-4">
+        <Link to="/product-category/accessories-components" className="block">
+          <div className="aspect-[21/9] md:aspect-[4/1] overflow-hidden rounded-lg">
+            <img
+              src="12.png"
+              alt="Accessories Promotion Banner Mobile"
+              className="w-full h-full object-cover rounded-lg lg:hidden"
+            />
+            <img
+              src="https://posmea.com/cdn/shop/files/Barcode-Printers_1025x250jpg.png?v=1758180531&width=1500"
+              alt="Accessories Promotion Banner Desktop"
+              className="w-full h-full object-cover rounded-lg hidden lg:block"
+            />
+          </div>
         </Link>
       </div>
 
       {/* Accessories Section - Mobile shows 2 products */}
-      <section className="py-8 mx-3">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-bold text-gray-900">Accessories</h2>
           <button
             onClick={() => handleCategoryClick("Accessories")}
-            className="text-green-600 hover:text-green-800 font-medium flex items-center"
+            className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
           >
             See All Products
             <ChevronRight className="ml-1" size={16} />
@@ -1257,53 +1261,54 @@ const Home = () => {
       {/* {renderDynamicSection(4)} */}
 
       {/* Mobile Banner Asus */}
-      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
-  <Link to={brandUrls.ASUS} aria-label="Browse ASUS products">
-          <img
-            //src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939737/asus_f95cjw.png"
-            src="laptop (2).png"
-            alt="ASUS Products Banner Mobile"
-            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
-          />
-        </Link>
-      </div>
-
-      {/* Desktop Banner - Two separate images side by side */}
-      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
-        <div className="w-1/2">
-          <Link to={brandUrls.Acer}>
+      <div className="md:hidden max-w-[1600px] mx-auto px-3">
+        <div className="aspect-[21/9] overflow-hidden rounded-lg shadow-lg">
+          <Link to={brandUrls.ASUS} aria-label="Browse ASUS products" className="block w-full h-full">
             <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/acer_half_side_jkun9a.png"
-             src="https://posmea.com/cdn/shop/files/Zebra-ZT411_565x250jpg.png?v=1758180530&width=1500"
-             alt="Acer Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+              src="laptop (2).png"
+              alt="ASUS Products Banner Mobile"
+              className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
             />
           </Link>
         </div>
-        <div className="w-1/2">
-          <Link to={brandUrls.ASUS}>
-            <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/asus_half_side_aikrmo.png"
-             src="https://posmea.com/cdn/shop/files/POS-Bundle-Banner.png?v=1766780021&width=1420"
-             alt="Asus Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            />
-          </Link>
+      </div>
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:block max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.Acer} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/Zebra-ZT411_565x250jpg.png?v=1758180530&width=1500"
+                alt="Acer Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.ASUS} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/POS-Bundle-Banner.png?v=1766780021&width=1420"
+                alt="Asus Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Acer and ASUS Section - Mobile shows only ASUS */}
-      <section className="py-8 mx-3">
-        <div className="flex flex-col md:flex-row gap-6">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Acer Products - Hidden on Mobile */}
-          <div className="w-full md:w-1/2 hidden md:block">
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900">Shop Acer</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("Acer")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1326,14 +1331,14 @@ const Home = () => {
           </div>
 
           {/* ASUS Products */}
-          <div className="w-full md:w-1/2">
+          <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop Asus</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("ASUS")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1363,28 +1368,30 @@ const Home = () => {
       {/* {renderDynamicSection(5)} */}
 
       {/* Networking Banner - Desktop/Mobile Responsive */}
-      <div className="mx-3 my-4 h-[160px] lg:h-[300px]">
-        <Link to="/product-category/networking">
-          <img
-            src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-End-of-the-seasonArtboard-1-copy-3.jpg?v=1766477483&width=3840"
-            alt="Networking Banner Mobile"
-            className="w-full h-full cover rounded-lg lg:hidden"
-          />
-          <img
-            src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-End-of-the-seasonArtboard-1-copy-3.jpg?v=1766477483&width=3840"
-            alt="Networking Banner Desktop"
-            className="w-full h-full cover rounded-lg hidden lg:block"
-          />
+      <div className="max-w-[1600px] mx-auto px-3 my-4">
+        <Link to="/product-category/networking" className="block">
+          <div className="aspect-[21/9] md:aspect-[4/1] overflow-hidden rounded-lg">
+            <img
+              src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-End-of-the-seasonArtboard-1-copy-3.jpg?v=1766477483&width=3840"
+              alt="Networking Banner Mobile"
+              className="w-full h-full object-cover rounded-lg lg:hidden"
+            />
+            <img
+              src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-End-of-the-seasonArtboard-1-copy-3.jpg?v=1766477483&width=3840"
+              alt="Networking Banner Desktop"
+              className="w-full h-full object-cover rounded-lg hidden lg:block"
+            />
+          </div>
         </Link>
       </div>
 
       {/* Networking Products Section - Mobile shows 2 products */}
-      <section className="py-8 mx-3">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-bold text-gray-900">Networking</h2>
           <button
             onClick={() => handleCategoryClick("Networking")}
-            className="text-green-600 hover:text-green-800 font-medium flex items-center"
+            className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
           >
             See All Products
             <ChevronRight className="ml-1" size={16} />
@@ -1413,53 +1420,54 @@ const Home = () => {
       {/* {renderDynamicSection(6)} */}
 
       {/* Mobile Banner MSI */}
-      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
-  <Link to={brandUrls.MSI} aria-label="Browse MSI products">
-          <img
-            //src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939739/msi_mmaozn.png"
-            src="14.png"
-            alt="MSI Products Banner Mobile"
-            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
-          />
-        </Link>
-      </div>
-
-      {/* Desktop Banner - Two separate images side by side */}
-      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
-        <div className="w-1/2">
-          <Link to={brandUrls.MSI}>
+      <div className="md:hidden max-w-[1600px] mx-auto px-3">
+        <div className="aspect-[21/9] overflow-hidden rounded-lg shadow-lg">
+          <Link to={brandUrls.MSI} aria-label="Browse MSI products" className="block w-full h-full">
             <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854476/msi_half_side_1_k4dmhz.png"
-             src="https://posmea.com/cdn/shop/files/Posmea-BannerChk-Point.png?v=1766740911&width=3840"
-             alt="MSI Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+              src="14.png"
+              alt="MSI Products Banner Mobile"
+              className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
             />
           </Link>
         </div>
-        <div className="w-1/2">
-          <Link to={brandUrls.Lenovo}>
-            <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753854475/lenovo_half_side_daug2k.png"
-             src="https://posmea.com/cdn/shop/files/create-an-image-for-pos-printer-scanner-store.png?v=1762924738&width=800"
-             alt="Dell Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            />
-          </Link>
+      </div>
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:block max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.MSI} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/Posmea-BannerChk-Point.png?v=1766740911&width=3840"
+                alt="MSI Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.Lenovo} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/create-an-image-for-pos-printer-scanner-store.png?v=1762924738&width=800"
+                alt="Dell Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* MSI and Lenovo Products Section - Mobile shows only MSI */}
-      <section className="py-8 mx-3">
-        <div className="flex flex-col md:flex-row gap-6">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* MSI Products */}
-          <div className="w-full md:w-1/2">
+          <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop MSI</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("MSI")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1482,14 +1490,14 @@ const Home = () => {
           </div>
 
           {/* Lenovo Products - Hidden on Mobile */}
-          <div className="w-full md:w-1/2 hidden md:block">
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900">Shop Lenovo</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("Lenovo")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1517,53 +1525,54 @@ const Home = () => {
       {/* {renderDynamicSection(7)} */}
 
       {/* Mobile Banner Apple */}
-      <div className="md:hidden rounded-lg shadow-lg mx-3 h-[160px]">
-  <Link to={brandUrls.Apple} aria-label="Browse Apple products">
-          <img
-          //  src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757769951/apple_half_side_n1cxhc.png"
-          src="15.png"
-          alt="Apple Products Banner Mobile"
-            className="w-full h-full cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
-          />
-        </Link>
-      </div>
-
-      {/* Desktop Banner - Two separate images side by side */}
-      <div className="hidden md:flex gap-2 mx-3 h-[270px]">
-        <div className="w-1/2">
-          <Link to={brandUrls.Apple}>
+      <div className="md:hidden max-w-[1600px] mx-auto px-3">
+        <div className="aspect-[21/9] overflow-hidden rounded-lg shadow-lg">
+          <Link to={brandUrls.Apple} aria-label="Browse Apple products" className="block w-full h-full">
             <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1757769951/apple_half_side_n1cxhc.png"
-             src="https://posmea.com/cdn/shop/articles/close-up-worker-manages-cargo-barcode-scanning-distribution-hub-Blog_01.jpg?v=1763791276&width=533"
-             alt="Apple Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+              src="15.png"
+              alt="Apple Products Banner Mobile"
+              className="w-full h-full object-cover rounded-lg hover:opacity-95 transition-opacity cursor-pointer"
             />
           </Link>
         </div>
-        <div className="w-1/2">
-          <Link to={brandUrls.Samsung}>
-            <img
-             // src="https://res.cloudinary.com/dyfhsu5v6/image/upload/v1753939592/samsung_half_side_gtslyc.png"
-             src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-Mobile-nationalArtboard-1-copy-2_f59a8254-0856-4a54-a88a-036b12377908.jpg?v=1766477483&width=3840" 
-             alt="Samsung Products Banner"
-              className="w-full h-full cover rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            />
-          </Link>
+      </div>
+
+      {/* Desktop Banner - Two separate images side by side */}
+      <div className="hidden md:block max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.Apple} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/articles/close-up-worker-manages-cargo-barcode-scanning-distribution-hub-Blog_01.jpg?v=1763791276&width=533"
+                alt="Apple Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
+          <div className="aspect-[27/10] overflow-hidden rounded-lg shadow-lg">
+            <Link to={brandUrls.Samsung} className="block w-full h-full">
+              <img
+                src="https://posmea.com/cdn/shop/files/Posmea-Banner-new-2-Mobile-nationalArtboard-1-copy-2_f59a8254-0856-4a54-a88a-036b12377908.jpg?v=1766477483&width=3840"
+                alt="Samsung Products Banner"
+                className="w-full h-full object-cover rounded-lg hover:shadow-xl transition-shadow cursor-pointer"
+              />
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Apple and Samsung Products Section - Mobile shows only Apple */}
-      <section className="py-8 mx-3">
-        <div className="flex flex-col md:flex-row gap-6">
+      <section className="py-8 max-w-[1600px] mx-auto px-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Apple Products */}
-          <div className="w-full md:w-1/2">
+          <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg md:text-xl font-bold text-gray-900">Shop Apple</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("Apple")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1588,14 +1597,14 @@ const Home = () => {
           </div>
 
           {/* Samsung Products - Hidden on Mobile */}
-          <div className="w-full md:w-1/2 hidden md:block">
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900">Shop Samsung</h2>
               </div>
               <button
                 onClick={() => handleBrandClick("Samsung")}
-                className="text-green-600 hover:text-green-800 font-medium flex items-center text-sm"
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm"
               >
                 See All
                 <ChevronRight className="ml-1" size={14} />
@@ -1624,7 +1633,7 @@ const Home = () => {
 
       {/* Upgrade Features Section - Responsive */}
       {upgradeFeatures.length > 0 && (
-        <section className="py-8 md:py-12 bg-gradient-to-br from-blue-50 to-indigo-100 mx-3 rounded-lg my-8">
+        <section className="py-8 md:py-12 bg-gradient-to-br from-blue-50 to-indigo-100 max-w-[1600px] mx-auto px-3 rounded-lg my-8">
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="text-center mb-8 md:mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Upgrade Features</h2>

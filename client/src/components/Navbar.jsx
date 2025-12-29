@@ -96,13 +96,13 @@ const MobileSubCategoryItem = ({
   const getArrowButtonStyles = () => {
     switch(level) {
       case 1:
-        return 'w-7 h-7 bg-lime-500 hover:bg-lime-600 shadow-sm'
+        return 'w-7 h-7 bg-blue-500 hover:bg-blue-600 shadow-sm'
       case 2:
-        return 'w-6 h-6 bg-lime-400 hover:bg-lime-500 shadow-sm'
+        return 'w-6 h-6 bg-blue-400 hover:bg-blue-500 shadow-sm'
       case 3:
-        return 'w-5 h-5 bg-lime-300 hover:bg-lime-400'
+        return 'w-5 h-5 bg-blue-300 hover:bg-blue-400'
       default:
-        return 'w-5 h-5 bg-lime-200 hover:bg-lime-300'
+        return 'w-5 h-5 bg-blue-200 hover:bg-blue-300'
     }
   }
   
@@ -135,7 +135,7 @@ const MobileSubCategoryItem = ({
               e.stopPropagation()
               onToggle(subCategory._id)
             }}
-            className={`ml-2 inline-flex items-center justify-center rounded-full text-white focus:outline-none focus:ring-2 focus:ring-lime-500 active:scale-95 transition ${getArrowButtonStyles()}`}
+            className={`ml-2 inline-flex items-center justify-center rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-500 active:scale-95 transition ${getArrowButtonStyles()}`}
             aria-expanded={isExpanded}
             aria-controls={`mobile-subcat-${subCategory._id}`}
           >
@@ -1421,30 +1421,43 @@ const Navbar = () => {
       </header>
 
       {/* Mobile Navbar - Shown only on Mobile */}
-      <header className="md:hidden bg-white shadow-sm sticky top-0 z-50">
+      <header className="md:hidden bg-blue-500 shadow-sm sticky top-0 z-50">
         {/* Mobile Top Bar */}
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-3 py-2.5">
           {/* Hamburger Menu */}
-          <button onClick={toggleMobileMenu} className="p-2">
-            <Menu size={24} className="text-gray-700" />
+          <button onClick={toggleMobileMenu} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+            <Menu size={22} className="text-white" />
           </button>
 
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src="/admin-logo.svg" alt="Logo" className="h-8" />
+            <img src="/seenalif.png" alt="Logo" className="h-9 object-contain" />
           </Link>
 
-          {/* Search Icon */}
-          <button className="p-2" onClick={handleMobileSearchOpen} aria-label="Open search">
-            <Search size={24} className="text-gray-700" />
-          </button>
+          {/* Right Icons */}
+          <div className="flex items-center gap-1">
+            {/* Search Icon */}
+            <button className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors" onClick={handleMobileSearchOpen} aria-label="Open search">
+              <Search size={20} className="text-white" />
+            </button>
+            
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+              <ShoppingCart size={20} className="text-white" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Mobile Search Overlay */}
       {isMobileSearchOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50">
-          <div className="w-full bg-white p-4 shadow-md relative">
+          <div className="w-full bg-blue-500 p-4 shadow-md relative">
             <div className="flex items-center gap-2">
               <form
                 onSubmit={async (e) => {
@@ -1470,7 +1483,7 @@ const Navbar = () => {
                     placeholder="Search products..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-lime-500"
+                    className="flex-1 px-4 py-2.5 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50"
                     autoFocus
                     ref={mobileSearchInputRef}
                     onFocus={() => {
@@ -1481,7 +1494,7 @@ const Navbar = () => {
                   {searchLoading && (
                     <span className="absolute right-16 top-1/2 transform -translate-y-1/2">
                       <svg
-                        className="animate-spin h-5 w-5 text-[#22ba85]"
+                        className="animate-spin h-5 w-5 text-blue-500"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -1498,7 +1511,7 @@ const Navbar = () => {
                       </svg>
                     </span>
                   )}
-                  <button type="submit" className="px-4 py-2 bg-lime-500 text-white rounded hover:bg-green-600">
+                  <button type="submit" className="px-4 py-2.5 bg-white text-blue-500 rounded-full hover:bg-gray-100 transition-colors">
                     <Search size={18} />
                   </button>
                 </div>
@@ -1506,7 +1519,7 @@ const Navbar = () => {
                 {showSearchDropdown && searchResults.length > 0 && (
                   <div
                     ref={mobileSearchDropdownRef}
-                    className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded z-50 mt-2 max-h-96 overflow-y-auto overflow-x-hidden"
+                    className="absolute left-0 right-0 bg-white border border-gray-200 shadow-lg rounded-xl z-50 mt-2 max-h-96 overflow-y-auto overflow-x-hidden"
                   >
                     {searchResults.map((product) => (
                       <Link
@@ -1531,7 +1544,7 @@ const Navbar = () => {
                     ))}
                     <Link
                       to={`/shop?search=${encodeURIComponent(searchQuery.trim())}`}
-                      className="block text-center text-lime-600 hover:underline py-2 text-sm font-medium"
+                      className="block text-center text-blue-600 hover:underline py-2 text-sm font-medium"
                       onClick={() => {
                         setShowSearchDropdown(false)
                         handleMobileSearchClose()
@@ -1542,8 +1555,8 @@ const Navbar = () => {
                   </div>
                 )}
               </form>
-              <button onClick={handleMobileSearchClose} className="ml-2 p-2" aria-label="Close search">
-                <X size={24} className="text-gray-600" />
+              <button onClick={handleMobileSearchClose} className="ml-2 p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors" aria-label="Close search">
+                <X size={22} className="text-white" />
               </button>
             </div>
           </div>
@@ -1559,7 +1572,7 @@ const Navbar = () => {
           {/* Drawer */}
           <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto">
             {/* Drawer Header */}
-            <div className="flex items-center justify-between p-4 bg-lime-500 text-white">
+            <div className="flex items-center justify-between p-4 bg-blue-500 text-white">
               <div className="flex items-center">
                 <UserCircle size={24} className="text-white mr-2" />
                 {isAuthenticated ? (
@@ -1576,8 +1589,8 @@ const Navbar = () => {
                   </button>
                 )}
               </div>
-              <button onClick={closeMobileMenu} className="p-1">
-                <X size={24} className="text-white" />
+              <button onClick={closeMobileMenu} className="p-1 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
+                <X size={22} className="text-white" />
               </button>
             </div>
 
@@ -1613,7 +1626,7 @@ const Navbar = () => {
 
               {/* Shop by Category */}
               <div>
-                <div className="flex items-center justify-between mb-4 bg-lime-500 text-white rounded px-3 py-2">
+                <div className="flex items-center justify-between mb-4 bg-blue-500 text-white rounded px-3 py-2">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
                     <Grid3X3 size={18} className="text-white" />
                     All Category
@@ -1661,7 +1674,7 @@ const Navbar = () => {
                               onClick={() => toggleMobileCategory(parentCategory._id)}
                               aria-label={isExpanded ? "Collapse subcategories" : "Expand subcategories"}
                               aria-expanded={isExpanded}
-                              className="ml-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-lime-500 text-white shadow-sm hover:bg-lime-600 active:scale-95 transition"
+                              className="ml-2 inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-500 text-white shadow-sm hover:bg-blue-600 active:scale-95 transition"
                             >
                               {isExpanded ? (
                                 <ChevronDown size={20} className="text-white" />
@@ -1703,22 +1716,22 @@ const Navbar = () => {
       )}
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 pb-safe">
         <div className="flex items-center justify-around py-2">
           {/* Home */}
-          <Link to="/" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]">
+          <Link to="/" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-blue-500">
             <Home size={20} />
             <span className="text-xs mt-1">Home</span>
           </Link>
 
           {/* Shop */}
-          <Link to="/shop" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]">
+          <Link to="/shop" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-blue-500">
             <Grid3X3 size={20} />
             <span className="text-xs mt-1">Shop</span>
           </Link>
 
           {/* Cart */}
-          <Link to="/cart" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85] relative">
+          <Link to="/cart" className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-blue-500 relative">
             <ShoppingCart size={20} />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
@@ -1731,7 +1744,7 @@ const Navbar = () => {
           {/* Wishlist */}
           <Link
             to="/wishlist"
-            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85] relative"
+            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-blue-500 relative"
             aria-label="Wishlist"
           >
             <Heart size={20} className="" />
@@ -1746,7 +1759,7 @@ const Navbar = () => {
           {/* Account */}
           <Link
             to={isAuthenticated ? "/profile" : "/login"}
-            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-[#22ba85]"
+            className="flex flex-col items-center py-2 px-4 text-gray-600 hover:text-blue-500"
           >
             <UserCircle size={20} />
             <span className="text-xs mt-1">Account</span>

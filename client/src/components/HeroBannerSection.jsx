@@ -3,11 +3,16 @@
 import { Link } from "react-router-dom"
 import BannerSlider from "./BannerSlider"
 
-const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
-  // Filter banners based on device type
+const HeroBannerSection = ({ banners, bannerCards, mobileBanners, deviceType }) => {
+  // Filter banners based on device type for desktop
   const filteredBanners = banners?.filter(
     (banner) => banner.deviceType && banner.deviceType.toLowerCase() === deviceType?.toLowerCase()
   ) || []
+
+  // For mobile, use mobileBanners if provided, otherwise fall back to filtered banners or all banners
+  const mobileDisplayBanners = mobileBanners && mobileBanners.length > 0 
+    ? mobileBanners 
+    : (filteredBanners.length > 0 ? filteredBanners : banners || [])
 
   // Get the first banner card for right side (or use default)
   const rightBannerCard = bannerCards && bannerCards.length > 0 ? bannerCards[0] : null
@@ -72,10 +77,12 @@ const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
     )
   }
 
-  // Mobile view - only show slider (no side banners)
+  // Mobile view - show slider with proper padding and styling
   if (deviceType?.toLowerCase() === "mobile") {
     return (
-      <BannerSlider banners={filteredBanners} />
+      <section className="w-full py-3 px-3">
+        <BannerSlider banners={mobileDisplayBanners} />
+      </section>
     )
   }
 
