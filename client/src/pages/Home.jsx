@@ -1022,7 +1022,7 @@ const Home = () => {
 
      
       {/* Three Cards Section - Simple Mobile Grid */}
-      <div className="max-w-[1600px] mx-auto px-3">
+      <div className="max-w-[1600px] mx-auto my-8 px-3">
         {/* Desktop & Tablet - Grid Layout */}
         <div className="hidden md:grid md:grid-cols-3 gap-4">
           <div className="aspect-[16/9] overflow-hidden rounded-lg">
