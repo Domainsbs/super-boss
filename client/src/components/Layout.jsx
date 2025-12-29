@@ -5,7 +5,7 @@ import Footer from "./Footer"
 function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/971508604360"
+      href="https://wa.me/97143258808"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-16 md:bottom-8 right-4 z-50"

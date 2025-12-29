@@ -82,7 +82,7 @@ const HeroBannerSection = ({ banners, bannerCards, deviceType }) => {
   // Desktop view - Left slider + Right static banner (fixed dimensions)
   return (
     <section className="w-full py-4 px-4 lg:px-6">
-      <div className="max-w-[1400px] mx-auto">
+      <div className=" w-full mx-auto">
         <div className="flex gap-4 items-stretch" style={{ height: '380px' }}>
           {/* Left Banner Slider - Fixed width, takes remaining space */}
           <div 

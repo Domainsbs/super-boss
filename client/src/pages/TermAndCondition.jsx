@@ -256,7 +256,7 @@ export default function TermsAndConditions() {
             <div className="text-center p-4 rounded-xl bg-slate-800/50">
               <Phone className="w-6 h-6 text-blue-400 mx-auto mb-2" />
               <h3 className="font-medium mb-1">Phone</h3>
-              <a href="tel:+97143540566" className="text-slate-400 hover:text-white">+971 4 354 0566</a>
+              <a href="tel:+97143258808" className="text-slate-400 hover:text-white">+971 4 3258808</a>
             </div>
             <div className="text-center p-4 rounded-xl bg-slate-800/50">
               <Mail className="w-6 h-6 text-blue-400 mx-auto mb-2" />

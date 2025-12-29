@@ -221,7 +221,7 @@ export default function VoucherTermsConditions() {
                 <Phone className="w-5 h-5 text-blue-400" />
               </div>
               <p className="text-sm text-gray-400 mb-1">Phone</p>
-              <a href="tel:+97143540566" className="text-white hover:text-blue-400">+971 4 354 0566</a>
+              <a href="tel:+97143258808" className="text-white hover:text-blue-400">+971 4 3258808</a>
             </div>
             <div className="text-center">
               <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">

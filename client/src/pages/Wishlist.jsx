@@ -165,7 +165,7 @@ const Wishlist = () => {
           <div className="max-w-7xl mx-auto px-4 text-center">
             <p className="text-gray-400 mb-2">Need help with your order?</p>
             <p className="text-white">
-              Contact us at <a href="mailto:Support@seenalif.com" className="text-blue-400 hover:text-blue-300">Support@seenalif.com</a> or call <a href="tel:+97143540566" className="text-blue-400 hover:text-blue-300">+971 4 354 0566</a>
+              Contact us at <a href="mailto:Support@seenalif.com" className="text-blue-400 hover:text-blue-300">Support@seenalif.com</a> or call <a href="tel:+97143258808" className="text-blue-400 hover:text-blue-300">+971 4 3258808</a>
             </p>
           </div>
         </div>

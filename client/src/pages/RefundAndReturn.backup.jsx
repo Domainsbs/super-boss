@@ -328,8 +328,8 @@ export default function RefundAndReturn() {
                 <Phone className="w-5 h-5 text-lime-500" />
               </div>
               <h3 className="font-medium mb-1">Phone</h3>
-              <a href="tel:+97143540566" className="text-black">
-                +971 4 354 0566
+              <a href="tel:+97143258808" className="text-black">
+                +971 4 3258808
               </a>
             </div>
 

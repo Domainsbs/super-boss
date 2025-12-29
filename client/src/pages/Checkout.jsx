@@ -24,7 +24,7 @@ const STORES = [
     name: "CROWN EXCEL (Experience Center)",
     address:
       "Admiral Plaza Hotel Building - 37C Street - Shop 5 - Khalid Bin Al Waleed Rd - Bur Dubai - Dubai - United Arab Emirates",
-    phone: "+97143540566",
+    phone: "+97143258808",
     img: "/placeholder.svg?height=200&width=300",
     mapEmbedUrl:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3608.7234567890123!2d55.28877!3d25.2603139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43ba6913e913%3A0x904de2fef7d413ec!2sCROWN%20EXCEL%20(Experience%20Center)!5e0!3m2!1sen!2sae!4v1640995200000!5m2!1sen!2sae",
@@ -36,7 +36,7 @@ const STORES = [
     name: "Crown Excel Head Office",
     address:
       "Al Jahra Building, 2nd floor, office 204, 18th st- Al Raffa - Khalid Bin Al Waleed Rd - Bur Dubai - Dubai - United Arab Emirates",
-    phone: "+97143540566",
+    phone: "+97143258808",
     img: "/placeholder.svg?height=200&width=300",
     mapEmbedUrl:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3608.7234567890123!2d55.28877!3d25.2603139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43ba6913e913%3A0x904de2fef7d413ec!2sCrown%20Excel%20Head%20Office!5e0!3m2!1sen!2sae!4v1640995200001!5m2!1sen!2sae",

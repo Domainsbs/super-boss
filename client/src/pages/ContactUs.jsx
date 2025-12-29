@@ -33,7 +33,7 @@ const ContactUs = () => {
   };
 
   const contactInfo = [
-    { icon: Phone, label: "Phone", value: "+971 4 354 0566", href: "tel:+97143540566" },
+    { icon: Phone, label: "Phone", value: "+971 4 3258808", href: "tel:+97143258808" },
     { icon: Mail, label: "Email", value: "Support@seenalif.com", href: "mailto:Support@seenalif.com" },
     { icon: MapPin, label: "Address", value: "Shop 11#, Sultan Building, AL Raffa St., Burdubai, Dubai, UAE" },
     { icon: Clock, label: "Working Hours", value: "Daily 9:00 AM - 7:00 PM" }

@@ -216,7 +216,7 @@ export default function AboutUs() {
                 <Phone className="w-7 h-7 text-blue-400" />
               </div>
               <p className="text-sm text-gray-400 mb-1">Phone</p>
-              <a href="tel:+97143540566" className="text-white hover:text-blue-400 transition-colors font-medium">+971 4 354 0566</a>
+              <a href="tel:+97143258808" className="text-white hover:text-blue-400 transition-colors font-medium">+971 4 3258808</a>
             </div>
             
             <div className="text-center">
