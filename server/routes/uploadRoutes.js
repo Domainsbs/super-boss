@@ -6,6 +6,12 @@ import asyncHandler from "express-async-handler"
 
 const router = express.Router()
 
+// Helper function to generate clean file URL without double slashes
+const getFileUrl = (filePath) => {
+  const relativePath = filePath.split("uploads")[1].replace(/\\/g, "/").replace(/^\/+/, "")
+  return `/uploads/${relativePath}`
+}
+
 // @desc    Upload single image
 // @route   POST /api/upload/single
 // @access  Private/Admin
@@ -34,7 +40,7 @@ router.post(
       }
 
       // Generate URL path for the uploaded file
-      const fileUrl = `/uploads/${req.file.path.split("uploads")[1].replace(/\\/g, "/")}`
+      const fileUrl = getFileUrl(req.file.path)
 
       console.log("✅ File uploaded successfully:")
       console.log("📍 File Path:", req.file.path)
@@ -86,7 +92,7 @@ router.post(
       }
 
       const files = req.files.map((file) => {
-        const fileUrl = `/uploads/${file.path.split("uploads")[1].replace(/\\/g, "/")}`
+        const fileUrl = getFileUrl(file.path)
         console.log("✅ File processed:", file.originalname, "->", fileUrl)
         return {
           url: fileUrl,
@@ -124,7 +130,7 @@ router.post(
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const fileUrl = `/uploads/${req.file.path.split("uploads")[1].replace(/\\/g, "/")}`;
+    const fileUrl = getFileUrl(req.file.path);
     res.json({ 
       url: fileUrl,
       filename: req.file.filename,
@@ -157,7 +163,7 @@ router.post(
         })
       }
 
-      const fileUrl = `/uploads/${req.file.path.split("uploads")[1].replace(/\\/g, "/")}`
+      const fileUrl = getFileUrl(req.file.path)
 
       console.log("✅ Product image uploaded successfully:", fileUrl)
 
@@ -198,7 +204,7 @@ router.post(
       }
 
       const files = req.files.map((file) => {
-        const fileUrl = `/uploads/${file.path.split("uploads")[1].replace(/\\/g, "/")}`
+        const fileUrl = getFileUrl(file.path)
         return {
           url: fileUrl,
           publicId: file.filename,
@@ -247,7 +253,7 @@ router.post(
         })
       }
 
-      const fileUrl = `/uploads/${req.file.path.split("uploads")[1].replace(/\\/g, "/")}`
+      const fileUrl = getFileUrl(req.file.path)
 
       console.log("✅ Video uploaded successfully:", fileUrl)
 

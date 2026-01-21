@@ -1630,8 +1630,13 @@ router.post("/ngenius/card", async (req, res) => {
   }
 
   try {
-    const basicToken =
-      "Njk1NWExNDItMjA3ZC00MWZiLTk5NjQtZTM5OWY5MmVjMjRmOjhmZGM1NThhLTM0ZWYtNDFjMC05M2NjLTk5OWNhZjM5ZTA2OQ=="
+    // Use the API key from environment variables
+    const basicToken = process.env.NG_API_KEY
+
+    if (!basicToken) {
+      console.error("NG_API_KEY is not configured in environment variables")
+      return res.status(500).json({ error: "Payment gateway not configured" })
+    }
 
     // Step 1: Get access token
     const tokenRes = await axios.post(
@@ -1653,6 +1658,7 @@ router.post("/ngenius/card", async (req, res) => {
     console.log("Access token:", accessToken.slice(0, 12) + "...")
 
     // Step 2: Create order
+    const clientUrl = process.env.CLIENT_URL || "https://seenalif.com"
     const orderPayload = {
       action: "PURCHASE",
       amount: {
@@ -1660,8 +1666,8 @@ router.post("/ngenius/card", async (req, res) => {
         value: Math.round(amount * 100), // AED 10 → 1000 fils
       },
       merchantAttributes: {
-        redirectUrl: "https://graba2z.ae/payment/success", // ✅ required
-        cancelUrl: "https://graba2z.ae/payment/cancel", // optional
+        redirectUrl: `${clientUrl}/payment/success`,
+        cancelUrl: `${clientUrl}/payment/cancel`,
       },
     }
 

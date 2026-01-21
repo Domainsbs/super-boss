@@ -35,6 +35,9 @@ export const getFullImageUrl = (imageUrl) => {
     return imageUrl
   }
   
+  // Clean up double slashes (except after protocol)
+  const cleanUrl = (url) => url.replace(/([^:]\/)\/+/g, "$1")
+  
   // Handle full URLs (http:// or https://)
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     // Check if it's a localhost URL that needs to be replaced
@@ -55,25 +58,25 @@ export const getFullImageUrl = (imageUrl) => {
         // If the hostname doesn't match, replace with current API_URL
         if (urlObj.hostname !== currentApiHost) {
           const uploadsPath = urlObj.pathname
-          return `${config.API_URL}${uploadsPath}`
+          return cleanUrl(`${config.API_URL}${uploadsPath}`)
         }
       } catch (e) {
         // If URL parsing fails, continue to return as-is
       }
     }
     
-    // Return other full URLs as-is
-    return imageUrl
+    // Return other full URLs as-is (cleaned)
+    return cleanUrl(imageUrl)
   }
   
-  // Local file path - prepend API URL
+  // Local file path - prepend API URL and clean double slashes
   if (imageUrl.startsWith("/uploads")) {
-    return `${config.API_URL}${imageUrl}`
+    return cleanUrl(`${config.API_URL}${imageUrl}`)
   }
   
   // Handle case where it might be just "uploads/..." without leading slash
   if (imageUrl.startsWith("uploads/")) {
-    return `${config.API_URL}/${imageUrl}`
+    return cleanUrl(`${config.API_URL}/${imageUrl}`)
   }
   
   // Default: return as-is (might be a placeholder or relative path)
